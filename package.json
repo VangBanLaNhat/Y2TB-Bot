@@ -24,7 +24,7 @@
   "homepage": "https://github.com/VangBanLaNhat/vangbanlanhat-bot#readme",
   "dependencies": {
     "dotenv": "^10.0.0",
-    "fca-unofficial": "^1.3.10",
+    "fca-unofficial": "github:VangBanLaNhat/fca-unofficial",
     "readline": "^1.3.0",
     "luxon": "^2.0.0",
     "strip-bom": "^4.0.0"
