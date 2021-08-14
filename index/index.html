@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>
+      VBLNBot
+    </title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <header id="header">
+      <a id="gnr">General Setting</a>
+      <a id="avc">Advance Setting</a>
+      <p class="message" id="message"></p>
+    </header>
+    <div class="content" id="content">
+      <div class="gnrct" id="gnrct">
+        <div class="bot">
+          <p class="group">Bot Config</p><br>
+          <a>Bot Name</a>
+          <div class="input"><input class="textbox" id="botname" type="text"></div>
+          <a>Language</a>
+          <div class="input">
+            <select class="optionbox" id="lang" name="option">
+              <option value="vi_VN" >Vietnamese</option>
+              <option value="en_US" >English</option>
+            </select>
+          </div>
+        </div>
+        
+        
+        
+        <div class="fb">
+          <p class="group">Facebook Config</p><br>
+          <a>Facebook Email/Phone/UID</a>
+          <div class="input"><input class="textbox" id="fbemail" type="text" value=""></div>
+          <a>Facebook Password</a>
+          <div class="input">
+              <input class="textbox" id="fbpass" type="password" value="">
+              
+              <ion-icon id="showpass"  name="eye-outline"></ion-icon><a id="showpassa"></a>
+              <ion-icon id="hidepass"  name="eye-off-outline"></ion-icon><a id="hidepassa"></a>
+          </div>
+          <a>Prefix(Characters to receive<br>commands)</a>
+          <div class="input"><input class="textbox" id="prefix" type="text" value=""></div>
+          <a>Admin</a>
+          <div class="admin">
+          </div>
+          <div class="input"><input class="textbox" id="adbox" type="text" value=""></div>
+          <p class="addadmin">+</p><br>
+          
+          <a>Auto Mark Read(Automatically<br>view messages)</a>
+          <div id="cb1" class="input checkboxd">
+            <input type="checkbox" name="cb" id="amr" class="checkbox" value="">
+            <label for="amr"></label>
+          </div>
+          <br>
+          <a>Self Listen(Take orders yourself)</a>
+          <div id="cb2" class="input checkboxd">
+            <input type="checkbox" name="cb" id="checkbox2" class="checkbox" value="">
+            <label for="checkbox2"></label>
+          </div>
+          <br><br><br><br>
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+			<div class="avcct" id="avcct">
+        <div class="csl">
+          <p class="group">Main Bot Config</p><br>
+          <a>Console Color</a>
+          <div class="input"><input class="textbox" id="cslcl" type="text" value=""></div>
+          <a>Data Save Time</a>
+          <div class="input"><input class="textbox" id="dst" type="text" value=""></div>
+          <a>Toggle Log</a>
+          <div id="cb3" class="input checkboxd">
+            <input type="checkbox" name="cb" id="checkbox3" class="checkbox" value="">
+            <label for="checkbox3"></label>
+          </div>
+          <br>
+        </div>
+        
+        
+        
+        <div class="fb">
+          <p class="group">Facebook Config</p><br>
+          <a>Log Level</a>
+          <div class="input"><input class="textbox" id="loglv" type="text" value=""></div>
+          <a>UserAgent</a>
+          <div class="input"><input class="textbox" id="userag" type="text" value=""></div>
+          
+          <a>Listen Events</a>
+          <div id="cb4" class="input checkboxd">
+            <input type="checkbox" name="cb" id="checkbox4" class="checkbox" value="">
+            <label for="checkbox4"></label>
+          </div>
+          <br>
+          <a>Update Presence</a>
+          <div id="cb5" class="input checkboxd">
+            <input type="checkbox" name="cb" id="checkbox5" class="checkbox" value="">
+            <label for="checkbox5"></label>
+          </div>
+          <br><br><br><br>
+        </div>
+      </div>
+    </div>
+
+    <footer id="footer">
+      <div class="button">
+        <a id="save">Save Setting</a>
+        <a id="start">Start VBLNBot</a>
+      </div>
+    </footer>
+    <div class="onload" id="onload">
+        <div class="loadd">
+      <img src="https://s1.uphinh.org/2021/07/24/Khong-Co-Tieu-De4_20210724201551.png" alt="No Network!" />
+      <span><div class="load"></div></span>
+        </div>
+      <br><p id="msglcs"></p>
+      <p id="msgl">Err: Can't not require loadConfig.json</p>
+    </div>
+    <script src="script.js"></script>
+    <script src="loadConfig.js"></script>
+    
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  </body>
+</html>

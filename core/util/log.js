@@ -1,4 +1,6 @@
 var lx = require("luxon");
+const fs = require("fs");
+const path = require("path");
 var readline = require("readline");
 
 /*!global.logLast ? global.logLast = {
@@ -23,7 +25,7 @@ function log(...msg){
     msg[0]="";
     var dt = lx.DateTime.now().setZone("Asia/Ho_Chi_Minh");
     try{
-		var cl = `\x1b[${global.avcconfig.consoleColor}m`;
+		var cl = `\x1b[${global.coreconfig.main_bot.consoleColor}m`;
     }
     catch(err){
         var cl = "\x1b[32m"
@@ -32,6 +34,13 @@ function log(...msg){
     var x = [`${cl}[${dt.day}.${dt.month}T${dt.hour}.${dt.minute}.${dt.second}Z]`];
 	for(i=1;i<msg.length;i++){
 		console.log.apply(console, x.concat([clcs]).concat([classs]).concat([cl]).concat(msg[i]).concat([cl]));
+		try{
+		    if(global.coreconfig.main_bot.toggleLog){
+		        var y = [`[${dt.day}.${dt.month}T${dt.hour}.${dt.minute}.${dt.second}Z]`];
+		        var str = y.concat([classs]).concat(msg[i]).join(" ");
+		        fs.writeFileSync(path.join(__dirname, "..", "..", "logs", global.logStart+".txt"), str+"\n", {mode: 0o666, flag: "a"});
+		    }
+		}catch(err){}
 	}
 }
 
@@ -52,7 +61,7 @@ function err(...msg){
     var dt = lx.DateTime.now().setZone("Asia/Ho_Chi_Minh");
     //readline.cursorTo(process.stdout, 0);
     try{
-		var cl = `\x1b[${global.avcconfig.consoleColor}m`;
+		var cl = `\x1b[${global.coreconfig.main_bot.consoleColor}m`;
     }
     catch(err){
         var cl = "\x1b[32m"
@@ -63,6 +72,13 @@ function err(...msg){
     var x = [`${cl}[${dt.day}.${dt.month}T${dt.hour}.${dt.minute}.${dt.second}Z]`];
 	for(i=1;i<msg.length;i++){
 		console.log.apply(console, x.concat([clcs]).concat([classs]).concat([clerr]).concat(["[ERR!]"]).concat([clwa]).concat(msg[i]).concat([cl]));
+		try{
+		    if(global.coreconfig.main_bot.toggleLog){
+		        var y = [`[${dt.day}.${dt.month}T${dt.hour}.${dt.minute}.${dt.second}Z]`];
+		        var str = y.concat([classs]).concat(["[ERR!]"]).concat(msg[i]).join(" ");
+		        fs.writeFileSync(path.join(__dirname, "..", "..", "logs", global.logStart+".txt"), str+"\n", {mode: 0o666, flag: "a"});
+		    }
+		}catch(err){}
 	}
 }
 
@@ -74,7 +90,7 @@ function warn(...msg){
     var dt = lx.DateTime.now().setZone("Asia/Ho_Chi_Minh");
     //readline.cursorTo(process.stdout, 0);
     try{
-    var cl = `\x1b[${global.avcconfig.consoleColor}m`;
+    var cl = `\x1b[${global.coreconfig.main_bot.consoleColor}m`;
     }
     catch(err){
         var cl = "\x1b[32m"
@@ -85,6 +101,13 @@ function warn(...msg){
     var x = [`${cl}[${dt.day}.${dt.month}T${dt.hour}.${dt.minute}.${dt.second}Z]`];
 	for(i=1;i<msg.length;i++){
 		console.log.apply(console, x.concat([clcs]).concat([classs]).concat([clwarn]).concat(["[WARN!]"]).concat([clwa]).concat(msg));
+		try{
+		    if(global.coreconfig.main_bot.toggleLog){
+		        var y = [`[${dt.day}.${dt.month}T${dt.hour}.${dt.minute}.${dt.second}Z]`];
+		        var str = y.concat([classs]).concat(["[WARN!]"]).concat(msg[i]).join(" ");
+		        fs.writeFileSync(path.join(__dirname, "..", "..", "logs", global.logStart+".txt"), str+"\n", {mode: 0o666, flag: "a"});
+		    }
+	    }catch(err){}
 	}
 }
    
