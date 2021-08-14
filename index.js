@@ -4,8 +4,22 @@ const fs = require("fs");
 const path = require("path");
 const login = require("fca-unofficial");
 const readline = require("readline");
+var lx = require("luxon");
 var log = require("./core/util/log.js");
+var scanDir = require("./core/util/scanDir.js");
 
+//Write log
+var dt = lx.DateTime.now().setZone("Asia/Ho_Chi_Minh");
+ensureExists(path.join(__dirname, "logs"));
+global.logStart = `${dt.day}D${dt.month}M${dt.year}Y.T${dt.hour}H${dt.minute}M${dt.second}S`;
+var ll = scanDir(".txt", path.join(__dirname, "logs"));
+for (var i=0; i<ll.length; i++){
+    var lll = ll[i].slice(0,2);
+    lll = lll.replace("D","");
+    if(dt.day.toString() != lll){
+        fs.unlinkSync(path.join(__dirname, "logs", ll[i]));
+    }
+}
 
 //config loader
 log.blank();
@@ -24,6 +38,29 @@ catch(err){
 }
 
 
+//data loader
+log.log("Data", "Loading data...");
+try{
+    require("./core/util/getData.js").getdt();
+    require("./core/util/getData.js").getprdt();
+    log.log("Data", "Loading data success!");
+}
+catch(err){
+    console.log(err);
+    log.err("Data", "Can't load Data. Existing...");
+	log.blank();
+    process.exit(102);
+}
+setInterval(function(){
+    try{
+        fs.writeFileSync(path.join(__dirname, "data", "data.json"), JSON.stringify(global.data, null, 4), {mode: 0o666});
+        fs.writeFileSync(path.join(__dirname, "data", "prdata.json"), JSON.stringify(global.prdata, null, 4), {mode: 0o666});
+    }
+    catch(err){
+        log.err("Data", "Can't auto save data with error: "+err);
+    }
+}, global.coreconfig.main_bot.dataSaveTime*1000)
+
 
 //credentials loader
 let fbCredentials = {
@@ -31,13 +68,13 @@ let fbCredentials = {
     password: global.config.facebook.FBpassword
 }
 log.log("Manager", "Loading User-credentials...");
-//log.log("Manager", `Appstate: ${(fs.existsSync(path.join(__dirname, "user_data_and_settings", "fbstate.json"))) ? "Yes" : "No"}`, `Email: ${(fbCredentials.email == "") ? `""` : fbCredentials.email}`, `Password: ${(fbCredentials.password == "") ? `""` : fbCredentials.password}`);
-fs.existsSync(path.join(__dirname, "user_data_and_settings", "fbstate.json")) ? log.log("Manager", `=> login account using Appstate`) : ((fbCredentials.email == "" && fbCredentials.password == "") ? log.err("Manager", "=> No Appstate and FBCredentials blank ", "=> Unable to login!") : log.log("Manager", `=> login account using FBCredentials`))
+//log.log("Manager", `Appstate: ${(fs.existsSync(path.join(__dirname, "udata", "fbstate.json"))) ? "Yes" : "No"}`, `Email: ${(fbCredentials.email == "") ? `""` : fbCredentials.email}`, `Password: ${(fbCredentials.password == "") ? `""` : fbCredentials.password}`);
+fs.existsSync(path.join(__dirname, "udata", "fbstate.json")) ? log.log("Manager", `=> Login account using FBstate`) : ((fbCredentials.email == "" && fbCredentials.password == "") ? log.err("Manager", "=> No FBstate and FBCredentials blank ", "=> Unable to login!") : log.log("Manager", `=> Login account using FBCredentials`))
 log.blank();
 
 //login facebook!!!
 var loginstate;
-(!(fs.existsSync(path.join(__dirname, "user_data_and_settings", "fbstate.json"))) && fbCredentials.email == "" && fbCredentials.password == "") ? loginstate = false : loginstate = true
+(!(fs.existsSync(path.join(__dirname, "udata", "fbstate.json"))) && fbCredentials.email == "" && fbCredentials.password == "") ? loginstate = false : loginstate = true
 if(loginstate){
 	let loginOptions = {
 		"logLevel": global.coreconfig.facebook.logLevel,
@@ -48,7 +85,7 @@ if(loginstate){
 		"autoMarkRead": global.config.facebook.autoMarkRead
 	}
 	log.log("Manager", "Logging...")
-	let appStatePath = path.join(__dirname, "user_data_and_settings", "fbstate.json");
+	let appStatePath = path.join(__dirname, "udata", "fbstate.json");
 	let appState = {};
 	if (fs.existsSync(appStatePath)) {
 		//login using appstate
@@ -85,3 +122,19 @@ if(loginstate){
 	}
 }
 
+function ensureExists(path, mask) {
+  if (typeof mask != 'number') {
+    mask = 0o777;
+  }
+  try {
+    fs.mkdirSync(path, {
+      mode: mask,
+      recursive: true
+    });
+    return;
+  } catch (ex) {
+    return {
+      err: ex
+    };
+  }
+}
