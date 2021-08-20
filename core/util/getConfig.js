@@ -6,13 +6,14 @@ var log = require("./log.js");
 var dfcf = {
 	"bot_info": {
 		"botname": "Y2TBbot",
-		"lang": "vi_VN"
+		"lang": "en_US"
 	},
 	"facebook": {
 		"FBemail": "",
 		"FBpassword": "",
 		"prefix": "/",
-		"admin": [],
+		"admin": [
+		],
 		"autoMarkRead": true,
 		"selfListen": false
 	}
@@ -23,7 +24,8 @@ var ccf = {
 		"consoleColor": "32",
 		//https://upload.wikimedia.org/wikipedia/commons/3/34/ANSI_sample_program_output.png
 		"dataSaveTime": "5",
-		"toggleLog": true
+		"toggleLog": true,
+		"toggleDebug": false
 	},
 	"facebook": {
 		"logLevel": "error",

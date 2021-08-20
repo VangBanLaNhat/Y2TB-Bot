@@ -42,7 +42,7 @@ catch(err){
 log.log("Data", "Loading data...");
 try{
     require("./core/util/getData.js").getdt();
-    require("./core/util/getData.js").getprdt();
+    //require("./core/util/getData.js").getprdt();
     log.log("Data", "Loading data success!");
 }
 catch(err){
@@ -54,13 +54,33 @@ catch(err){
 setInterval(function(){
     try{
         fs.writeFileSync(path.join(__dirname, "data", "data.json"), JSON.stringify(global.data, null, 4), {mode: 0o666});
-        fs.writeFileSync(path.join(__dirname, "data", "prdata.json"), JSON.stringify(global.prdata, null, 4), {mode: 0o666});
+        //fs.writeFileSync(path.join(__dirname, "data", "prdata.json"), JSON.stringify(global.prdata, null, 4), {mode: 0o666});
     }
     catch(err){
         log.err("Data", "Can't auto save data with error: "+err);
     }
 }, global.coreconfig.main_bot.dataSaveTime*1000)
 
+require("./core/util/global.js")();
+
+
+setInterval(function(){
+    require("./core/util/global.js")();
+}, 1*60*60*1000)
+
+//loadPlugins
+log.log("Plugin", "Loading Plugins...")
+try{
+    ensureExists(path.join(__dirname, "lang"));
+    require("./core/util/loadPlugin.js")();
+}
+catch(err){
+    log.err("Plugins", "Can't load plugins with error: "+err);
+}
+
+//loadLang
+log.log("Languages", "Loading Languages...");
+require("./core/util/loadLang.js")();
 
 //credentials loader
 let fbCredentials = {
@@ -73,6 +93,7 @@ fs.existsSync(path.join(__dirname, "udata", "fbstate.json")) ? log.log("Manager"
 log.blank();
 
 //login facebook!!!
+
 var loginstate;
 (!(fs.existsSync(path.join(__dirname, "udata", "fbstate.json"))) && fbCredentials.email == "" && fbCredentials.password == "") ? loginstate = false : loginstate = true
 if(loginstate){

@@ -4,7 +4,6 @@ const path = require("path");
 const listen = require(path.join(__dirname, "listen.js"))
 var log = require(path.join(__dirname, "..", "util", "log.js"));
 
-let prefix = "/";
 
 module.exports = (appState, loginOptions) => {
     var opts = loginOptions;
