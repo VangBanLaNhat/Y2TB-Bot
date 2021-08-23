@@ -6,12 +6,16 @@
     <title>
       VBLNBot
     </title>
+    <link href="../node_modules/xterm/css/xterm.css" rel="stylesheet" type="text/css" />
+    <script src="../node_modules/xterm/lib/xterm.js"></script>
+
     <link href="style.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
     <header id="header">
       <a id="gnr">General Setting</a>
       <a id="avc">Advance Setting</a>
+      <a id="tmn">Terminal</a>
       <p class="message" id="message"></p>
     </header>
     <div class="content" id="content">
@@ -110,6 +114,15 @@
           <br><br><br><br>
         </div>
       </div>
+
+
+
+
+
+
+      <div class="tmnct" id="tmnct">
+        <div id="terminal"></div>
+      </div>
     </div>
 
     <footer id="footer">
@@ -128,6 +141,7 @@
     </div>
     <script src="script.js"></script>
     <script src="loadConfig.js"></script>
+    <script src="terminal.js"></script>
     
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
   </body>

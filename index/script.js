@@ -8,7 +8,7 @@ setTimeout(function(){
     document.getElementById('header').style.display= 'flex';
     document.getElementById('footer').style.display= 'flex';
 }, 5.5*1000*1)
-//gnr setting
+//gnr setting tab
 const gnr = document.querySelector('header #gnr')
 document.getElementById('gnr').style.background= '#29282d';
 document.getElementById('gnr').style.color= 'cyan';
@@ -16,26 +16,49 @@ document.getElementById('avcct').style.display= 'none';
 document.getElementById('gnrct').style.display= 'block';
 
 gnr.onclick = function () {
-  document.getElementById('gnr').style.background= '#29282d';
-  document.getElementById('gnr').style.color= 'cyan';
-  document.getElementById('avc').style.background= 'none';
-  document.getElementById('avc').style.color= '#fff';
-  document.getElementById('gnrct').style.display= 'block';
-	document.getElementById('avcct').style.display= 'none';
+    document.getElementById('gnr').style.background= '#29282d';
+    document.getElementById('gnr').style.color= 'cyan';
+    document.getElementById('avc').style.background= 'none';
+    document.getElementById('avc').style.color= '#fff';
+    document.getElementById('tmn').style.background= 'none';
+    document.getElementById('tmn').style.color= '#fff';
+    document.getElementById('gnrct').style.display= 'block';
+    document.getElementById('avcct').style.display= 'none';
+    document.getElementById('tmnct').style.display= 'none';
+    document.getElementById('footer').style.display= 'flex';
 }
-document.getElementById('footer').style.display= 'none';
+//document.getElementById('footer').style.display= 'none';
 
 
-//avc setting
+//avc setting tab
 const avc = document.querySelector('header #avc')
 avc.onclick = function () {
-  document.getElementById('avc').style.background= '#29282d';
-  document.getElementById('avc').style.color= 'cyan';
-  document.getElementById('gnr').style.background= 'none';
-  document.getElementById('gnr').style.color= '#fff';
-  document.getElementById('gnrct').style.display= 'none';
+    document.getElementById('gnr').style.background= 'none';
+    document.getElementById('gnr').style.color= '#fff';
+    document.getElementById('avc').style.background= '#29282d';
+    document.getElementById('avc').style.color= 'cyan';
+    document.getElementById('tmn').style.background= 'none';
+    document.getElementById('tmn').style.color= '#fff';
+    document.getElementById('gnrct').style.display= 'none';
 	document.getElementById('avcct').style.display= 'block';
+    document.getElementById('tmnct').style.display= 'none';
+    document.getElementById('footer').style.display= 'flex';
+}
 
+
+//terminal tab
+const tmn = document.querySelector('header #tmn')
+tmn.onclick = function () {
+    document.getElementById('gnr').style.background= 'none';
+    document.getElementById('gnr').style.color= '#fff';
+    document.getElementById('avc').style.background= 'none';
+    document.getElementById('avc').style.color= '#fff';
+    document.getElementById('tmn').style.background= '#29282d';
+    document.getElementById('tmn').style.color= 'cyan';
+    document.getElementById('gnrct').style.display= 'none';
+    document.getElementById('avcct').style.display= 'none';
+    document.getElementById('tmnct').style.display= 'block';
+    document.getElementById('footer').style.display= 'none';
 }
 //show/hide password
 const show = document.querySelector('#showpass')

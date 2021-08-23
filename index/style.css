@@ -143,6 +143,11 @@ ion-icon{
 .checkbox{
     display: none;
 }
+
+#terminal{
+  padding-top: 40px;
+  background: #000;
+}
 /*Footer*/
 footer{
   position: fixed;
