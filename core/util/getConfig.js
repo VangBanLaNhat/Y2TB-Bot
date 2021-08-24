@@ -6,43 +6,39 @@ var log = require("./log.js");
 var dfcf = {
 	"bot_info": {
 		"botname": "Y2TBbot",
-		"lang": "en_US"
+		"lang": "vi_VN"
 	},
 	"facebook": {
 		"FBemail": "",
 		"FBpassword": "",
 		"prefix": "/",
-		"admin": [
-		],
+		"admin": [],
 		"autoMarkRead": true,
 		"selfListen": false
 	}
 }
 
 var ccf = {
-	"main_bot": {
+	"console": {
 		"consoleColor": "32",
 		//https://upload.wikimedia.org/wikipedia/commons/3/34/ANSI_sample_program_output.png
-		"dataSaveTime": "5",
-		"toggleLog": true,
-		"toggleDebug": false
 	},
 	"facebook": {
 		"logLevel": "error",
 		"userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",
 		"listenEvents": true,
-		"updatePresence": false
+		"updatePresence": false,
 	}
 }
 
 function getConfig(){
     var check = true;
     try {
-        var t = fs.readFileSync(path.join(__dirname, "..", "..", "udata", "config.json"), {encoding: "utf8"})
+        var t = fs.readFileSync(path.join(__dirname, "..", "..", "user_data_and_settings", "config.json"), {encoding: "utf8"})
     } catch (err) {check=false}
     if(check){
         try{
-            var returnConfig = JSON.parse(stripBom(fs.readFileSync(path.join(__dirname, "..", "..", "udata", "config.json"), {encoding: "utf8"})));
+            var returnConfig = JSON.parse(stripBom(fs.readFileSync(path.join(__dirname, "..", "..", "user_data_and_settings", "config.json"), {encoding: "utf8"})));
             var arr = Object.keys(dfcf);
             var ch = false;
             for (var i=0; i<arr.length; i++){
@@ -79,14 +75,14 @@ function getConfig(){
 				}
             }
             if (ch) {
-                fs.writeFileSync(path.join(__dirname, "..", "..", "udata", "config.json"), JSON.stringify(returnConfig, null, 4), {mode: 0o666});
+                fs.writeFileSync(path.join(__dirname, "..", "..", "user_data_and_settings", "config.json"), JSON.stringify(returnConfig, null, 4), {mode: 0o666});
             }
         }
         catch (err){
             log.err("Config", "Got some error with your Config.json file");
             log.warn("Config", "Resetting all settings...");
             try {
-                fs.writeFileSync(path.join(__dirname, "..", "..", "udata", "config.json"), JSON.stringify(dfcf, null, 4), {mode: 0o666});
+                fs.writeFileSync(path.join(__dirname, "..", "..", "user_data_and_settings", "config.json"), JSON.stringify(dfcf, null, 4), {mode: 0o666});
             }
             catch (ert) {
                 log.log("Config", `Error resetting the settings: ${err}`);
@@ -96,9 +92,9 @@ function getConfig(){
     }
     else {
         log.warn("Config", "Config file not found. Creating a default one...");
-		ensureExists(path.join(__dirname, "..", "..", "udata"));
+		ensureExists(path.join(__dirname, "..", "..", "user_data_and_settings"));
         try {
-            fs.writeFileSync(path.join(__dirname, "..", "..", "udata", "config.json"), JSON.stringify(dfcf, null, 4), {mode: 0o666});
+            fs.writeFileSync(path.join(__dirname, "..", "..", "user_data_and_settings", "config.json"), JSON.stringify(dfcf, null, 4), {mode: 0o666});
         }
         catch (err) {
             log.err("Config", `Cannot write default config, returned an error: ${err}`);
