@@ -48,7 +48,7 @@ avc.onclick = function () {
 
 //terminal tab
 const tmn = document.querySelector('header #tmn')
-tmn.onclick = function () {
+function tmnTab () {
     document.getElementById('gnr').style.background= 'none';
     document.getElementById('gnr').style.color= '#fff';
     document.getElementById('avc').style.background= 'none';
@@ -59,6 +59,9 @@ tmn.onclick = function () {
     document.getElementById('avcct').style.display= 'none';
     document.getElementById('tmnct').style.display= 'block';
     document.getElementById('footer').style.display= 'none';
+}
+tmn.onclick = function () {
+    tmnTab();
 }
 //show/hide password
 const show = document.querySelector('#showpass')

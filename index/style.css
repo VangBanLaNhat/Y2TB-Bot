@@ -145,7 +145,7 @@ ion-icon{
 }
 
 #terminal{
-  padding-top: 40px;
+  margin-top: 40px;
   background: #000;
 }
 /*Footer*/
@@ -165,15 +165,12 @@ footer .button{
   display: flex;
   background: none;
   width: 100%;
-  text-align: right;
   padding: 10px 20px;
 }
 
 footer .button div{
   background: #000;
   display: flex;
-  text-align: right;
-  align-items: right;
 }
 
 footer .button #start{

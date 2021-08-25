@@ -1,6 +1,6 @@
 var fs = require("fs");
 const path = require('path');
-
+//const ipc = require("electron").ipcRenderer;
 
 try{
     var msgl = document.querySelector('#msgl')
@@ -168,5 +168,4 @@ savebutton.onclick = function (){
 const startbutton = document.querySelector('#start')
 startbutton.onclick = function (){
     send("yellow", 'Starting BotChat...')
-    window.cmd.exec('start start_bot.bat')
 }

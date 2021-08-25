@@ -1,6 +1,9 @@
 {
-    "console": {
-        "consoleColor": "32"
+    "main_bot": {
+        "consoleColor": "32",
+        "dataSaveTime": "5",
+        "toggleLog": true,
+        "toggleDebug": false
     },
     "facebook": {
         "logLevel": "error",

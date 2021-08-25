@@ -1,1 +1,2 @@
-npm i fca-unofficial
+npm i && npm i electron
+delay(10000)

@@ -1,7 +1,13 @@
 const electron = require('electron');
+const ipc = electron.ipcMain;
 const url = require('url');
 const path = require('path');
+const pty = require("node-pty");
+const os = require("os");
 var fs = require("fs");
+
+var shell = os.platform() === "win32" ? "powershell.exe" : "bash";
+;
 var dfcf = {
 	"bot_info": {
 		"botname": "Y2TBbot",
@@ -70,7 +76,25 @@ function createWindow () {
 	Menu.setApplicationMenu(mM);
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  //mainWindow.webContents.openDevTools()
+
+  //terminal
+
+var ptyPr = pty.spawn(shell, [], {
+	name: "xterm-color",
+	cols: 80,
+    rows: 30,
+	cwd: process.env.HOME,
+	env: process.env
+})
+
+ptyPr.on("data", function(data){
+	mainWindow.webContents.send("terminal.incData", data)
+})
+
+ipc.on("terminal.toterm", (event, data)=>{
+	ptyPr.write(data);
+})
 }
 
 // This method will be called when Electron has finished
