@@ -144,10 +144,15 @@ ion-icon{
     display: none;
 }
 
+//terminal
 #terminal{
   margin-top: 40px;
   background: #000;
 }
+.tmninfo{
+  color: #fff;
+}
+
 /*Footer*/
 footer{
   position: fixed;
