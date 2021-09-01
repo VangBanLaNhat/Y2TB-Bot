@@ -2,38 +2,11 @@ var fs = require("fs");
 var path = require("path");
 var stripBom = require("strip-bom");
 var log = require("./log.js");
+var cf = require("./defaultConfig.js");
 
-var dfcf = {
-	"bot_info": {
-		"botname": "Y2TBbot",
-		"lang": "en_US"
-	},
-	"facebook": {
-		"FBemail": "",
-		"FBpassword": "",
-		"prefix": "/",
-		"admin": [
-		],
-		"autoMarkRead": true,
-		"selfListen": false
-	}
-}
+var dfcf = cf.normal();
 
-var ccf = {
-	"main_bot": {
-		"consoleColor": "32",
-		//https://upload.wikimedia.org/wikipedia/commons/3/34/ANSI_sample_program_output.png
-		"dataSaveTime": "5",
-		"toggleLog": true,
-		"toggleDebug": false
-	},
-	"facebook": {
-		"logLevel": "error",
-		"userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",
-		"listenEvents": true,
-		"updatePresence": false
-	}
-}
+var ccf = cf.core();
 
 function getConfig(){
     var check = true;
