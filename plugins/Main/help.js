@@ -80,7 +80,7 @@ function init(){
     }
 }
 function main(data, api){
-    if(!Number(data.body) && data.body.length != 0){
+    if(!Number(data.args) && data.args.length != 0){
         moreInfo(data, api);
     }
     else{
@@ -90,7 +90,8 @@ function main(data, api){
 function help(data, api){
     var cmNumber = 10;
     var msg;
-    data.body ? msg = data.body : msg = 1;
+    data.args ? msg = data.args : msg = 1;
+    msg = Math.trunc(Number(msg));
     var listCommand = [];
     var listHelp = "";
     for (var x in global.plugins){
@@ -133,11 +134,11 @@ function help(data, api){
 }
 
 function moreInfo(data, api){
-    var rt = global.lang.Help.noCommand[global.config.bot_info.lang].replace("{0}", data.body);
+    var rt = global.lang.Help.noCommand[global.config.bot_info.lang].replace("{0}", data.args);
     for (var i in global.plugins){
-        if (global.plugins[i].command[data.body] != undefined){
-            var use = `${global.config.facebook.prefix}${data.body} ${global.plugins[i].command[data.body].help[global.config.bot_info.lang]}`
-            var rt = global.lang.Help.commandInfo[global.config.bot_info.lang].replace("{0}", use).replace("{1}", global.plugins[i].command[data.body].tag[global.config.bot_info.lang])
+        if (global.plugins[i].command[data.args] != undefined){
+            var use = `${global.config.facebook.prefix}${data.args} ${global.plugins[i].command[data.args].help[global.config.bot_info.lang]}`
+            var rt = global.lang.Help.commandInfo[global.config.bot_info.lang].replace("{0}", use).replace("{1}", global.plugins[i].command[data.args].tag[global.config.bot_info.lang])
             break;
         }
     }

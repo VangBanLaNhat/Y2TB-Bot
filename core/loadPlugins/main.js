@@ -75,18 +75,18 @@ function load(file, pluginInfo){
             !global.plugins.main.command[i].tag ? global.plugins.main.command[i].tag = pluginInfo.commandList[i].tag:"";
             !global.plugins.main.command[i].main ? global.plugins.main.command[i].main = path.join(__dirname, "..", "..", "plugins", "Main", file):"";
             !global.plugins.main.command[i].mainFunc ? global.plugins.main.command[i].mainFunc = pluginInfo.commandList[i].mainFunc:"";
-            if(typeof pluginInfo.langMap == "object"){
+        };
+        if(typeof pluginInfo.langMap == "object"){
                 if(!fs.existsSync(path.join(__dirname, "..", "..", "lang", `${pluginInfo.pluginName}.json`))){
                     fs.writeFileSync(path.join(__dirname, "..", "..", "lang", `${pluginInfo.pluginName}.json`), JSON.stringify(pluginInfo.langMap, null, 4), {mode: 0o666});
                 }
             }
-            if(typeof pluginInfo.chathook == "string"){
+        if(typeof pluginInfo.chathook == "string"){
                 !global.chathook[pluginInfo.pluginName] ? global.chathook[pluginInfo.pluginName] = {
                     main: path.join(__dirname, "..", "..", "plugins", "Main", file),
                     func: pluginInfo.chathook
                 }:"";
             }
-        }
     }
     catch(err){
         log.err("Plugins(main)", "Can't load \""+file+"\" with error: "+err)

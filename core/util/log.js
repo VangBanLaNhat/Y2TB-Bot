@@ -20,6 +20,7 @@ function log(...msg){
 	}
 	else {
 		classs = "Manager";
+		msg.push(msg[0]);
 	}
     classs= "["+classs+"]";
     msg[0]="";
@@ -33,7 +34,7 @@ function log(...msg){
     var clcs = "\x1b[36m"; //Color is Cyan
     var x = [`${cl}[${dt.day}.${dt.month}T${dt.hour}.${dt.minute}.${dt.second}Z]`];
 	for(i=1;i<msg.length;i++){
-		console.log.apply(console, x.concat([clcs]).concat([classs]).concat([cl]).concat(msg[i]).concat([cl]));
+		console.logg.apply(console, x.concat([clcs]).concat([classs]).concat([cl]).concat(msg[i]).concat([cl]));
 		try{
 		    if(global.coreconfig.main_bot.toggleLog){
 		        var y = [`[${dt.day}.${dt.month}T${dt.hour}.${dt.minute}.${dt.second}Z]`];
@@ -55,6 +56,7 @@ function err(...msg){
 	}
 	else {
 		classs = "Manager";
+		msg.push(msg[0]);
 	}
     classs= "["+classs+"]";
     msg[0]="";
@@ -71,7 +73,7 @@ function err(...msg){
     var clwa = "\x1b[33m"; //Color is Yellow
     var x = [`${cl}[${dt.day}.${dt.month}T${dt.hour}.${dt.minute}.${dt.second}Z]`];
 	for(i=1;i<msg.length;i++){
-		console.log.apply(console, x.concat([clcs]).concat([classs]).concat([clerr]).concat(["[ERR!]"]).concat([clwa]).concat(msg[i]).concat([cl]));
+		console.logg.apply(console, x.concat([clcs]).concat([classs]).concat([clerr]).concat(["[ERR!]"]).concat([clwa]).concat(msg[i]).concat([cl]));
 		try{
 		    if(global.coreconfig.main_bot.toggleLog){
 		        var y = [`[${dt.day}.${dt.month}T${dt.hour}.${dt.minute}.${dt.second}Z]`];
@@ -83,7 +85,18 @@ function err(...msg){
 }
 
 function warn(...msg){
-    var classs = msg[0];
+    if(msg.length > 1){
+		if(msg[0] == ""){
+			classs = "Manager";
+		}
+		else {
+			classs = msg[0];
+		}
+	}
+	else {
+		classs = "Manager";
+		msg.push(msg[0]);
+	}
     if (classs=='') classs="Manager";
     classs= "["+classs+"]";
     msg[0]="";
@@ -100,7 +113,7 @@ function warn(...msg){
     var clwa = "\x1b[37m"; //Color is Yellow
     var x = [`${cl}[${dt.day}.${dt.month}T${dt.hour}.${dt.minute}.${dt.second}Z]`];
 	for(i=1;i<msg.length;i++){
-		console.log.apply(console, x.concat([clcs]).concat([classs]).concat([clwarn]).concat(["[WARN!]"]).concat([clwa]).concat(msg));
+		console.logg.apply(console, x.concat([clcs]).concat([classs]).concat([clwarn]).concat(["[WARN!]"]).concat([clwa]).concat(msg));
 		try{
 		    if(global.coreconfig.main_bot.toggleLog){
 		        var y = [`[${dt.day}.${dt.month}T${dt.hour}.${dt.minute}.${dt.second}Z]`];
@@ -112,7 +125,7 @@ function warn(...msg){
 }
    
 function blank(){
-	console.log("\r");
+	console.logg("\r");
 }
 
 module.exports = {

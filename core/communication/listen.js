@@ -62,9 +62,12 @@ async function mess (event, api){
             var check = false;
             for (var i in global.plugins) {
             if (global.plugins[i].command[ms[0]] != undefined) {
+                event.args = event.body;
+                event.args = event.args.split(" ");
+                
                 event.body = event.body.split(" ");
                 event.body.splice(0,1);
-                event.body = event.body.toString(" ");
+                event.body = event.body.join(" ");
                 try{
                     var rq = require(global.plugins[i].command[ms[0]].main);
                     var func = global.plugins[i].command[ms[0]].mainFunc
@@ -108,6 +111,10 @@ async function mess (event, api){
 }
 
 async function chathook (event, api){
+    try{
+        event.args = event.body;
+        event.args = event.args.split(" ");
+    }catch(_){}
     for (var i in global.chathook){
         try{
             var rq = require(global.chathook[i].main);

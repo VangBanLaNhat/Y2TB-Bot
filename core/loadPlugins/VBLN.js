@@ -74,7 +74,8 @@ function load(file, pluginInfo){
             !global.plugins.VBLN.command[i].tag ? global.plugins.VBLN.command[i].tag = pluginInfo.commandList[i].tag:"";
             !global.plugins.VBLN.command[i].main ? global.plugins.VBLN.command[i].main = path.join(__dirname, "..", "..", "plugins", "VBLN", file):"";
             !global.plugins.VBLN.command[i].mainFunc ? global.plugins.VBLN.command[i].mainFunc = pluginInfo.commandList[i].mainFunc:"";
-            if(typeof pluginInfo.langMap == "object"){
+        }
+        if(typeof pluginInfo.langMap == "object"){
                 if(!fs.existsSync(path.join(__dirname, "..", "..", "lang", `${pluginInfo.pluginName}.json`))){
                     fs.writeFileSync(path.join(__dirname, "..", "..", "lang", `${pluginInfo.pluginName}.json`), JSON.stringify(pluginInfo.langMap, null, 4), {mode: 0o666});
                 }
@@ -85,7 +86,6 @@ function load(file, pluginInfo){
                     func: pluginInfo.chathook
                 }:"";
             }
-        }
         log.log("Plugins(VBLN)", "Loaded plugin: "+pluginInfo.pluginName+" "+pluginInfo.version+" by "+pluginInfo.author)
     }
     catch(err){
