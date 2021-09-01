@@ -145,14 +145,67 @@ ion-icon{
 }
 
 //terminal
-#terminal{
-  margin-top: 40px;
-  background: #000;
-}
+
 .tmninfo{
+  margin: 10px;
+  padding: 3px 6px;
+}
+.os{
   color: #fff;
 }
 
+.stbt{
+  display: flex;
+}
+
+.startTmn{
+  
+  box-shadow:  0 0 0 1px lime;
+  padding:  3px 6px;
+  transition: all .3s ease;
+  color: lime;
+  border-radius: 5px;
+}
+
+.startTmn:hover{
+  box-shadow:  0 0 0 1px lime;
+  padding:  3px 6px;
+  background: lime;
+  color: #fff;
+  border-radius: 5px;
+}
+
+.stopTmn{
+  
+  box-shadow:  0 0 0 1px orangered;
+  padding:  3px 6px;
+  transition: all .3s ease;
+  color: orangered;
+  border-radius: 5px;
+}
+
+.stopTmn:hover{
+  box-shadow:  0 0 0 1px orangered;
+  padding:  3px 6px;
+  background: orangered;
+  color: #fff;
+  border-radius: 5px;
+}
+
+.disbt{
+  box-shadow:  0 0 0 1px gray;
+  padding:  3px 6px;
+  transition: all .0s ease;
+  color: gray;
+  border-radius: 5px;
+}
+
+.disbt:hover{
+  box-shadow:  0 0 0 1px gray;
+  padding:  3px 6px;
+  color: gray;
+  border-radius: 5px;
+}
 /*Footer*/
 footer{
   position: fixed;

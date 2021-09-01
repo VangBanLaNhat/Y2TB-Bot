@@ -62,7 +62,7 @@ function createWindow () {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 800,
-    height: 600,
+    height: 650,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
@@ -81,7 +81,7 @@ function createWindow () {
   //terminal
 
 var ptyPr = pty.spawn(shell, [], {
-	name: "xterm-color",
+	name: "xterm-color",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
 	cols: 80,
     rows: 30,
 	cwd: process.env.HOME,

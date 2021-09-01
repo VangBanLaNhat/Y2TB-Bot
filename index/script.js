@@ -14,6 +14,7 @@ document.getElementById('gnr').style.background= '#29282d';
 document.getElementById('gnr').style.color= 'cyan';
 document.getElementById('avcct').style.display= 'none';
 document.getElementById('gnrct').style.display= 'block';
+document.getElementById('tmnct').style.display= 'none';
 
 gnr.onclick = function () {
     document.getElementById('gnr').style.background= '#29282d';

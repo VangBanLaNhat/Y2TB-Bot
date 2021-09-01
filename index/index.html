@@ -83,7 +83,7 @@
           <div class="input"><input class="textbox" id="cslcl" type="text" value=""></div>
           <a>Data Save Time</a>
           <div class="input"><input class="textbox" id="dst" type="text" value=""></div>
-          <a>Toggle Log</a>
+          <a>Toggle Log (Dev-function)</a>
           <div id="cb3" class="input checkboxd">
             <input type="checkbox" name="cb" id="checkbox3" class="checkbox" value="">
             <label for="checkbox3"></label>
@@ -120,12 +120,16 @@
 
 
 
-      <div class="tmnct" id="tmnct">
-        <div id="terminal"></div>
+      <div class="tmnct" id="tmnct"><br><br>
+        <div id="terminal"></div><br>
         <div class="tmninfo">
+          <div class="btst">
+            <a class="startTmn" id="startTmn">Start</a>
+            <a class="stopTmn" id="stopTmn">Stop</a>
+          </div>
           <div class="os">
-            <div class="ram"><ion-icon name="albums-outline" size="large"></ion-icon>  Ram: <a id="ram"></a>%</div>
-            <div class="cpu"><ion-icon name="copy-outline" size="large"></ion-icon>  CPU: <a id="cpu"></a>%</div>
+            <div class="ram"><ion-icon name="albums-outline" size="large"></ion-icon>  Ram: <a id="ram">0.00</a>%</div>
+            <div class="cpu"><ion-icon name="copy-outline" size="large"></ion-icon>  CPU: <a id="cpu">0.00</a>%</div>
           </div>
         </div>
       </div>
@@ -134,7 +138,7 @@
     <footer id="footer">
       <div class="button">
         <a id="save">Save Setting</a>
-        <a id="start">Start VBLNBot</a>
+        <a id="start">Set To Default</a>
       </div>
     </footer>
     <div class="onload" id="onload">

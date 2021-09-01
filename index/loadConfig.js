@@ -91,40 +91,44 @@ function deip(i){
 }
 
 //loadConfig
-    //General Config
-document.getElementById('botname').value = dfcf.bot_info.botname
-document.getElementById('lang').value= dfcf.bot_info.lang
-document.getElementById('fbemail').value= dfcf.facebook.FBemail
-document.getElementById('fbpass').value= dfcf.facebook.FBpassword
-document.getElementById('prefix').value= dfcf.facebook.prefix
-var admin = document.querySelector('.admin')
-for (var i=0; i<dfcf.facebook.admin.length; i++){
-    if (dfcf.facebook.admin[i] != '' && dfcf.facebook.admin[i] != null){
-        lengthAdmin +=1;
-        var add = `<div class="input"><input class="textbox boxad" id="ad${i}" type="text" value="" disabled><a id="del${i} del" onclick="return deip(${i})">-</a></div>`
-        admin.innerHTML += add;
-        htmladmin += add     
-        document.getElementById(`ad${i}`).style.transform = "translateY(-0.1px)"
+function lcf() {
+//General Config
+    document.getElementById('botname').value = dfcf.bot_info.botname
+    document.getElementById('lang').value= dfcf.bot_info.lang
+    document.getElementById('fbemail').value= dfcf.facebook.FBemail
+    document.getElementById('fbpass').value= dfcf.facebook.FBpassword
+    document.getElementById('prefix').value= dfcf.facebook.prefix
+    var admin = document.querySelector('.admin')
+    admin.innerHTML = "";
+    for (var i=0; i<dfcf.facebook.admin.length; i++){
+        if (dfcf.facebook.admin[i] != '' && dfcf.facebook.admin[i] != null){
+            lengthAdmin +=1;
+            var add = `<div class="input"><input class="textbox boxad" id="ad${i}" type="text" value="" disabled><a id="del${i} del" onclick="return deip(${i})">-</a></div>`
+            admin.innerHTML += add;
+            htmladmin += add     
+            document.getElementById(`ad${i}`).style.transform = "translateY(-0.1px)"
+        }
     }
-}
-for (var i=0; i<dfcf.facebook.admin.length; i++){
-    if (dfcf.facebook.admin[i] != '' && dfcf.facebook.admin[i] != null) {
-        try{
-            document.getElementById(`ad${i}`).value = dfcf.facebook.admin[i];
-        }catch(err){}
+    for (var i=0; i<dfcf.facebook.admin.length; i++){
+        if (dfcf.facebook.admin[i] != '' && dfcf.facebook.admin[i] != null) {
+            try{
+                document.getElementById(`ad${i}`).value = dfcf.facebook.admin[i];
+            }catch(err){}
+        }
     }
-}
-
-document.getElementsByName('cb')[0].checked= dfcf.facebook.autoMarkRead
-document.getElementsByName('cb')[1].checked= dfcf.facebook.selfListen
+    
+    document.getElementsByName('cb')[0].checked= dfcf.facebook.autoMarkRead
+    document.getElementsByName('cb')[1].checked= dfcf.facebook.selfListen
     //Advance Config
-document.getElementById('cslcl').value= ccf.main_bot.consoleColor
-document.getElementById('dst').value= ccf.main_bot.dataSaveTime
-document.getElementsByName('cb')[2].checked= ccf.main_bot.toggleLog
-document.getElementById('loglv').value= ccf.facebook.logLevel
-document.getElementById('userag').value= ccf.facebook.userAgent
-document.getElementsByName('cb')[3].checked= ccf.facebook.listenEvents
-document.getElementsByName('cb')[4].checked= ccf.facebook.updatePresence
+    document.getElementById('cslcl').value= ccf.main_bot.consoleColor
+    document.getElementById('dst').value= ccf.main_bot.dataSaveTime
+    document.getElementsByName('cb')[2].checked= ccf.main_bot.toggleLog
+    document.getElementById('loglv').value= ccf.facebook.logLevel
+    document.getElementById('userag').value= ccf.facebook.userAgent
+    document.getElementsByName('cb')[3].checked= ccf.facebook.listenEvents
+    document.getElementsByName('cb')[4].checked= ccf.facebook.updatePresence
+}
+lcf()
 //Save Config
 const savebutton = document.querySelector('#save')
 savebutton.onclick = function (){
@@ -165,7 +169,10 @@ savebutton.onclick = function (){
     }
 }
 //Start Bot
-const startbutton = document.querySelector('#start')
+const startbutton = document.querySelector('#start');
 startbutton.onclick = function (){
-    send("yellow", 'Starting BotChat...')
+    var cf = require(path.join(__dirname,"..", "core", "util", "defaultConfig.js"));
+    dfcf = cf.normal();
+    ccf = cf.core();
+    lcf();
 }
