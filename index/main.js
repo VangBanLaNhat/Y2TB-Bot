@@ -63,6 +63,8 @@ function createWindow () {
   const mainWindow = new BrowserWindow({
     width: 800,
     height: 650,
+    resizable: false,
+    maximizable: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
@@ -76,14 +78,14 @@ function createWindow () {
 	Menu.setApplicationMenu(mM);
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  //mainWindow.webContents.openDevTools()
 
   //terminal
 
 var ptyPr = pty.spawn(shell, [], {
 	name: "xterm-color",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
 	cols: 80,
-    rows: 30,
+  rows: 30,
 	cwd: process.env.HOME,
 	env: process.env
 })
@@ -93,7 +95,11 @@ ptyPr.on("data", function(data){
 })
 
 ipc.on("terminal.toterm", (event, data)=>{
-	ptyPr.write(data);
+	try{
+		ptyPr.write(data);
+	} catch(e){
+		console.log(e);
+	}
 })
 }
 
@@ -114,7 +120,7 @@ app.whenReady().then(() => {
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') app.quit()
+  if (process.platform != 'darwin') app.quit()
 })
 
 //save config

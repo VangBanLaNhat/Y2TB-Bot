@@ -1,0 +1,112 @@
+.onload {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding-top: 50%;
+  text-align: center;
+  align-items: center;
+  /*background: url("https://s1.uphinh.org/2021/07/22/dark-hexagonal-background-with-gradient-color_79603-1409.jpg");*/
+  background: rgba(33,38,57,0);
+  position: absolute;
+  padding: 10px 100px;
+  z-index: 1000;
+  animation: onload 5.5s;
+}
+@keyframes onload {
+  0%, 95%{
+    background: rgba(33,38,57,1);
+    display: flex;
+  }
+  100% {
+    background: rgba(33,38,57,0);
+    display: none;
+  }
+}
+
+/*Logo*/
+.logo{
+  width: 70%;
+  height: 35%;
+  position: absolute;
+  top: 30%;
+  left: 15%;
+  display: none;
+}
+.logo_tron{
+  width: 205px;
+  height: 205px;
+  position: absolute;
+  top: 30%;
+  left: 60%;
+  animation: xoay 10s linear 0s infinite;
+    -webkit-animation: xoay 10s linear 0s infinite;
+    -moz-animation: xoay 10s linear 0s infinite;
+    -o-animation: xoay 10s linear 0s infinite; 
+}
+
+@keyframes xoay {
+    from{
+        -webkit-transform:rotate(0deg);
+        -moz-transform:rotate(0deg);
+        -o-transform:rotate(0deg);
+    }
+    to{
+        -webkit-transform:rotate(360deg);
+        -moz-transform:rotate(360deg);
+        -o-transform:rotate(360deg);
+    }
+}
+
+.logo_robot{
+  width: 100px;
+  height: 100px;
+  position: absolute;
+  top: 39%;
+  left: 67%;
+  animation: flash 1s;
+}
+
+.logo_v{
+  width: 91px;
+  height: 83px;
+  position: absolute;
+  top: 37%;
+  left: 20%;
+  animation: backInDown 1s;
+}
+
+.logo_b{
+  width: 65px;
+  height: 83px;
+  position: absolute;
+  top: 37%;
+  left: 32%;
+  animation: backInLeft 1s;
+}
+
+.logo_l{
+  width: 54px;
+  height: 83px;
+  position: absolute;
+  top: 37%;
+  left: 41%;
+  animation: backInRight 1s;
+}
+
+.logo_n{
+  width: 65px;
+  height: 83px;
+  position: absolute;
+  top: 37%;
+  left: 49%;
+  animation: backInUp 1s;
+}
+
+.logo_slogan{
+  width: 350px;
+  height: 100px;
+  position: absolute;
+  top: 41%;
+  left: 13%;
+  animation: slideInLeft 1s;
+}

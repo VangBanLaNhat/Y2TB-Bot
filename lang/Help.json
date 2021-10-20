@@ -1,0 +1,60 @@
+{
+    "listCommand": {
+        "desc": "listCommand",
+        "vi_VN": "Danh sách các lệnh:",
+        "en_US": "List of commands:",
+        "args": {}
+    },
+    "pages": {
+        "desc": "Pages",
+        "vi_VN": "Trang {0}/{1}",
+        "en_US": "Page {0}/{1}",
+        "args": {
+            "{0}": {
+                "vi_VN": "Trang hiện tại",
+                "en_US": "Current page"
+            },
+            "{1}": {
+                "vi_VN": "Tổng số trang",
+                "en_US": "Total pages"
+            }
+        }
+    },
+    "listCommandEnd": {
+        "desc": "listCommandEnd",
+        "vi_VN": "Hãy gõ \"{prefix}help [Lệnh]\" để biết thêm chi tiết về lệnh đó",
+        "en_US": "Type \"{prefix}help [Command]\" for more details about that command",
+        "args": {
+            "{prefix}": {
+                "vi_VN": "Prefix",
+                "en_US": "Prefix"
+            }
+        }
+    },
+    "commandInfo": {
+        "desc": "Pages",
+        "vi_VN": "Chi tiết lệnh:\n-Cách dùng:\n{0}\n-Mô tả: {1}\n\nChú thích:\n<>: Bắt buộc phải có\n[]: Không bắt buộc phải có",
+        "en_US": "Command details:\n-Usage:\n{0}\n-Description: {1}\n\nNote:\n<>: Required\n[]: Not required",
+        "args": {
+            "{0}": {
+                "vi_VN": "Cách dùng",
+                "en_US": "Use"
+            },
+            "{1}": {
+                "vi_VN": "Mô tả",
+                "en_US": "Description"
+            }
+        }
+    },
+    "noCommand": {
+        "desc": "No Command",
+        "vi_VN": "Lệnh \"{0}\" không tồn tại!",
+        "en_US": "The command \"{0}\" does not exist!",
+        "args": {
+            "{0}": {
+                "vi_VN": "Lời nhắn",
+                "en_US": "Message"
+            }
+        }
+    }
+}

@@ -1,0 +1,25 @@
+{
+    "simReturn": {
+        "desc": "lang khi bot nhận lệnh csim",
+        "vi_VN": "Sim muốn nói: {0}",
+        "en_US": "Sim said: {0}",
+        "args": {
+            "{0}": {
+                "vi_VN": "Lời sim nói",
+                "en_US": "Sim's speech"
+            }
+        }
+    },
+    "simOn": {
+        "desc": "lang khi bot nhận lệnh csim",
+        "vi_VN": "Đã kích hoạt Csim ở đây!",
+        "en_US": "Csim's on!",
+        "args": {}
+    },
+    "simOff": {
+        "desc": "lang khi bot nhận lệnh csim",
+        "vi_VN": "Đã tắt Csim ở đây!",
+        "en_US": "Csim's off!",
+        "args": {}
+    }
+}
