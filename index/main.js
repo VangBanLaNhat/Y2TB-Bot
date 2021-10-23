@@ -53,14 +53,16 @@ var ccf = {
 
 
 const {app, BrowserWindow, Menu, ipcMain} = electron;
+const ipcR = require("electron").ipcRenderer;
 
 let mainWindow;
+let confirmWindow;
 
 
 
 function createWindow () {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 800,
     height: 650,
     resizable: false,
@@ -72,35 +74,88 @@ function createWindow () {
     }
   })
 
+
+
+
   // and load the index.html of the app.
-  mainWindow.loadFile('index.html')
+  mainWindow.loadFile('index.html');
+
+  //Window confirm
+  function crCFwindow(data){
+  	return new Promise((resolve, reject) => {
+    		confirmWindow = new BrowserWindow({
+    		width: 400,
+    		height: 200,
+    		title: 'Confirm',
+    		resizable: false,
+      	maximizable: false,
+      	minimizable: false,
+      	frame: false,
+      	parent: mainWindow,
+      	modal: true,
+    		webPreferences: {
+        	nodeIntegration: true,
+        	contextIsolation: false
+      	}
+    	});
+    	confirmWindow.loadFile('confirm.html');
+    	//confirmWindow.webContents.openDevTools()
+    	
+    	mainWindow.on("close", function () {
+    		app.quit();
+    	})
+    	confirmWindow.on("close", function () {
+    		confirmWindow = null;
+    	})
+    	confirmWindow.once("ready-to-show", function () {
+    		confirmWindow.show();
+    	})
+    	confirmWindow.webContents.on('did-finish-load', () => {
+        resolve()
+      })
+    })
+	}
   const mM = Menu.buildFromTemplate(mMn);
 	Menu.setApplicationMenu(mM);
 
   // Open the DevTools.
   //mainWindow.webContents.openDevTools()
 
+
   //terminal
 
-var ptyPr = pty.spawn(shell, [], {
-	name: "xterm-color",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
-	cols: 80,
-  rows: 30,
-	cwd: process.env.HOME,
-	env: process.env
-})
+	var ptyPr = pty.spawn(shell, [], {
+		name: "xterm-color",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+		cols: 80,
+  	rows: 30,
+		cwd: process.env.HOME,
+		env: process.env
+	})
 
-ptyPr.on("data", function(data){
-	mainWindow.webContents.send("terminal.incData", data)
-})
+	ptyPr.on("data", function(data){
+		mainWindow.webContents.send("terminal.incData", data)
+	})
 
-ipc.on("terminal.toterm", (event, data)=>{
-	try{
-		ptyPr.write(data);
-	} catch(e){
-		console.log(e);
-	}
-})
+
+	ipc.on("terminal.toterm", (event, data)=>{
+		try{
+			ptyPr.write(data);
+		} catch(e){
+			console.log(e);
+		}
+	})
+	ipc.on("confirm", (event, data)=>{
+		var dt = new Date;
+		crCFwindow().then(()=>{
+			confirmWindow.webContents.send("confirm", data);
+		})
+		
+	})
+	ipc.on("confirm.return", (event, data)=>{
+		mainWindow.webContents.send(data.from, data);
+		confirmWindow.close();
+		console.log(data);
+	})
 }
 
 // This method will be called when Electron has finished

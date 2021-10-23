@@ -171,8 +171,21 @@ savebutton.onclick = function (){
 //Start Bot
 const startbutton = document.querySelector('#start');
 startbutton.onclick = function (){
-    var cf = require(path.join(__dirname,"..", "core", "util", "defaultConfig.js"));
-    dfcf = cf.normal();
-    ccf = cf.core();
-    lcf();
+    ipc.send("confirm", {
+        type: "setDefaultConfig",
+        msg: "Are you sure you want to return the settings to default?"
+    });
+    
 }
+
+var ipc = require("electron").ipcRenderer;
+
+ipc.on("setDefaultConfig", (event, data)=>{
+    if(data.accept){
+        send("green", "Reset config sussed!")
+        var cf = require(path.join(__dirname,"..", "core", "util", "defaultConfig.js"));
+        dfcf = cf.normal();
+        ccf = cf.core();
+        lcf();
+    }
+})
