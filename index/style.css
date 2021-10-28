@@ -161,6 +161,42 @@ ion-icon{
   display: flex;
 }
 
+.dcmdip{
+  display: inline-block;
+  width: 100%;
+  transform: translateY(-15px);
+  background: #000833;
+  transition: 0.5s;
+}
+
+.cmdip{
+  width: 95%;
+  border-radius: 0px;
+  background: #000833;
+}
+
+.sendcmd{
+  color: #fff;
+  border: 0px solid #cfffee;
+  transition: 0.5s;
+}
+
+.sendcmd:hover{
+  animation: send 2s infinite;
+}
+
+.sendcmd:active{
+  color: #003033;
+  transition: 0.1s;
+}
+@keyframes send {
+  0%, 100%{
+    transform: translate(0px, 5px);
+  }
+  50%{
+    transform: translate(5px, 5px);
+  }
+}
 .startTmn{
   
   box-shadow:  0 0 0 1px lime;
