@@ -25,19 +25,19 @@ async function listen(err, event, api){
 			switch(event.type) {
 				case "message":
 				    if(event.attachments.length != 0){
-				        log.log("Message", event);
+				        console.log("Message", event);
 				    }
 				    else{
-				        log.log("Message", `[${event.senderID} to ${event.threadID}] ${event.body}`);
+				        console.log("Message", `[${event.senderID} to ${event.threadID}] ${event.body}`);
 				    }
 					break;
                 default:
                 if(global.coreconfig.main_bot.toggleDebug == true){
-					log.log(event.type, event);
+					console.log(event.type, event);
                 }
-                else if(event.type == "message_reply"){
+                else if(event.type == "message_reply" && event.senderID != undefined){
                     
-                    log.log("Message", `[${event.senderID} reply ${event.messageReply.senderID} to ${event.threadID}] ${event.body}`);
+                    console.log("Message", `[${event.senderID} reply ${event.messageReply.senderID} to ${event.threadID}] ${event.body}`);
                 }
 					break;
 			}
@@ -70,26 +70,13 @@ async function mess (event, api){
                 event.body = event.body.join(" ");
                 try{
                     var rq = require(global.plugins[i].command[ms[0]].main);
-                    var func = global.plugins[i].command[ms[0]].mainFunc
-                    //console.log(rq, func)
-                    /*if (rq[func][Symbol.toStringTag] == 'AsyncFunction'){
-                    rq[func](event, api).then(function(rt){
-                        if(rt != undefined){
-                            log.log(global.plugins[i].command[ms[0]].namePlugin, rt.data)
-                            send(rt, event, api);
-                        }
-                    }).catch(function(err){
-                        log.err(global.plugins[i].command[ms[0]].namePlugin, err);
-                        send(err, event, api);
-                    })
+                    var func = global.plugins[i].command[ms[0]].mainFunc;
+                    try{
+                        await rq[func](event, api);
+                    } catch (err){
+                        log.err(global.plugins[i].command[ms[0]].namePlugin, err)
+                        api.sendMessage(err , event.threadID, event.messageID);
                     }
-                    else{*/
-                    var rt = rq[func](event, api);
-                    /*if(rt != undefined){
-                        log.log(global.plugins[i].command[ms[0]].namePlugin, rt.data)
-                        send(rt, event, api);
-                    }*/
-                    //}
                 }
                 catch(err){
                     log.err(global.plugins[i].command[ms[0]].namePlugin, err)
@@ -122,7 +109,7 @@ async function chathook (event, api){
             /*if (rq[func][Symbol.toStringTag] == 'AsyncFunction'){
                 rq[func](event, apii).then(function(rt){
                     if(rt != undefined){
-                        log.log(i, rt.data)
+                        console.log(i, rt.data)
                         send(rt, event, api);
                     }
                 }).catch(function(err){
@@ -133,7 +120,7 @@ async function chathook (event, api){
             else{*/
                 var rt = rq[func](event, api);
                 /*if(rt != undefined){
-                    log.log(i, rt.data)
+                    console.log(i, rt.data)
                     send(rt, event, api);
                 }*/
             //}

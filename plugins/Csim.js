@@ -14,9 +14,10 @@ async function csim(data, api){
         api.sendMessage(global.lang.Csim.simOff[global.config.bot_info.lang] , data.threadID, data.messageID);
     }
     else{
-        var datajs = await fetch(encodeURI(`https://api.simsimi.net/v1/?text=${msg}&lang=${global.config.bot_info.lang}`));
+        var datajs = await fetch(encodeURI(`https://api.simsimi.net/v2/?text=${msg}&lang=${global.config.bot_info.lang}&lc=${global.config.bot_info.lang.split("_")[0]}`));
         var json = await datajs.json();
-        var s = json.success;
+        var s = json.success != "Sim doesn't know what you are talking about. Please teach me" ? json.success : msg;
+        s = s != "I don't know what you're saying. Please teach me" ? s : msg;
         var rt = global.lang.Csim.simReturn[global.config.bot_info.lang].replace("{0}", s);
         if (s != undefined) {
             api.sendMessage(rt , data.threadID, data.messageID);
@@ -26,13 +27,14 @@ async function csim(data, api){
 
 async function chathook(data, api){
     !global.data.csim?global.data.csim = {}:"";
-    if(data.type == "message" && global.data.csim[data.threadID]){
+    if(data.type == "message" && global.data.csim[data.threadID] && data.body != `${global.config.facebook.prefix}csim off`){
         const fetch = require("node-fetch");
     
         var msg = data.body
-        var datajs = await fetch(encodeURI(`https://api.simsimi.net/v1/?text=${msg}&lang=${global.config.bot_info.lang}`));
+        var datajs = await fetch(encodeURI(`https://api.simsimi.net/v2/?text=${msg}&lang=${global.config.bot_info.lang}&lc=${global.config.bot_info.lang.split("_")[0]}`));
         var json = await datajs.json();
-        var s = json.success;
+        var s = json.success != "Sim doesn't know what you are talking about. Please teach me" ? json.success : msg;
+        s = s != "I don't know what you're saying. Please teach me" ? s : msg;
         var rt = global.lang.Csim.simReturn[global.config.bot_info.lang].replace("{0}", s);
         if (s != undefined) {
             api.sendMessage(rt , data.threadID, data.messageID);
@@ -64,8 +66,8 @@ function init(){
         "langMap":{
             "simReturn":{
                 "desc": "lang khi bot nhận lệnh csim",
-                "vi_VN": "Sim muốn nói: {0}",
-                "en_US": "Sim said: {0}",
+                "vi_VN": "{0}",
+                "en_US": "{0}",
                 "args": {
                     "{0}": {
                         "vi_VN": "Lời sim nói",

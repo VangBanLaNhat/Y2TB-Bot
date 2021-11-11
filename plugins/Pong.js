@@ -23,12 +23,13 @@ function init(){
 }
 
 function pong(data, api){
-    api.sendMessage("Pong" , data.threadID, data.messageID);
+    const timeStart = Date.now();
+    api.sendMessage("Pinging...", data.threadID, () => api.sendMessage(`Ping: ${Date.now() - timeStart}ms`, data.threadID, data.messageID))
 }
 
 function pongch(data, api){
     if(data.body == "ping" || data.body == "Ping"){
-        api.sendMessage("Pong" , data.threadID, data.messageID);
+        api.sendMessage("‍Pong" , data.threadID, data.messageID);
     } else if(data.body == "pong" || data.body == "Pong"){
         api.sendMessage("Amen, pong thì để tui nói, nói ping đê" , data.threadID, data.messageID);
     }
