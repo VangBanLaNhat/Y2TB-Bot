@@ -119,7 +119,7 @@ function createWindow () {
 	Menu.setApplicationMenu(mM);
 
   // Open the DevTools.
-  //mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 
 
   //terminal

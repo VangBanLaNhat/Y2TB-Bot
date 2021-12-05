@@ -108,7 +108,7 @@ function checkxp (data, api){
 }
 
 function mainrc (data, api){
-    delete global.data.rankcard[data.threadID]
+    //delete global.data.rankcard[data.threadID]
     !global.data.rankcard ? global.data.rankcard = {}:"";
 
     !global.data.rankcard[data.senderID] ? global.data.rankcard[data.senderID] = {

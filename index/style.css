@@ -147,6 +147,16 @@ ion-icon{
     display: none;
 }
 
+.addfbs{
+  display: none;
+}
+
+.btn-addfbs{
+  padding: 5px 10px;
+  margin: 0 15px;
+  font-size: 12px;
+}
+
 //terminal
 
 .tmninfo{

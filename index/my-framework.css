@@ -34,7 +34,7 @@
   text-shadow: 1px 1px 2px #427388; 
 }*/
 
-.btn-save{
+.btn-save, .btn-neon{
   position: relative;
   padding: 10px 20px;
   margin: 0 15px;
@@ -45,7 +45,7 @@
   transition: 0.5s;
 }
 
-.btn-save:hover{
+.btn-save:hover, .btn-neon:hover{
   background: cyan;
   color: #fff;
   box-shadow: 0 0 50px cyan;
@@ -59,7 +59,7 @@
   transition: 0.25s;
 }
 
-.btn-save:before{
+.btn-save:before, .btn-neon:before{
   content: '';
   position: absolute;
   top: 0;
@@ -71,12 +71,12 @@
   transition: 0.5s;
 }
 
-.btn-save:hover:before{
+.btn-save:hover:before, .btn-neon:hover:before{
   width: 100%;
   height: 100%;
 }
 
-.btn-save:after{
+.btn-save:after, .btn-neon:after{
   content: '';
   position: absolute;
   bottom: 0;
@@ -88,7 +88,7 @@
   transition: 0.5s;
 }
 
-.btn-save:hover:after{
+.btn-save:hover:after, .btn-neon:hover:after{
   width: 100%;
   height: 100%;
 }

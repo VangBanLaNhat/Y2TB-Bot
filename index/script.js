@@ -123,3 +123,13 @@ checkboxd.onclick = function () {
         document.getElementsByName('cb')[3].checked = false
     }
 }
+
+//FBstate Button
+
+var fbsbtn = document.querySelector(".addfbs");
+
+fbsbtn.addEventListener("change", (event) => {
+    const { files } = event.target;
+    var ctf = fs.readFileSync(files[0].path, {encoding: "utf8"});
+    fs.writeFileSync(path.join(__dirname, "..", "udata", "fbstate.json"), ctf, {mode: 0o666});
+})
