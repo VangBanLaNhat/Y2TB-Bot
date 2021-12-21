@@ -5,7 +5,11 @@ function init(){
     ensureExists(path.join(__dirname, "cache", "ytmp3"));
     return{
         "pluginName": "YTmp34",
-        "pluginMain": "YTmp3.js",
+        "pluginMain": "YouTube.js",
+        "desc": {
+            "vi_VN": "Phát nhạc và tải video từ Youtube",
+            "en_US": "Play music and download videos from Youtube"
+        },
         "commandList": {
             "ytmp4": {
                 "help": {
@@ -16,7 +20,11 @@ function init(){
                     "vi_VN": "Tải video về từ YouTube",
                     "en_US": "Download video from YouTube"
                 },
-                "mainFunc": "ytmp4"
+                "mainFunc": "ytmp4",
+                "example": {
+                    "vi_VN": "ytmp4 https://www.youtube.com/watch?v=kTJczUoc26U",
+                    "en_US": "ytmp4 https://www.youtube.com/watch?v=kTJczUoc26U"
+                }
             },
             "ytmp3": {
                 "help": {
@@ -27,7 +35,11 @@ function init(){
                     "vi_VN": "Tải audio về từ YouTube",
                     "en_US": "Download audio from YouTube"
                 },
-                "mainFunc": "ytmp3"
+                "mainFunc": "ytmp3",
+                "example": {
+                    "vi_VN": "ytmp3 https://www.youtube.com/watch?v=kTJczUoc26U",
+                    "en_US": "ytmp3 https://www.youtube.com/watch?v=kTJczUoc26U"
+                }
             }
         },
         "nodeDepends":{
@@ -106,6 +118,7 @@ async function ytmp3(data, api){
         
         ffmpeg(vdo).audioBitrate(128).save(dirr).on('progress', p => {
                 console.log("ytmp3", `${p.targetSize}KB downloaded`);
+                console.blank();
             }).on('end', () => {
                 if (fs.statSync(dirr).size > 26214400) api.sendMessage("Audio lớn hơn 25MB", data.threadID, () => fs.unlinkSync(dirr), data.messageID)
                 else api.sendMessage({

@@ -2,6 +2,10 @@ function init(){
     return{
         "pluginName": "SearchWiki",
         "pluginMain": "Wiki.js",
+        "desc": {
+            "vi_VN": "Tìm kiếm trên Wiki",
+            "en_US": "Search on Wiki"
+        },
         "commandList": {
             "wiki": {
                 "help": {
@@ -12,7 +16,11 @@ function init(){
                     "vi_VN": "Tìm tất cả mọi thứ trên Wikipedia",
                     "en_US": "Find everything on Wikipedia"
                 },
-                "mainFunc": "wiki"
+                "mainFunc": "wiki",
+                "example": {
+                    "vi_VN": "wiki AI",
+                    "en_US": "wiki AI"
+                }
             }
         },
         "nodeDepends":{

@@ -2,6 +2,10 @@ function init(){
     return{
         "pluginName": "AntiUnsend",
         "pluginMain": "AntiUnsend.js",
+        "desc": {
+            "vi_VN": "Khôi phục tin nhắn khi bị gỡ",
+            "en_US": "Resend messages when deleted"
+        },
         "commandList": {
             "antiunsend": {
                 "help": {
@@ -11,6 +15,10 @@ function init(){
                 "tag": {
                     "vi_VN": "Bật/Tắt AntiUnsend",
                     "en_US": "On/Off AntiUnsend"
+                },
+                "example": {
+                    "vi_VN": "antiunsend",
+                    "en_US": "antiunsend"
                 },
                 "mainFunc": "start"
             }

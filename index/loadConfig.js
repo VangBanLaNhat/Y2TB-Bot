@@ -94,9 +94,9 @@ function deip(i){
 function lcf() {
 //General Config
     document.getElementById('botname').value = dfcf.bot_info.botname
-    document.getElementById('lang').value= dfcf.bot_info.lang
     document.getElementById('fbemail').value= dfcf.facebook.FBemail
     document.getElementById('fbpass').value= dfcf.facebook.FBpassword
+    document.getElementById('lang').value= dfcf.bot_info.lang
     document.getElementById('prefix').value= dfcf.facebook.prefix
     var admin = document.querySelector('.admin')
     admin.innerHTML = "";
@@ -119,14 +119,17 @@ function lcf() {
     
     document.getElementsByName('cb')[0].checked= dfcf.facebook.autoMarkRead
     document.getElementsByName('cb')[1].checked= dfcf.facebook.selfListen
+    document.getElementById('uidMode').value= dfcf.facebook.UIDmode
     //Advance Config
     document.getElementById('cslcl').value= ccf.main_bot.consoleColor
     document.getElementById('dst').value= ccf.main_bot.dataSaveTime
     document.getElementsByName('cb')[2].checked= ccf.main_bot.toggleLog
+    document.getElementsByName('cb')[3].checked= ccf.main_bot.toggleDebug
+    document.getElementsByName('cb')[4].checked= ccf.main_bot.developMode
     document.getElementById('loglv').value= ccf.facebook.logLevel
     document.getElementById('userag').value= ccf.facebook.userAgent
-    document.getElementsByName('cb')[3].checked= ccf.facebook.listenEvents
-    document.getElementsByName('cb')[4].checked= ccf.facebook.updatePresence
+    document.getElementsByName('cb')[5].checked= ccf.facebook.listenEvents
+    document.getElementsByName('cb')[6].checked= ccf.facebook.updatePresence
 }
 lcf()
 //Save Config
@@ -148,14 +151,17 @@ savebutton.onclick = function (){
     console.log(lengthAdmin)
     dfcf.facebook.autoMarkRead = document.getElementsByName('cb')[0].checked
     dfcf.facebook.selfListen = document.getElementsByName('cb')[1].checked
+    dfcf.facebook.UIDmode = document.getElementById('uidMode').value
     //Advance Config
     ccf.main_bot.consoleColor = document.getElementById('cslcl').value
     ccf.main_bot.dataSaveTime = document.getElementById('dst').value
     ccf.main_bot.toggleLog = document.getElementsByName('cb')[2].checked
+    ccf.main_bot.toggleDebug = document.getElementsByName('cb')[3].checked
+    ccf.main_bot.developMode = document.getElementsByName('cb')[4].checked
     ccf.facebook.logLevel = document.getElementById('loglv').value
     ccf.facebook.userAgent = document.getElementById('userag').value
-    ccf.facebook.listenEvents = document.getElementsByName('cb')[3].checked
-    ccf.facebook.updatePresence = document.getElementsByName('cb')[4].checked
+    ccf.facebook.listenEvents = document.getElementsByName('cb')[5].checked
+    ccf.facebook.updatePresence = document.getElementsByName('cb')[6].checked
     try{
         //window.ipcRenderer.send('gnrcf', dfcf);
         //window.ipcRenderer.send('avccf', ccf);
@@ -189,3 +195,21 @@ ipc.on("setDefaultConfig", (event, data)=>{
         lcf();
     }
 })
+
+optUID(dfcf.facebook.UIDmode);
+
+function optUID(a) {
+    var value = a.value;
+    var box = document.querySelector('.listuidmode');
+    box.innerHTML = "";
+    if(value != "disabled"){
+        document.querySelector('#adduidmode').disabled = false;
+        var length = dfcf.facebook[value].length;
+        console.log(length);
+        for(let i in dfcf.facebook[value]){
+            box.innerHTML += `<div class="input"><input class="textbox boxUID" id="uid${i}" type="text" value="${dfcf.facebook[value][i]}" disabled><a id="delUID${i} del" onclick="return deUID(${i})">-</a></div>`
+        }
+    } else {
+        document.querySelector('#adduidmode').disabled = true;
+    }
+}

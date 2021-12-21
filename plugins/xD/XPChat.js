@@ -7,6 +7,10 @@ function init(){
     return{
         "pluginName": "XPchat",
         "pluginMain": "XPChat.js",
+        "desc": {
+            "vi_VN": "Rankcard",
+            "en_US": "Rankcard"
+        },
         "commandList": {
             "rank": {
                 "help": {
@@ -16,6 +20,10 @@ function init(){
                 "tag": {
                     "vi_VN": "Cho bạn Rank Card",
                     "en_US": "Get Rank Card"
+                },
+                "example": {
+                    "vi_VN": "rank",
+                    "en_US": "rank"
                 },
                 "mainFunc": "mainrc"
             },
@@ -32,6 +40,7 @@ function init(){
             }
         },
         "chathook": "xps",
+        "obb": "XPchat",
         "nodeDepends":{
             "jimp": "",
             "text2png": ""

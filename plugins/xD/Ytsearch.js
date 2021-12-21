@@ -70,6 +70,10 @@ function init(){
     return{
         "pluginName": "YTSearch",
         "pluginMain": "Ytsearch.js",
+        "desc": {
+            "vi_VN": "Tìm kiếm trên Youtube",
+            "en_US": "Search on Youtube"
+        },
         "commandList": {
             "ytsearch": {
                 "help": {
@@ -80,7 +84,11 @@ function init(){
                     "vi_VN": "Tìm kiếm video trên YouTube",
                     "en_US": "Search video on YouTube"
                 },
-                "mainFunc": "ytsearch"
+                "mainFunc": "ytsearch",
+                "example": {
+                    "vi_VN": "ytsearch stay",
+                    "en_US": "ytsearch stay"
+                }
             }
         },
         "nodeDepends":{

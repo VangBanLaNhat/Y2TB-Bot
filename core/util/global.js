@@ -3,7 +3,7 @@ const path = require("path");
 const log = require(path.join(__dirname, "log.js"));
 
 async function loadBan(){
-    try{
+    /*try{
         var fetchData = await fetch("https://api.vangbanlanhat.tk/ban?mode=list");
         var json = await fetchData.json();
         global.listBan = json;
@@ -17,8 +17,10 @@ async function loadBan(){
         
     } catch(err){
         log.err("VBLN Ban", "Can't load list ban. Exitting...");
-        process.exit(301);
-    }
+        global.listBan = {};
+        //process.exit(301);
+    }*/
+    global.listBan = {};
 }
 
 module.exports = loadBan;

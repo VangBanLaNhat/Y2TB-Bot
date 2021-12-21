@@ -2,6 +2,10 @@ function init(){
     return{
         "pluginName": "Ping",
         "pluginMain": "pong.js",
+        "desc": {
+            "vi_VN": "Check độ trễ từ bot đến Facebook",
+            "en_US": "Check latency from Bot to Facebook"
+        },
         "commandList": {
             "ping": {
                 "help": {
@@ -12,7 +16,11 @@ function init(){
                     "vi_VN": "Ping Pong",
                     "en_US": "Ping Pong"
                 },
-                "mainFunc": "pong"
+                "mainFunc": "pong",
+                "example": {
+                    "vi_VN": "ping",
+                    "en_US": "ping"
+                }
             }
         },
         "chathook": "pongch",

@@ -128,8 +128,27 @@ checkboxd.onclick = function () {
 
 var fbsbtn = document.querySelector(".addfbs");
 
+
+var fbsPath = document.querySelector(".fbs-path");
+
+var fs = require("fs");
+
+if(fs.existsSync(require("path").join(__dirname, "..", "udata", "fbstate.json"))){
+    fbsPath.innerHTML = "FBstate.json is exists!"
+}
+
 fbsbtn.addEventListener("change", (event) => {
     const { files } = event.target;
     var ctf = fs.readFileSync(files[0].path, {encoding: "utf8"});
     fs.writeFileSync(path.join(__dirname, "..", "udata", "fbstate.json"), ctf, {mode: 0o666});
+    fbsPath.innerHTML = files[0].path;
 })
+
+//Plugins Store Button
+var ipc = require("electron").ipcRenderer;
+
+var plstbtn = document.querySelector(".btn-plst");
+
+plstbtn.onclick = function (){
+    ipc.send("openPluginsStore");
+}

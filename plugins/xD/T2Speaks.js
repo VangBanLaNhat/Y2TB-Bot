@@ -2,6 +2,10 @@ function init(){
     return{
         "pluginName": "T2Speaks",
         "pluginMain": "T2Speaks.js",
+        "desc": {
+			"vi_VN": "Chuyển văn bản thành giọng nói",
+			"en_US": "Convert Text to Speech"
+        },
         "commandList": {
             "say": {
                 "help": {
@@ -12,7 +16,11 @@ function init(){
                     "vi_VN": "Chuyển văn bản thành giọng nói",
                     "en_US": "Convert Text to Speech"
                 },
-                "mainFunc": "tts"
+                "mainFunc": "tts",
+                "example": {
+                    "vi_VN": "say em đẹp lắm",
+                    "en_US": "say Hello"
+                }
             }
         },
         "author": "UIRI",

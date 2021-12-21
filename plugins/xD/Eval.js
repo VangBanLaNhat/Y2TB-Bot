@@ -2,17 +2,25 @@ function init(){
     return{
         "pluginName": "Eval",
         "pluginMain": "Eval.js",
+        "desc": {
+            "vi_VN": "Chạy lệnh Javascrift",
+            "en_US": "Run Javascript commands"
+        },
         "commandList": {
             "eval": {
                 "help": {
-                    "vi_VN": "",
-                    "en_US": ""
+                    "vi_VN": "<Lệnh>",
+                    "en_US": "<Command>"
                 },
                 "tag": {
-                    "vi_VN": "",
-                    "en_US": ""
+                    "vi_VN": "Chạy lệnh Javascrift",
+                    "en_US": "Run Javascript commands"
                 },
-                "mainFunc": "outeval"
+                "mainFunc": "outeval",
+                "example": {
+                    "vi_VN": "eval new Date()",
+                    "en_US": "eval new Date()"
+                }
             }
         },
         "chathook": "outeval",
@@ -45,7 +53,7 @@ function outeval(data, api){
                     api.sendMessage(err.toString() , data.threadID, data.messageID);
                 }
             }else{
-                api.sendMessage("Dảk" , data.threadID, data.messageID);
+                api.sendMessage("No permission!" , data.threadID, data.messageID);
             }
         }
     }

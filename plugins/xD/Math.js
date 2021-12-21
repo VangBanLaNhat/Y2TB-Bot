@@ -2,6 +2,10 @@ function init(){
     return{
         "pluginName": "Math",
         "pluginMain": "Math.js",
+        "desc": {
+			"vi_VN": "Tính toán những phương trình phức tạp",
+			"en_US": "Calculating complex equations"
+        },
         "commandList": {
             "math": {
                 "help": {
@@ -12,7 +16,11 @@ function init(){
                     "vi_VN": "",
                     "en_US": ""
                 },
-                "mainFunc": "math"
+                "mainFunc": "math",
+                "example": {
+                    "vi_VN": "math x^2+2x-3=0",
+                    "en_US": "math x^2+2x-3=0"
+                }
             }
         },
         "nodeDepends":{

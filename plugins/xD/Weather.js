@@ -4,6 +4,10 @@ function init(){
     return{
         "pluginName": "Weather",
         "pluginMain": "Weather.js",
+        "desc": {
+            "vi_VN": "Dự báo thời tiết",
+            "en_US": "Weather forecast"
+        },
         "commandList": {
             "weather": {
                 "help": {
@@ -11,10 +15,14 @@ function init(){
                     "en_US": "[City]"
                 },
                 "tag": {
-                    "vi_VN": "Thời tiết hiện tại",
-                    "en_US": "Weather now"
+                    "vi_VN": "Thời tiết hôm nay",
+                    "en_US": "Weather today"
                 },
-                "mainFunc": "wth"
+                "mainFunc": "wth",
+                "example": {
+                    "vi_VN": "weather Hà Nội",
+                    "en_US": "weather Tokyo"
+                }
             }
         },
         "langMap":{

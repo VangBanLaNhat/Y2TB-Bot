@@ -1,0 +1,173 @@
+@import url("https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900&display=swap");
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', Sans-Serif;
+}
+
+html, body, .content{
+  width: 100%;
+  height: 100%;
+}
+
+body{
+  position: absolute;
+  background: #29282d;
+  background-size: cover;
+  background-position: left;
+  background-attachment: fixed;
+}
+
+a, br{
+  user-select:  none;
+}
+
+.content{
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 100%;
+  height: 100%;
+}
+
+.plugin{
+    position: relative;
+    margin: 10px 10px;
+    display: flex;
+    flex-direction: column;
+    width: auto;
+    background: #ffffff0d;
+    color: #fff;
+    justify-content: left;
+    align-items: left;
+    transition: 1s;
+}
+
+.pluginName{
+    margin: 10px 20px;
+}
+
+.info_install{
+    display: block;
+    margin: 10px 25px;
+}
+
+.info_install .plath{
+    margin-right: 20px;
+}
+
+.btn-install{
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    color: #fff;
+}
+
+/* Button */
+
+.btn-amt{
+    max-width: 106px;
+    padding: 10px 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #000;
+    transition: 1s;
+    overflow: hidden;
+}
+
+.btn-amt:hover{
+    background: #00ccff;
+    box-shadow: 0 0 10px #00ccff,
+                0 0 30px #00ccff,
+                0 0 60px #00ccff,
+                0 0 100px #00ccff;
+}
+
+.btn-amt::before{
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 400%;
+    background: var(--clr);
+    transition: 1s;
+    animation: animate 4s linear infinite;
+}
+
+@keyframes animate {
+    0%{
+        transform: rotate(0deg);
+    }
+    100%{
+        transform: rotate(360deg);
+    }
+}
+
+.btn-amt:hover::before, .btn-uins::before{
+    width: 120%;
+}
+
+.btn-amt::after{
+    content: '';
+    position: absolute;
+    inset: 2px;
+    background: #29282d;
+    transition: 1s;
+}
+
+/*.btn-amt:hover::after{
+    background: var(--clr);
+}*/
+
+.btn-amt span{
+    position: relative;
+    z-index: 1;
+    opacity: 0.5;
+    text-transform: uppercase;
+}
+
+.btn-ist{
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    bottom: 10px;
+    right: 10px;
+    color: #fff;
+    max-width: 106px;
+    padding: 10px 30px;
+    background: #29282d;
+    transition: 0.5s;
+}
+
+.btn-ist:hover{
+    background: #00ccff;
+}
+
+/*Page*/
+
+footer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    bottom: 0px;
+    width: 100%;
+    min-height: 50px;
+    margin-top: 10px;
+    z-index: 1;
+    background: #29282d;
+}
+
+.page{
+    padding: 7px 17px;
+    color: #fff;
+    background: #000;
+    opacity: 0.5;
+    transition: 0.5s;
+}
+
+.page.active, .page:hover{
+    background: #00ccff;
+    opacity: 1;
+}

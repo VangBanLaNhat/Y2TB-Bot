@@ -3,6 +3,10 @@ function init(){
     return{
         "pluginName": "ArrowChat",
         "pluginMain": "ArrowChat.js",
+        "desc": {
+            "vi_VN": "Trả lời tự động khi xuất hiện từ mà người dùng có thể cài đặt sẵn",
+            "en_US": "Auto-reply when a user-preset word appears"
+        },
         "commandList": {
             "adrow": {
                 "help": {
@@ -13,7 +17,11 @@ function init(){
                     "vi_VN": "",
                     "en_US": ""
                 },
-                "mainFunc": "add"
+                "mainFunc": "add",
+                "example": {
+                    "vi_VN": "adrow chào eim=>anh đứng đây từ chiều",
+                    "en_US": "adrow ping=>pong"
+                }
             },
             "listrow": {
                 "help": {
@@ -24,7 +32,11 @@ function init(){
                     "vi_VN": "",
                     "en_US": ""
                 },
-                "mainFunc": "list"
+                "mainFunc": "list",
+                "example": {
+                    "vi_VN": "listrow",
+                    "en_US": "listrow"
+                }
             },
             "delarow": {
                 "help": {
@@ -35,7 +47,11 @@ function init(){
                     "vi_VN": "",
                     "en_US": ""
                 },
-                "mainFunc": "del"
+                "mainFunc": "del",
+                "example": {
+                    "vi_VN": "delarow chào eim",
+                    "en_US": "delarow ping"
+                }
             },
             "delarowall": {
                 "help": {
@@ -46,7 +62,11 @@ function init(){
                     "vi_VN": "",
                     "en_US": ""
                 },
-                "mainFunc": "delall"
+                "mainFunc": "delall",
+                "example": {
+                    "vi_VN": "delarowall",
+                    "en_US": "delarowall"
+                }
             }
         },
         "chathook": "chathook",

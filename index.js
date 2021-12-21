@@ -8,9 +8,10 @@ var lx = require("luxon");
 var log = require("./core/util/log.js");
 var scanDir = require("./core/util/scanDir.js");
 console.logg = console.log;
-console.log = log.log;
+//console.log = log.log;
 console.error = log.err;
 console.warn = log.warn;
+console.blank = log.blank;
 
 //Write log
 var dt = lx.DateTime.now().setZone("Asia/Ho_Chi_Minh");
@@ -26,6 +27,15 @@ for (var i=0; i<ll.length; i++){
 }
 
 //config loader
+
+fs.writeFileSync(path.join(__dirname, "data", "isStart.txt"), "1");
+
+//let glb = JSON.stringify(global);
+
+/*setInterval(function(){
+    require("./core/util/global.js")();
+}, 1*60*60*1000)*/
+async function restart (){
 log.blank();
 log.log("Config", "Loading config...");
 try{
@@ -35,7 +45,7 @@ try{
 	log.blank();
 }
 catch(err){
-	console.log(err);
+	log.log(err);
     log.err("Config", "Can't load Config. Existing...");
 	log.blank();
     process.exit(101);
@@ -50,14 +60,14 @@ try{
     log.log("Data", "Loading data success!");
 }
 catch(err){
-    console.log(err);
+    log.log(err);
     log.err("Data", "Can't load Data. Existing...");
 	log.blank();
     process.exit(102);
 }
 setInterval(function(){
     try{
-        fs.writeFileSync(path.join(__dirname, "data", "data.json"), JSON.stringify(global.data, null, 4), {mode: 0o666});
+        fs.writeFileSync(path.join(__dirname, "data", "data.json"), JSON.stringify(global.globalC.data, null, 4), {mode: 0o666});
         //fs.writeFileSync(path.join(__dirname, "data", "prdata.json"), JSON.stringify(global.prdata, null, 4), {mode: 0o666});
     }
     catch(err){
@@ -65,26 +75,49 @@ setInterval(function(){
     }
 }, global.coreconfig.main_bot.dataSaveTime*1000)
 
+globalC = {};
+
+for(let i in global){
+    if(i != "global" && i != "plugins"){
+        globalC[i] = global[i];
+    } else if(i == "plugins"){
+    	globalC[i] = JSON.parse(JSON.stringify(global[i]))
+    }
+
+}
+
 require("./core/util/global.js")();
-
-
-setInterval(function(){
-    require("./core/util/global.js")();
-}, 1*60*60*1000)
 
 //loadPlugins
 log.log("Plugin", "Loading Plugins...")
 try{
     ensureExists(path.join(__dirname, "lang"));
-    require("./core/util/loadPlugin.js")();
+    await require("./core/util/loadPlugin.js")();
+    for(let i in global){
+    	if(i != "global" && i != "plugins"){
+        globalC[i] = global[i];
+    } else if(i == "plugins"){
+    	globalC[i] = JSON.parse(JSON.stringify(global[i]))
+    }
+	}
+	for(let i in globalC.plugins.VBLN.command){
+    	delete globalC.plugins.VBLN.command[i].main;
+	}
 }
 catch(err){
     log.err("Plugins", "Can't load plugins with error: "+err);
 }
 
+
 //loadLang
 log.log("Languages", "Loading Languages...");
 require("./core/util/loadLang.js")();
+
+for(let i in global){
+    	if(i != "global" && i != "plugins"){
+        globalC[i] = global[i];
+    }
+}
 
 //credentials loader
 let fbCredentials = {
@@ -124,7 +157,7 @@ if(loginstate){
 			output: process.stdout
 		});
 		login(fbCredentials, loginOptions, (err, api) => {
-			console.log(err);
+			log.log(err);
 			if (err) {
 				switch (err.error) {
 					case 'login-approval':
@@ -146,6 +179,21 @@ if(loginstate){
 		});
 	}
 }
+}
+
+restart();
+
+process.on('exit', async function(code) {  
+	if (code == 185192011820) {
+		delete global.plugins
+		delete global.chathook
+		delete global.data
+		delete global.config
+		delete global.coreconfig
+		delete global.lang
+		var t = await restart()
+	}else fs.writeFileSync(path.join(__dirname, "data", "isStart.txt"), "0");
+});
 
 function ensureExists(path, mask) {
   if (typeof mask != 'number') {

@@ -2,17 +2,25 @@ function init(){
     return{
         "pluginName": "Unsend",
         "pluginMain": "unsend.js",
+        "desc": {
+            "vi_VN": "Gỡ tin nhắn của Bot",
+            "en_US": "Remove Bot's messages"
+        },
         "commandList": {
             "unsend": {
                 "help": {
-                    "vi_VN": "",
-                    "en_US": ""
+                    "vi_VN": "<Trả lời>",
+                    "en_US": "<Reply>"
                 },
                 "tag": {
                     "vi_VN": "Gỡ tin nhắn",
                     "en_US": "Unsend messages"
                 },
-                "mainFunc": "main"
+                "mainFunc": "main",
+                "example": {
+                    "vi_VN": "unsend",
+                    "en_US": "unsend"
+                }
             }
         },
         "langMap":{

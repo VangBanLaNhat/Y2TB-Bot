@@ -3,6 +3,10 @@ function init(){
     return{
         "pluginName": "Connected",
         "pluginMain": "connected.js",
+        "desc": {
+            "vi_VN": "Tự đông phê duyệt",
+            "en_US": "Auto-approval"
+        },
         "commandList": {},
         "langMap":{
             "connect":{

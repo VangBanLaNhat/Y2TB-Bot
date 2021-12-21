@@ -5,6 +5,10 @@ function init(){
     return{
         "pluginName": "QRcode",
         "pluginMain": "QRcode.js",
+        "desc": {
+            "vi_VN": "Quét và tạo mã QR",
+            "en_US": "Scan and generate QR code"
+        },
         "commandList": {
             "qr": {
                 "help": {
@@ -15,7 +19,11 @@ function init(){
                     "vi_VN": "Tạo/quét mã QR",
                     "en_US": "Create/scan QR code"
                 },
-                "mainFunc": "main"
+                "mainFunc": "main",
+                "example": {
+                    "vi_VN": "qr create burk burk lmao",
+                    "en_US": "qr create Hello"
+                }
             }
         },
         "langMap":{
@@ -38,6 +46,7 @@ function init(){
                 "args": {}
             },
         },
+        "obb": "QRcode",
         "nodeDepends":{
         },
         "author": "HerokeyVN",

@@ -2,6 +2,10 @@ function init(){
     return{
         "pluginName": "Help",
         "pluginMain": "help.js",
+        "desc": {
+            "vi_VN": "Xem các lệnh hiện có ở Bot",
+            "en_US": "View existing commands in Bot"
+        },
         "commandList": {
             "help": {
                 "help": {
@@ -12,7 +16,11 @@ function init(){
                     "vi_VN": "Xem các lệnh hiện có",
                     "en_US": "View existing commands"
                 },
-                "mainFunc": "main"
+                "mainFunc": "main",
+                "example": {
+                    "vi_VN": "help",
+                    "en_US": "help"
+                }
             }
         },
         "langMap":{

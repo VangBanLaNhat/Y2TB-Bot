@@ -6,6 +6,27 @@
     font-family: 'Poppins', Sans-Serif;
 }
 
+#fbs-path::-webkit-scrollbar-track {
+  display: none;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.1);
+  border: 1px solid #ccc;
+}
+
+#fbs-path::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: linear-gradient(left, #fff, #e4e4e4);
+  border: 1px solid #aaa;
+}
+
+#fbs-path::-webkit-scrollbar-thumb:hover {
+  background: #fff;
+}
+
+#fbs-path::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(left, #22ADD4, #1E98BA);
+}
+
 html, body, .content{
   width: 100%;
   height: 100%;
@@ -18,6 +39,10 @@ body{
   background-position: left;
   background-attachment: fixed;
   z-index: 1;
+}
+
+a, br, label, select, .ram, .cpu, .sendcmd{
+  user-select:  none;
 }
 
 .content{
@@ -39,6 +64,7 @@ header{
 header a{
   text-align: center;
   padding: 7.5px 20px;
+  user-select:  none;
 }
 header .message{
   transform: translateX(100px) translateY(7.5px)
@@ -63,6 +89,7 @@ header .message{
   /*color: #28272d;*/
   color: rgba(255,255,255,0.5);;
   text-shadow: 0px 0px 2px #777;
+  user-select:  none;
 }
 
 .input {
@@ -90,20 +117,23 @@ select {
 ion-icon{
     font-size: 20px;
     transform: translateY(5px) translateX(4px);
+    user-select:  none;
 }
 #del{
     transform: translate(60px);
+    user-select:  none;
 }
-.boxad{
+.boxad, .boxUID{
     border: 1px solid rgba(255,255,255,0);
     background: rgba(255,255,255,0.05);
 }
-#adbox{
+#adbox, #adduidmode{
   margin-top: 5px;
 }
-.addadmin{
+.addadmin, .add{
   padding-left: 300px;
   transform: translateY(-20px);
+  user-select:  none;
 }
 
 .checkboxd {
@@ -152,9 +182,15 @@ ion-icon{
 }
 
 .btn-addfbs{
+  
   padding: 5px 10px;
   margin: 0 15px;
   font-size: 12px;
+}
+
+.fbs-path{
+  max-width: 220px;
+  overflow: auto;
 }
 
 //terminal
@@ -172,7 +208,7 @@ ion-icon{
 }
 
 .dcmdip{
-  display: inline-block;
+  display: inline-flex;
   width: 100%;
   transform: translateY(-15px);
   background: #000833;

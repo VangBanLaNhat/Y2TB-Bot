@@ -2,6 +2,10 @@ function init(){
     return{
         "pluginName": "ChemicalEquationBalancer",
         "pluginMain": "CEB.js",
+        "desc": {
+            "vi_VN": "Cân bằng phương trình hóa học",
+            "en_US": "Balance chemical equations"
+        },
         "commandList": {
             "chebal": {
                 "help": {
@@ -12,9 +16,14 @@ function init(){
                     "vi_VN": "Cân bằng 1 phương trình hoá học",
                     "en_US": "Balance a chemical equation"
                 },
-                "mainFunc": "balance"
+                "mainFunc": "balance",
+                "example": {
+                    "vi_VN": "chebal H2+O2=H2O",
+                    "en_US": "chebal H2+O2=H2O"
+                }
             }
         },
+        "obb": "CEB",
         "nodeDepends":{
             "jsdom": ""
         },

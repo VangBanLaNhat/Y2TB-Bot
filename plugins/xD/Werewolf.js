@@ -3,19 +3,28 @@ function init(){
     return{
         "pluginName": "Werewolf",
         "pluginMain": "Werewolf.js",
+        "desc": {
+            "vi_VN": "Trò chơi ma sói",
+            "en_US": "Werewolf game"
+        },
         "commandList": {
             "ww": {
                 "help": {
-                    "vi_VN": "<create>",
-                    "en_US": "<create>"
+                    "vi_VN": "<create||join||out||kick||unban||start||myrole||vote>",
+                    "en_US": "<create||join||out||kick||unban||start||myrole||vote>"
                 },
                 "tag": {
                     "vi_VN": "Trò chơi ma sói",
                     "en_US": "Werewolf game"
                 },
                 "mainFunc": "main",
+                "example": {
+                    "vi_VN": "ww create",
+                    "en_US": "ww create"
+                }
             }
         },
+        "obb": "Werewolf",
         "author": "HerokeyVN",
         "version": "0.0.1"
     }

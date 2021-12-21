@@ -46,6 +46,10 @@ function init(){
     return{
         "pluginName": "Csim",
         "pluginMain": "Csim.js",
+        "desc": {
+            "vi_VN": "Trò chuyện với bạn Sim vui tính (AI)",
+            "en_US": "Talk with Sim the funny A.I."
+        },
         "commandList": {
             "csim": {
                 "help": {
@@ -56,7 +60,11 @@ function init(){
                     "vi_VN": "Trò chuyện với Csim",
                     "en_US": "Talking with Csim"
                 },
-                "mainFunc": "csim"
+                "mainFunc": "csim",
+                "example": {
+                    "vi_VN": "csim bủk bủk lmao",
+                    "en_US": "csim Hello"
+                }
             }
         },
         "chathook": "chathook",

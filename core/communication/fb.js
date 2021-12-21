@@ -23,8 +23,10 @@ module.exports = (appState, loginOptions) => {
 
 
         log.log("Manager","Login successfuly!");
-		var stopListening = api.listenMqtt((err, event) => {
-			listen(err, event, api);
-		});
+        try{
+		  api.listenMqtt((err, event) => {
+		  	listen(err, event, api);
+		  });
+        } catch (e) {/*console.error("ListenMqtt", e)*/};
     })
 }

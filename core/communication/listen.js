@@ -1,6 +1,10 @@
 var fs = require("fs");
 const path = require("path");
+const process = require("process");
 var log = require(path.join(__dirname, "..", "util", "log.js"));
+var { requireFromString } = require('module-from-string');
+
+
 
 var langMap = {
             "exitCM":{
@@ -17,7 +21,7 @@ var langMap = {
         }
 
 async function listen(err, event, api){
-    if(err) return log.err(err);
+    //if(err) return log.err(err);
 			api.markAsRead(event.threadID, (err) => {
 				if(err) log.err(err);
 			});
@@ -25,19 +29,19 @@ async function listen(err, event, api){
 			switch(event.type) {
 				case "message":
 				    if(event.attachments.length != 0){
-				        console.log("Message", event);
+				        log.log("Message", event);
 				    }
 				    else{
-				        console.log("Message", `[${event.senderID} to ${event.threadID}] ${event.body}`);
+				        log.log("Message", `[${event.senderID} to ${event.threadID}] ${event.body}`);
 				    }
 					break;
                 default:
                 if(global.coreconfig.main_bot.toggleDebug == true){
-					console.log(event.type, event);
+					log.log(event.type, event);
                 }
                 else if(event.type == "message_reply" && event.senderID != undefined){
                     
-                    console.log("Message", `[${event.senderID} reply ${event.messageReply.senderID} to ${event.threadID}] ${event.body}`);
+                    log.log("Message", `[${event.senderID} reply ${event.messageReply.senderID} to ${event.threadID}] ${event.body}`);
                 }
 					break;
 			}
@@ -61,31 +65,45 @@ async function mess (event, api){
             var ms = cml.split(" ");
             var check = false;
             for (var i in global.plugins) {
-            if (global.plugins[i].command[ms[0]] != undefined) {
-                event.args = event.body;
-                event.args = event.args.split(" ");
-                
-                event.body = event.body.split(" ");
-                event.body.splice(0,1);
-                event.body = event.body.join(" ");
-                try{
-                    var rq = require(global.plugins[i].command[ms[0]].main);
-                    var func = global.plugins[i].command[ms[0]].mainFunc;
+                if (global.plugins[i].command[ms[0]] != undefined) {
+                    event.args = event.body;
+                    event.args = event.args.split(" ");
+                    
+                    event.body = event.body.split(" ");
+                    event.body.splice(0,1);
+                    event.body = event.body.join(" ");
+                    
                     try{
-                        await rq[func](event, api);
-                    } catch (err){
+                        var rq = requireFromString({
+                            code: global.plugins[i].command[ms[0]].main,
+                            globals: { 
+                                __dirname: path.join(__dirname, "..", "..", "plugins"), 
+                                global: global,
+                                console: console,
+                                process: process,
+                                clearInterval: clearInterval,
+                                clearTimeout: clearTimeout,
+                                setInterval: setInterval,
+                                setTimeout: setTimeout
+                            }
+                        });
+                        var func = global.plugins[i].command[ms[0]].mainFunc;
+                        try{
+                            await rq[func](event, api);
+                        } catch (err){
+                            log.err(global.plugins[i].command[ms[0]].namePlugin, err)
+                            api.sendMessage(err , event.threadID, event.messageID);
+                        }
+                    }
+                    catch(err){
                         log.err(global.plugins[i].command[ms[0]].namePlugin, err)
                         api.sendMessage(err , event.threadID, event.messageID);
                     }
+                    
+                    check = true;
+                    break;
                 }
-                catch(err){
-                    log.err(global.plugins[i].command[ms[0]].namePlugin, err)
-                    api.sendMessage(err , event.threadID, event.messageID);
-                }
-                check = true;
-                break;
             }
-        }
             if(!check){
                 var rt = global.lang.listen.exitCM[global.config.bot_info.lang].replace("{0}", global.config.facebook.prefix)
                 api.sendMessage(rt , event.threadID, event.messageID);
@@ -104,7 +122,19 @@ async function chathook (event, api){
     }catch(_){}
     for (var i in global.chathook){
         try{
-            var rq = require(global.chathook[i].main);
+            var rq = requireFromString({
+                code: global.chathook[i].main,
+                globals: { 
+                    __dirname: path.join(__dirname, "..", "..", "plugins"), 
+                    global: global.globalC,
+                    console: console,
+                    process: process,
+                    clearInterval: clearInterval,
+                    clearTimeout: clearTimeout,
+                    setInterval: setInterval,
+                    setTimeout: setTimeout
+                }
+            });
             var func = global.chathook[i].func
             /*if (rq[func][Symbol.toStringTag] == 'AsyncFunction'){
                 rq[func](event, apii).then(function(rt){

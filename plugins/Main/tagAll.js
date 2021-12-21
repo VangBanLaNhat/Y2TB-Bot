@@ -2,6 +2,10 @@ function init(){
     return{
         "pluginName": "TagAll",
         "pluginMain": "tagAll.js",
+        "desc": {
+            "vi_VN": "Gọi mọi người",
+            "en_US": "Tag everyone"
+        },
         "commandList": {},
         "chathook": "all",
         "author": "HerokeyVN",

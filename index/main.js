@@ -8,35 +8,8 @@ var fs = require("fs");
 
 var shell = os.platform() === "win32" ? "powershell.exe" : "bash";
 ;
-var dfcf = {
-	"bot_info": {
-		"botname": "Y2TBbot",
-		"lang": "vi_VN"
-	},
-	"facebook": {
-		"FBemail": "",
-		"FBpassword": "",
-		"prefix": "/",
-		"admin": [],
-		"autoMarkRead": true,
-		"selfListen": false
-	}
-}
-
-var ccf = {
-	"main_bot": {
-		"consoleColor": "32",
-		//https://upload.wikimedia.org/wikipedia/commons/3/34/ANSI_sample_program_output.png
-		"dataSaveTime": "5",
-		"toggleLog": true
-	},
-	"facebook": {
-		"logLevel": "error",
-		"userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",
-		"listenEvents": true,
-		"updatePresence": false
-	}
-}
+let dfcf = require("../core/util/defaultConfig.js").normal()
+let ccf = require("../core/util/defaultConfig.js").core()
 
 	if (!fs.existsSync('udata')) {
     	fs.mkdirSync('udata')
@@ -55,6 +28,12 @@ var ccf = {
 const {app, BrowserWindow, Menu, ipcMain} = electron;
 const ipcR = require("electron").ipcRenderer;
 
+const contextMenu = require('electron-context-menu');
+
+contextMenu({
+	inspect: false
+});
+
 let mainWindow;
 let confirmWindow;
 
@@ -64,9 +43,10 @@ function createWindow () {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 800,
-    height: 650,
+    height: 710,
     resizable: false,
     maximizable: false,
+    icon: path.join(__dirname, "icon", "icon_square.jpg"),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
@@ -115,11 +95,39 @@ function createWindow () {
       })
     })
 	}
+
+	
+
+  function startPluginStore() {
+  	var pluginStore = new BrowserWindow({
+      width: 800,
+      height: 710,
+      minWidth: 800,
+      minHeight: 710,
+    	icon: path.join(__dirname, "icon", "icon_square.jpg"),
+      webPreferences: {
+        nodeIntegration: true,
+        contextIsolation: false
+      }
+    })
+    pluginStore.loadFile("./pluginStore/index.html")
+
+    mainWindow.on("close", function () {
+			app.quit();
+		})
+		pluginStore.on("close", function () {
+			pluginStore = null;
+		})
+		pluginStore.once("ready-to-show", function () {
+			pluginStore.show();
+		})
+  }
+
   const mM = Menu.buildFromTemplate(mMn);
 	Menu.setApplicationMenu(mM);
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  //mainWindow.webContents.openDevTools()
 
 
   //terminal
@@ -155,6 +163,11 @@ function createWindow () {
 		mainWindow.webContents.send(data.from, data);
 		confirmWindow.close();
 		console.log(data);
+	})
+
+	//Plugin store
+	ipc.on("openPluginsStore", ()=>{
+		startPluginStore();
 	})
 }
 

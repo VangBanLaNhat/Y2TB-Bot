@@ -1,3 +1,12 @@
+
+img {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+}
+
 .onload {
   display: block;
   width: 100%;
@@ -11,6 +20,7 @@
   padding: 10px 100px;
   z-index: 1000;
   animation: onload 5.5s;
+  user-select:  none;
 }
 @keyframes onload {
   0%, 95%{

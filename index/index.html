@@ -6,6 +6,7 @@
     <title>
       VBLNBot
     </title>
+    <link href="./icon/icon.png" rel="icon">
     <link href="../node_modules/xterm/css/xterm.css" rel="stylesheet" type="text/css" />
     <script src="../node_modules/xterm/lib/xterm.js"></script>
 
@@ -15,7 +16,7 @@
     <link href="my-framework.css" rel="stylesheet" type="text/css" />
     <link href="onload.css" rel="stylesheet" type="text/css" />
   </head>
-  <body>
+  <body id="body">
     <header id="header">
       <a id="gnr">General Setting</a>
       <a id="avc">Advance Setting</a>
@@ -35,6 +36,8 @@
               <option value="en_US" >English</option>
             </select>
           </div>
+          <a>Plugins</a>
+          <div class="input"><a class="btn-plst btn-neon">Plugins Store</a></div>
         </div>
         
         
@@ -54,6 +57,7 @@
           <div class="input">
             <input name="addFBstate" class="addfbs" id="addfbs" type="file" accept=".json" required/>
             <label for="addfbs" class="btn-addfbs btn-neon">Upload FBstate</label>
+            <a class="fbs-path" id="fbs-path"></a>
           </div>
           <a>Prefix(Characters to receive<br>commands)</a>
           <div class="input"><input class="textbox" id="prefix" type="text" value=""></div>
@@ -74,6 +78,20 @@
             <input type="checkbox" name="cb" id="checkbox2" class="checkbox" value="">
             <label for="checkbox2"></label>
           </div>
+          <br>
+          <a>UID Mode</a>
+          <div class="input">
+            <select class="optionbox" id="uidMode" name="option" onchange="optUID(this)">
+              <option value="disabled" >Disabled</option>
+              <option value="blackList" >Black list</option>
+              <option value="whiteList" >White list</option>
+            </select>
+          </div>
+          <a>List UID (of UID Mode)</a>
+          <div class="listuidmode">
+          </div>
+          <div class="input"><input class="textbox" id="adduidmode" type="text" value=""></div>
+          <p class="adduidm add">+</p><br>
           <br><br><br><br>
         </div>
       </div>
@@ -98,6 +116,18 @@
             <label for="checkbox3"></label>
           </div>
           <br>
+          <a>Toggle Debug</a>
+          <div id="cb4" class="input checkboxd">
+            <input type="checkbox" name="cb" id="checkbox4" class="checkbox" value="">
+            <label for="checkbox4"></label>
+          </div>
+          <br>
+          <a>Develop Mode</a>
+          <div id="cb5" class="input checkboxd">
+            <input type="checkbox" name="cb" id="checkbox5" class="checkbox" value="">
+            <label for="checkbox5"></label>
+          </div>
+          <br>
         </div>
         
         
@@ -110,15 +140,15 @@
           <div class="input"><input class="textbox" id="userag" type="text" value=""></div>
           
           <a>Listen Events</a>
-          <div id="cb4" class="input checkboxd">
-            <input type="checkbox" name="cb" id="checkbox4" class="checkbox" value="">
-            <label for="checkbox4"></label>
+          <div id="cb5" class="input checkboxd">
+            <input type="checkbox" name="cb" id="checkbox6" class="checkbox" value="">
+            <label for="checkbox5"></label>
           </div>
           <br>
           <a>Update Presence</a>
-          <div id="cb5" class="input checkboxd">
-            <input type="checkbox" name="cb" id="checkbox5" class="checkbox" value="">
-            <label for="checkbox5"></label>
+          <div id="cb6" class="input checkboxd">
+            <input type="checkbox" name="cb" id="checkbox7" class="checkbox" value="">
+            <label for="checkbox6"></label>
           </div>
           <br><br><br><br>
         </div>
@@ -143,6 +173,7 @@
           <div class="os">
             <div class="ram"><ion-icon name="albums-outline" size="large"></ion-icon>  Ram: <a id="ram">0.00</a>%</div>
             <div class="cpu"><ion-icon name="copy-outline" size="large"></ion-icon>  CPU: <a id="cpu">0.00</a>%</div>
+            <div class="uptime"><ion-icon name="timer-outline" size="large"></ion-icon>  Up time: <a id="day">0</a> day <a id="hours">0</a> hours <a id="mins">0</a> minutes <a id="secs">0</a> seconds</div>
           </div>
         </div>
       </div>
@@ -171,6 +202,7 @@
     <script src="script.js"></script>
     <script src="loadConfig.js"></script>
     <script src="terminal.js"></script>
+    <script src="fileJS/contextMenu.js"></script>
     
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
   </body>
