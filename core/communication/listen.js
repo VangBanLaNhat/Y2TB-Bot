@@ -48,19 +48,14 @@ async function listen(err, event, api){
 			
 			//chathook(event, api);
 			addLang();
-			mess(event, api);
+			if (checkList(event.senderID, event.threadID)) mess(event, api);
 }
 
 async function mess (event, api){
-    if (global.listBan[api.getCurrentUserID()]) {
-        log.warn("VBLN Ban", `\n ATTENTION:\n  You have been banned from using VBLN's products!\n-Reason: ${global.listBan[global.config.facebook.admin[i]].reason}\n-Proof: ${global.listBan[global.config.facebook.admin[i]].proof}\nExisting...`);
-        process.exit(0);
-    }
-    if(!global.listBan[event.senderID]){
-        chathook(event, api);
-    }
+    //Running Chathook...
+    chathook(event, api);
+    //Running Command...
     if(event.body != undefined && event.body.slice(0,global.config.facebook.prefix.length) == global.config.facebook.prefix){
-        if(!global.listBan[event.senderID]){
             var cml = event.body.slice(global.config.facebook.prefix.length, event.body.length);
             var ms = cml.split(" ");
             var check = false;
@@ -107,11 +102,7 @@ async function mess (event, api){
             if(!check){
                 var rt = global.lang.listen.exitCM[global.config.bot_info.lang].replace("{0}", global.config.facebook.prefix)
                 api.sendMessage(rt , event.threadID, event.messageID);
-            }
-        }
-        /*else{
-            api.sendMessage(`ATTENTION:\nUsers have been banned from using VBLN's products!\n-Reason: ${global.listBan[event.senderID].reason}\n-Proof: ${global.listBan[event.senderID].proof}` , event.threadID, event.messageID);
-        }*/
+            }  
     }
 }
 
@@ -169,6 +160,19 @@ async function chathook (event, api){
         api.sendMessage(data.data, event.threadID, event.messageID);
     }
 }*/
+
+function checkList(uid, tid) {
+    if (global.config.facebook.UIDmode == "blackList"){
+        if(global.config.facebook.blackList.indexOf(uid) == -1 && global.config.facebook.blackList.indexOf(tid) == -1) return true;
+        return false;
+    };
+    if (global.config.facebook.UIDmode == "whiteList"){
+        if(global.config.facebook.whiteList.indexOf(tid) != -1) return true;
+        if(global.config.facebook.whiteList.indexOf(uid) != -1) return true;
+        return false;
+    };
+    return true;
+}
 
 function addLang(){
     !global.lang.listen ? global.lang.listen = langMap : ""

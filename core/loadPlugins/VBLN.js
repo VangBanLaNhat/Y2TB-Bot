@@ -155,6 +155,14 @@ function load(file, pluginInfo, func, devmode){
             else {
                 if(!fs.existsSync(path.join(__dirname, "..", "..", "lang", `${pluginInfo.pluginName}.json`))){
                     fs.writeFileSync(path.join(__dirname, "..", "..", "lang", `${pluginInfo.pluginName}.json`), JSON.stringify(pluginInfo.langMap, null, 4), {mode: 0o666});
+                } else {
+                    //Check lang.json file
+                    var langjs = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "..", "lang", `${pluginInfo.pluginName}.json`)));
+                    for (let l in langjs)
+                        !pluginInfo.langMap[l] ? delete langjs[l]:"";
+                    //Check plugin
+                    for (let l in pluginInfo.langMap)
+                        !langjs[l] ? langjs[l] = pluginInfo.langMap[l]:"";
                 }
             }
         }

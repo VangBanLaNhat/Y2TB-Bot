@@ -152,6 +152,13 @@ savebutton.onclick = function (){
     dfcf.facebook.autoMarkRead = document.getElementsByName('cb')[0].checked
     dfcf.facebook.selfListen = document.getElementsByName('cb')[1].checked
     dfcf.facebook.UIDmode = document.getElementById('uidMode').value
+    
+    try{
+        dfcf.facebook[document.getElementById('uidMode').value].length = 0;
+        for(var i in document.getElementsByClassName("listuidmode")[0].children){
+            dfcf.facebook[document.getElementById('uidMode').value].push(document.getElementsByClassName("listuidmode")[0].children[i].children[0].value)
+        }
+    } catch(e){console.log(e)};
     //Advance Config
     ccf.main_bot.consoleColor = document.getElementById('cslcl').value
     ccf.main_bot.dataSaveTime = document.getElementById('dst').value
@@ -198,18 +205,35 @@ ipc.on("setDefaultConfig", (event, data)=>{
 
 optUID(dfcf.facebook.UIDmode);
 
-function optUID(a) {
-    var value = a.value;
+var lengthUID = 10;
+
+function optUID(value) {
+    
     var box = document.querySelector('.listuidmode');
     box.innerHTML = "";
     if(value != "disabled"){
+        lengthUID = dfcf.facebook[value].length;
         document.querySelector('#adduidmode').disabled = false;
         var length = dfcf.facebook[value].length;
         console.log(length);
         for(let i in dfcf.facebook[value]){
-            box.innerHTML += `<div class="input"><input class="textbox boxUID" id="uid${i}" type="text" value="${dfcf.facebook[value][i]}" disabled><a id="delUID${i} del" onclick="return deUID(${i})">-</a></div>`
+            box.innerHTML += `<div class="input" id="uid${i}" ><input class="textbox boxUID" type="text" value="${dfcf.facebook[value][i]}" disabled><a id="delUID${i} del" onclick="return deUID(${i})">-</a></div>`
         }
     } else {
+        document.querySelector('.listuidmode').innerHTML = "";
         document.querySelector('#adduidmode').disabled = true;
     }
+    //document.getElementsByClassName("listuidmode")[0].children[0].children[0].value
+}
+
+function deUID(n) {
+    document.getElementsByClassName("listuidmode")[0].removeChild(document.getElementById("uid"+n));
+}
+
+document.querySelector(".adduidm").onclick = function () {
+    if(!document.querySelector("#adduidmode").value) return false;
+    lengthUID++;
+    var box = document.querySelector('.listuidmode');
+    box.innerHTML += `<div class="input" id="uid${lengthUID}" ><input class="textbox boxUID" type="text" value="${document.querySelector("#adduidmode").value}" disabled><a id="delUID${lengthUID} del" onclick="return deUID(${lengthUID})">-</a></div>`;
+    document.querySelector("#adduidmode").value = "";
 }

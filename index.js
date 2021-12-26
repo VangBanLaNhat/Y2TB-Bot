@@ -86,8 +86,6 @@ for(let i in global){
 
 }
 
-require("./core/util/global.js")();
-
 //loadPlugins
 log.log("Plugin", "Loading Plugins...")
 try{

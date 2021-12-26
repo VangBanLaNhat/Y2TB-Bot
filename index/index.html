@@ -81,14 +81,14 @@
           <br>
           <a>UID Mode</a>
           <div class="input">
-            <select class="optionbox" id="uidMode" name="option" onchange="optUID(this)">
+            <select class="optionbox" id="uidMode" name="option" onchange="optUID(this.value)">
               <option value="disabled" >Disabled</option>
               <option value="blackList" >Black list</option>
               <option value="whiteList" >White list</option>
             </select>
           </div>
           <a>List UID (of UID Mode)</a>
-          <div class="listuidmode">
+          <div id="listuidmode" class="listuidmode">
           </div>
           <div class="input"><input class="textbox" id="adduidmode" type="text" value=""></div>
           <p class="adduidm add">+</p><br>
