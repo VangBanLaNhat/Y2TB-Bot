@@ -38,7 +38,9 @@ function log(...msg){
 		try{
 		    if(global.coreconfig.main_bot.toggleLog){
 		        var y = [`[${dt.day}.${dt.month}T${dt.hour}.${dt.minute}.${dt.second}Z]`];
-		        var str = y.concat([classs]).concat(msg[i]).join(" ");
+
+		        let mg = typeof msg[i] == "object"?JSON.stringify(msg[i], null, 4):msg[i];
+		        var str = y.concat([classs]).concat(mg).join(" ");
 		        fs.writeFileSync(path.join(__dirname, "..", "..", "logs", global.logStart+".txt"), str+"\n", {mode: 0o666, flag: "a"});
 		    }
 		}catch(err){}
@@ -77,7 +79,9 @@ function err(...msg){
 		try{
 		    if(global.coreconfig.main_bot.toggleLog){
 		        var y = [`[${dt.day}.${dt.month}T${dt.hour}.${dt.minute}.${dt.second}Z]`];
-		        var str = y.concat([classs]).concat(["[ERR!]"]).concat(msg[i]).join(" ");
+
+		        let mg = typeof msg[i] == "object"?JSON.stringify(msg[i], null, 4):msg[i];
+		        var str = y.concat([classs]).concat(["[ERR!]"]).concat(mg).join(" ");
 		        fs.writeFileSync(path.join(__dirname, "..", "..", "logs", global.logStart+".txt"), str+"\n", {mode: 0o666, flag: "a"});
 		    }
 		}catch(err){}
@@ -117,7 +121,9 @@ function warn(...msg){
 		try{
 		    if(global.coreconfig.main_bot.toggleLog){
 		        var y = [`[${dt.day}.${dt.month}T${dt.hour}.${dt.minute}.${dt.second}Z]`];
-		        var str = y.concat([classs]).concat(["[WARN!]"]).concat(msg[i]).join(" ");
+
+		        let mg = typeof msg[i] == "object"?JSON.stringify(msg[i], null, 4):msg[i];
+		        var str = y.concat([classs]).concat(["[WARN!]"]).concat(mg).join(" ");
 		        fs.writeFileSync(path.join(__dirname, "..", "..", "logs", global.logStart+".txt"), str+"\n", {mode: 0o666, flag: "a"});
 		    }
 	    }catch(err){}

@@ -22,10 +22,10 @@ async function loadPlugin(){
             var check = path.join(__dirname, "..", "..", "plugins", list[i]);
             if (!fs.lstatSync(check).isDirectory()) {
                 try {
-                    var pluginInfo = requireFromString({
+                    var pluginInfo = await requireFromString({
                         code: fs.readFileSync(path.join(__dirname, "..", "..", "plugins", list[i])).toString(),
                         globals: { 
-                            __dirname: __dirname, 
+                            __dirname: path.join(__dirname, "..", "..", "plugins"), 
                             global: globalC,
                             console: console,
                             process: process,
@@ -113,10 +113,10 @@ async function loadPlugin(){
     }
     for(i=0;i<name.length;i++){
         try{
-            var pluginInfo = requireFromString({
+            var pluginInfo = await requireFromString({
                 code: files[name[i]],
                 globals: { 
-                    __dirname: __dirname, 
+                    __dirname: path.join(__dirname, "..", "..", "plugins"), 
                     global: globalC,
                     console: console,
                     process: process,
@@ -134,12 +134,51 @@ async function loadPlugin(){
             log.err("Plugins(VBLN)", "Can't load \""+name[i]+"\" with error: "+err)
         }
     }
+
+    if(!global.coreconfig.main_bot.developMode){
+        let listObb = fs.readdirSync(path.join(__dirname, "..", "..", "plugins", "obb"));
+        for(let i of listObb)
+            if(!global.plugins.VBLN.obb[i] && i != "Backup"){
+                ensureExists(path.join(__dirname, "..", "..", "plugins", "obb", "Backup"));
+                let zip = new AdmZip();
+                zip.addLocalFolder(path.join(__dirname, "..", "..", "plugins", "obb", i))
+                zip.writeZip(path.join(__dirname, "..", "..", "plugins", "obb", "Backup", i+".zip"))
+                removeDir(path.join(__dirname, "..", "..", "plugins", "obb", i));
+            };
+    }
 }
 
 
 function load(file, pluginInfo, func, devmode){
     try{
+        let fullFunc = requireFromString({
+            code: func,
+            globals: { 
+                __dirname: path.join(__dirname, "..", "..", "plugins"), 
+                global: global.globalC,
+                console: console,
+                process: process,
+                clearInterval: clearInterval,
+                clearTimeout: clearTimeout,
+                setInterval: setInterval,
+                setTimeout: setTimeout
+            }
+        })
         //var funcmain = require(path.join(__dirname, "..", "..", "plugins", file));
+        !global.plugins.VBLN.plugins ? global.plugins.VBLN.plugins = {}:"";
+        !global.plugins.VBLN.plugins[pluginInfo.pluginName] ? global.plugins.VBLN.plugins[pluginInfo.pluginName] = {
+            "author": pluginInfo.author,
+            "version": pluginInfo.version,
+            "loginFunc": fullFunc[pluginInfo.loginFunc],
+            "lang": false
+        }:"";
+        !global.plugins.VBLN.plugins.listen ? global.plugins.VBLN.plugins.listen = {
+            "lang": true
+        }:"";
+
+        !global.plugins.VBLN.obb ? global.plugins.VBLN.obb = {}:"";
+        pluginInfo.obb ? global.plugins.VBLN.obb[pluginInfo.obb] = pluginInfo.pluginName:"";
+
         for(var i in pluginInfo.commandList){
             !global.plugins.VBLN.command[i] ? global.plugins.VBLN.command[i] = {}:"";
             !global.plugins.VBLN.command[i].help ? global.plugins.VBLN.command[i].namePlugin = pluginInfo.pluginName:"";
@@ -149,12 +188,26 @@ function load(file, pluginInfo, func, devmode){
             !global.plugins.VBLN.command[i].mainFunc ? global.plugins.VBLN.command[i].mainFunc = pluginInfo.commandList[i].mainFunc:"";
         }
         if(typeof pluginInfo.langMap == "object"){
-            if(devmode){
+            if(global.coreconfig.main_bot.developMode){
                 fs.writeFileSync(path.join(__dirname, "..", "..", "lang", `${pluginInfo.pluginName}.json`), JSON.stringify(pluginInfo.langMap, null, 4), {mode: 0o666});
+                global.plugins.VBLN.plugins[pluginInfo.pluginName].lang = true;
+
             }
             else {
                 if(!fs.existsSync(path.join(__dirname, "..", "..", "lang", `${pluginInfo.pluginName}.json`))){
-                    fs.writeFileSync(path.join(__dirname, "..", "..", "lang", `${pluginInfo.pluginName}.json`), JSON.stringify(pluginInfo.langMap, null, 4), {mode: 0o666});
+                    if(!fs.existsSync(path.join(__dirname, "..", "..", "lang", "backup", `${pluginInfo.pluginName}.json`)))
+                        fs.writeFileSync(path.join(__dirname, "..", "..", "lang", `${pluginInfo.pluginName}.json`), JSON.stringify(pluginInfo.langMap, null, 4), {mode: 0o666})
+                    else {
+                        fs.renameSync(path.join(__dirname, "..", "..", "lang", "backup", `${pluginInfo.pluginName}.json`), path.join(__dirname, "..", "..", "lang", `${pluginInfo.pluginName}.json`))
+                        //Check lang.json file
+                        var langjs = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "..", "lang", `${pluginInfo.pluginName}.json`)));
+                        for (let l in langjs)
+                            !pluginInfo.langMap[l] ? delete langjs[l]:"";
+                        //Check plugin
+                        for (let l in pluginInfo.langMap)
+                            !langjs[l] ? langjs[l] = pluginInfo.langMap[l]:"";
+                        fs.writeFileSync(path.join(__dirname, "..", "..", "lang", `${pluginInfo.pluginName}.json`), JSON.stringify(langjs, null, 4), {mode: 0o666});
+                    }
                 } else {
                     //Check lang.json file
                     var langjs = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "..", "lang", `${pluginInfo.pluginName}.json`)));
@@ -163,7 +216,9 @@ function load(file, pluginInfo, func, devmode){
                     //Check plugin
                     for (let l in pluginInfo.langMap)
                         !langjs[l] ? langjs[l] = pluginInfo.langMap[l]:"";
+                    fs.writeFileSync(path.join(__dirname, "..", "..", "lang", `${pluginInfo.pluginName}.json`), JSON.stringify(langjs, null, 4), {mode: 0o666});
                 }
+                global.plugins.VBLN.plugins[pluginInfo.pluginName].lang = true;
             }
         }
         if(typeof pluginInfo.chathook == "string"){
@@ -172,7 +227,7 @@ function load(file, pluginInfo, func, devmode){
                 func: pluginInfo.chathook
             }:"";
         }
-        devmode == true ? log.log("Plugins(VBLN)", "Loaded devplugin: "+pluginInfo.pluginName+" "+pluginInfo.version+" by "+pluginInfo.author) : log.log("Plugins(VBLN)", "Loaded plugin: "+pluginInfo.pluginName+" "+pluginInfo.version+" by "+pluginInfo.author)
+        global.coreconfig.main_bot.developMode ? log.log("Plugins(VBLN)", "Loaded devplugin: "+pluginInfo.pluginName+" "+pluginInfo.version+" by "+pluginInfo.author) : log.log("Plugins(VBLN)", "Loaded plugin: "+pluginInfo.pluginName+" "+pluginInfo.version+" by "+pluginInfo.author)
     }
     catch(err){
         log.err("Plugins(VBLN)", "Can't load \""+file+"\" with error: "+err)
@@ -195,14 +250,14 @@ function installmd(file, pluginInfo){
                 
                 log.warn("Plugins(VBLN)", "Installing Node_module \""+i+"\" for plugin \""+pluginInfo.pluginName+"\":\n");
                 if(pluginInfo.nodeDepends[i] != ""){
-                    cmd.execSync(`npm install ${i}@${pluginInfo.nodeDepends[i]}`,{
+                    cmd.execSync(`npm install --save ${i}@${pluginInfo.nodeDepends[i]}`,{
                         stdio: "inherit",
                         env: process.env,
                         shell: true
                     })
                 }
                 else{
-                    cmd.execSync(`npm install ${i}`,{
+                    cmd.execSync(`npm install --save ${i}`,{
                         stdio: "inherit",
                         env: process.env,
                         shell: true

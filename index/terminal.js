@@ -105,14 +105,14 @@ starttmn.onclick = function (){
 				clearInterval(isStart);
 				clearInterval(uptimeF);
 
-				/*UTJ = checkTime(UTJ.d, UTJ.h, UTJ.m, UTJ.s-14);
+				UTJ = checkTime(UTJ.d, UTJ.h, UTJ.m, UTJ.s-5);
 				dh.innerHTML = UTJ.d
 				hh.innerHTML = UTJ.h
 				mh.innerHTML = UTJ.m
-				sh.innerHTML = UTJ.s*/
+				sh.innerHTML = UTJ.s
 			}
 		//}, 2000)
-	}, 2000)
+	}, 5000)
 	document.getElementById(`stopTmn`).style = "";
 	document.getElementById(`startTmn`).style.display = "none"
 }

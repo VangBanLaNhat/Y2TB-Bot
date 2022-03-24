@@ -21,7 +21,8 @@ var langMap = {
         }
 
 async function listen(err, event, api){
-    //if(err) return log.err(err);
+    if(!event) return;
+    if(!event.threadID || !event.senderID) return;
 			api.markAsRead(event.threadID, (err) => {
 				if(err) log.err(err);
 			});
@@ -39,7 +40,7 @@ async function listen(err, event, api){
                 if(global.coreconfig.main_bot.toggleDebug == true){
 					log.log(event.type, event);
                 }
-                else if(event.type == "message_reply" && event.senderID != undefined){
+                else if(event.type == "message_reply" && event.senderID != undefined && event.messageReply){
                     
                     log.log("Message", `[${event.senderID} reply ${event.messageReply.senderID} to ${event.threadID}] ${event.body}`);
                 }
@@ -73,7 +74,7 @@ async function mess (event, api){
                             code: global.plugins[i].command[ms[0]].main,
                             globals: { 
                                 __dirname: path.join(__dirname, "..", "..", "plugins"), 
-                                global: global,
+                                global: global.globalC,
                                 console: console,
                                 process: process,
                                 clearInterval: clearInterval,
@@ -83,12 +84,7 @@ async function mess (event, api){
                             }
                         });
                         var func = global.plugins[i].command[ms[0]].mainFunc;
-                        try{
-                            await rq[func](event, api);
-                        } catch (err){
-                            log.err(global.plugins[i].command[ms[0]].namePlugin, err)
-                            api.sendMessage(err , event.threadID, event.messageID);
-                        }
+                        await rq[func](event, api);
                     }
                     catch(err){
                         log.err(global.plugins[i].command[ms[0]].namePlugin, err)
