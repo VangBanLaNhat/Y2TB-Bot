@@ -1,24 +1,44 @@
 var fs = require("fs");
 const path = require('path');
-//const ipc = require("electron").ipcRenderer;
+const fetch = require("node-fetch");
+
+const NOTIFICATION_TITLE = 'Title'
+const NOTIFICATION_BODY = 'Notification from the Renderer process. Click to log to console.'
+const CLICK_MESSAGE = 'Notification clicked!'
+
+var a;
 
 try{
-    var msgl = document.querySelector('#msgl')
-    document.getElementById(`msgl`).style.color = "yellow";
+    fetch('https://raw.githubusercontent.com/VangBanLaNhat/VBLNBot/main/package.json')
+    .then(res => res.text())
+    .then(json => {
+        a = json;
+        while(a.indexOf("\\n\\r") != -1){
+            a.replace("\\n\\r", "\n")
+        }
+        json = JSON.parse(a)
+        if(json.version != "1.0.1") ipc.send("update", {
+            current: "1.0.0",
+            latest: json.version
+        });
+        console.log(json)
+    });
+    //var msgl = document.querySelector('#msgl')
+    //document.getElementById(`msgl`).style.color = "yellow";
     //loadGNRconfig
-    msgl.innerHTML = "Loading General Config...";
+    //msgl.innerHTML = "Loading General Config...";
     //var datadf = await fetch('./udata/config.json');
     //var dfcf = await datadf.json();
     var dfcf = JSON.parse(fs.readFileSync(path.join(__dirname,"..", "udata", "config.json")));
     //await new Promise(x => setTimeout(x, 1*1*1000));
     //loadAVCconfig
-    msgl.innerHTML = "Loading Advance Config...";
+    //msgl.innerHTML = "Loading Advance Config...";
     //var dataco = await fetch('./core/coreconfig.json');
     //var ccf = await dataco.json();
     var ccf = JSON.parse(fs.readFileSync(path.join(__dirname,"..", "core", "coreconfig.json")));
     //await new Promise(x => setTimeout(x, 1*1*1000));
     //log
-    msgl.innerHTML = "Loading data...";
+    //msgl.innerHTML = "Loading data...";
 }
 catch (err){
     var msgl = document.querySelector('#msgl')
@@ -27,15 +47,16 @@ catch (err){
 }
 
 //Message
-function send(color, msg){
-    document.getElementById(`message`).style.display = "none";
+function send(title, msg){
+    /*document.getElementById(`message`).style.display = "none";
     var mess = document.querySelector('.message')
     document.getElementById(`message`).style.color = color;
     mess.innerHTML = msg;
     document.getElementById(`message`).style.display = "flex";
     setTimeout(function(){
         document.getElementById(`message`).style.display = "none";
-    }, 3*1000)
+    }, 3*1000)*/
+    new Notification(title, {body: msg});
 }
 //addAdmin
 const addadmin = document.querySelector('.addadmin')
@@ -61,7 +82,7 @@ addadmin.onclick = function (){
         }
     }
     else{
-        send('red', 'Please add value!')
+        send('Setting', 'Please add value!')
     }
 }
 //delete admin
@@ -135,7 +156,7 @@ lcf()
 //Save Config
 const savebutton = document.querySelector('#save')
 savebutton.onclick = function (){
-    send("yellow", "Saving...")
+    send("Setting", "Saving...")
     dfcf.bot_info.botname = document.getElementById('botname').value
     dfcf.bot_info.lang = document.getElementById('lang').value
     dfcf.facebook.FBemail = document.getElementById('fbemail').value
@@ -175,10 +196,10 @@ savebutton.onclick = function (){
         //console.log(window.ipcRenderer);
         fs.writeFileSync(path.join(__dirname,"..", "udata", "config.json"), JSON.stringify(dfcf, null, 4), {mode: 0o666});
         fs.writeFileSync(path.join(__dirname,"..", "core", "coreconfig.json"), JSON.stringify(ccf, null, 4), {mode: 0o666});
-        send("green", "Save sussed!")
+        send("Setting", "Save sussed!")
     }
     catch(err){
-        send("red", err)
+        send("Error", err)
     }
 }
 //Start Bot
@@ -195,7 +216,7 @@ var ipc = require("electron").ipcRenderer;
 
 ipc.on("setDefaultConfig", (event, data)=>{
     if(data.accept){
-        send("green", "Reset config sussed!")
+        send("Setting", "Reset config sussed!")
         var cf = require(path.join(__dirname,"..", "core", "util", "defaultConfig.js"));
         dfcf = cf.normal();
         ccf = cf.core();

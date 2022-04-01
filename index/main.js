@@ -4,6 +4,7 @@ const url = require('url');
 const path = require('path');
 const pty = require("node-pty");
 const os = require("os");
+
 var fs = require("fs");
 
 var shell = os.platform() === "win32" ? "powershell.exe" : "bash";
@@ -25,22 +26,30 @@ let ccf = require("../core/util/defaultConfig.js").core()
 	}
 
 
-const {app, BrowserWindow, Menu, ipcMain} = electron;
+const {app, BrowserWindow, Menu, ipcMain, Notification} = electron;
 const ipcR = require("electron").ipcRenderer;
 
 const contextMenu = require('electron-context-menu');
 
 contextMenu({
-	inspect: false
+	showSaveImageAs: false,
+	showCopyImage: false,
+	showInspectElement: true
 });
 
 let mainWindow;
 let confirmWindow;
 
+app.setAppUserModelId("VBLN");
+app.setName("VBLN");
+app.setUserTasks([
+  
+])
+console.log(process.execPath)
 
-
-function createWindow () {
+function createWindow (a) {
   // Create the browser window.
+  //if(a != 1) return;
   mainWindow = new BrowserWindow({
     width: 800,
     height: 710,
@@ -55,7 +64,7 @@ function createWindow () {
   })
 
 
-
+  //new Notification(options).show();
 
   // and load the index.html of the app.
   mainWindow.loadFile('index.html');
@@ -96,8 +105,6 @@ function createWindow () {
     })
 	}
 
-	
-
   function startPluginStore() {
   	var pluginStore = new BrowserWindow({
       width: 800,
@@ -111,6 +118,8 @@ function createWindow () {
       }
     })
     pluginStore.loadFile("./pluginStore/index.html")
+
+
 
     mainWindow.on("close", function () {
 			app.quit();
@@ -131,18 +140,21 @@ function createWindow () {
 
 
   //terminal
+  try{
+		var ptyPr = pty.spawn(shell, [], {
+			name: "xterm-color",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+			cols: 80,
+	  	rows: 30,
+			cwd: process.env.HOME,
+			env: process.env
+		})
 
-	var ptyPr = pty.spawn(shell, [], {
-		name: "xterm-color",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
-		cols: 80,
-  	rows: 30,
-		cwd: process.env.HOME,
-		env: process.env
-	})
-
-	ptyPr.on("data", function(data){
-		mainWindow.webContents.send("terminal.incData", data)
-	})
+		ptyPr.on("data", function(data){
+			try{
+				mainWindow.webContents.send("terminal.incData", data)
+			}catch(e){}
+		})
+	} catch(e){};
 
 
 	ipc.on("terminal.toterm", (event, data)=>{
@@ -168,6 +180,51 @@ function createWindow () {
 	//Plugin store
 	ipc.on("openPluginsStore", ()=>{
 		startPluginStore();
+	})
+
+	var upd;
+
+	function startUpdate() {
+  	upd = new BrowserWindow({
+      width: 400,
+    	height: 150,
+    	resizable: false,
+      maximizable: false,
+      minimizable: false,
+      frame: false,
+      center: true,
+      skipTaskbar: false,
+    	icon: path.join(__dirname, "icon", "icon_square.jpg"),
+      webPreferences: {
+        nodeIntegration: true,
+        contextIsolation: false
+      }
+    })
+    upd.loadFile("./update/index.html")
+
+
+    mainWindow.close()
+    upd.on("close", function () {
+			app.quit();
+		})
+		upd.on("close", function () {
+			//upd = null;
+		})
+  }
+
+	ipc.on("update", (event, data)=>{
+		startUpdate();
+		setTimeout(()=>{
+			upd.webContents.send("update.send", data);
+		}, 1000)
+		console.log(data);
+	})
+
+	ipc.on("update.close", (event, data)=>{
+		upd.close();
+		createWindow(1)
+		//mainWindow.loadFile('index.html');
+		console.log(mainWindow)
 	})
 }
 

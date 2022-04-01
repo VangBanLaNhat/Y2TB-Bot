@@ -61,5 +61,27 @@
     "xterm": "^4.13.0",
     "ytdl-core": "^4.9.2",
     "ytsr": "^3.5.3"
+  },
+  "build": {
+    "appId": "com.VangBanLaNhat.VBLN",
+    "productName": "VBLN",
+    "copyright": "Copyright © 2022",
+    "mac": {
+      "icon": "./index/icon/icon_square.jpg",    
+      "category": "public.app-category.utilities"
+    },
+    "win": {
+      "icon": "./index/icon/icon_square.jpg" 
+    },
+    "files": [
+      "./build/**/*",
+      "./dist/**/*",
+      "./node_modules/**/*",
+      "./public/**/*",       
+      "*.js"
+    ],
+    "directories": {
+      "buildResources": "public" 
+    }
   }
 }

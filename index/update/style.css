@@ -1,0 +1,55 @@
+body{
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  background: #29282d;
+  background-size: cover;
+  background-position: left;
+  background-attachment: fixed;
+  z-index: 1;
+}
+
+h3{
+  color: #fff;
+}
+
+a{
+  color: #fff;
+}
+
+.loading{
+  position: relative;
+  background: #585858;
+  width: 360px;
+  height: 2px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.loading::before{
+  content: "";
+  position: absolute;
+  width: 380px;
+  height: 30px;
+  transform: translate(-50%, 150%);
+  background: cyan;
+  box-shadow: 1px 0px 1px cyan
+              2px 0px 2px cyan
+              3px 0px 3px cyan
+              4px 0px 4px cyan
+              5px 0px 5px cyan
+              ;
+  animation: xoay 5s linear 0s infinite;
+  overflow: hidden;
+}
+
+@keyframes xoay {
+  0%{
+      transform: translate(-50%, 150%) rotate(0deg);
+  }
+  100%{
+      transform: translate(-50%, 150%) rotate(360deg);
+  }
+}
