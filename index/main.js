@@ -222,9 +222,6 @@ function createWindow (a) {
 
 	ipc.on("update.close", (event, data)=>{
 		upd.close();
-		createWindow(1)
-		//mainWindow.loadFile('index.html');
-		console.log(mainWindow)
 	})
 }
 

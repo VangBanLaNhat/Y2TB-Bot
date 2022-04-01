@@ -31,10 +31,10 @@ ipc.on("update.send", (event, data)=>{
 //require(path.join(__dirname, "..", "..", "core", "util", "dlUpdate.js"))();
 
 let lk = "VangBanLaNhat/VangBanLaNhat-Bot"
-git('github:VangBanLaNhat/VBLNBot', 'temp', function (err) {
+git('github:'+lk, 'temp', function (err) {
 	console.log(err ? 'Error' : 'Success');
-	//if(err) return;
-	let dir = path.join(__dirname, "..", "..", "test");
+	if(err) return console.log(err);
+	let dir = path.join(__dirname, "..", "..");
 	let listF = fs.readdirSync(dir);
 	let ct=[];
 	for(let i of save.file){

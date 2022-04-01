@@ -9,7 +9,7 @@ const CLICK_MESSAGE = 'Notification clicked!'
 var a;
 
 try{
-    fetch('https://raw.githubusercontent.com/VangBanLaNhat/VBLNBot/main/package.json')
+    fetch('https://raw.githubusercontent.com/VangBanLaNhat/VangBanLaNhat-Bot/master/package.json')
     .then(res => res.text())
     .then(json => {
         a = json;
@@ -17,7 +17,7 @@ try{
             a.replace("\\n\\r", "\n")
         }
         json = JSON.parse(a)
-        if(json.version != "1.0.1") ipc.send("update", {
+        if(json.version != "1.0.0") ipc.send("update", {
             current: "1.0.0",
             latest: json.version
         });
