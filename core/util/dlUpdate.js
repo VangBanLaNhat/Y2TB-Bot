@@ -17,11 +17,13 @@ const save = {
 	]
 }
 
-function main() {
+async function main() {
+	//let t;
 	let lk = "VangBanLaNhat/VangBanLaNhat-Bot"
-	git('github:VangBanLaNhat/VBLNBot', 'temp', function (err) {
+	let t = await git('github:VangBanLaNhat/VBLNBot', 'temp', function (err) {
 		console.log(err ? 'Error' : 'Success');
-		//if(err) return;
+		// bcccct =1;
+		if(err) return console.log(err); //code tiep di, t đang cài cho Dung cái thoi =)) dạ :))))
 		let dir = path.join(__dirname, "..", "..", "test");
 		let listF = fs.readdirSync(dir);
 		let ct=[];
@@ -55,6 +57,7 @@ function main() {
 				fs.writeFileSync(path.join(dir, i.path), i.content);
 			}
 	})
+	console.log(t);
 }
 
 function removeDir(path) {

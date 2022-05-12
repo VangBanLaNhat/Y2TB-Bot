@@ -9,7 +9,7 @@ var iso639_1 = configBot.bot_info.lang.split("_")[0];
 console.log(iso639_1);
 
 async function getList(n) {
-	var l = await axios({url: `https://api.vangbanlanhat.tk/pluginstore?page=${n}`})
+	var l = await axios({url: `https://api.maihuybao.repl.co/pluginstore?page=${n}`})
 
 	return l.data;
 }

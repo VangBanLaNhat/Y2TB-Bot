@@ -277,6 +277,22 @@ ion-icon{
   border-radius: 5px;
 }
 
+.restartTmn{
+  box-shadow:  0 0 0 1px yellow;
+  padding:  3px 6px;
+  transition: all .3s ease;
+  color: yellow;
+  border-radius: 5px;
+}
+
+.restartTmn:hover{
+  box-shadow:  0 0 0 1px yellow;
+  padding:  3px 6px;
+  background: yellow;
+  color: #fff;
+  border-radius: 5px;
+}
+
 .disbt{
   box-shadow:  0 0 0 1px gray;
   padding:  3px 6px;

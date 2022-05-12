@@ -74,6 +74,7 @@ async function mess (event, api){
                             code: global.plugins[i].command[ms[0]].main,
                             globals: { 
                                 __dirname: path.join(__dirname, "..", "..", "plugins"), 
+                                Buffer: Buffer,
                                 global: global.globalC,
                                 console: console,
                                 process: process,
@@ -112,7 +113,8 @@ async function chathook (event, api){
             var rq = requireFromString({
                 code: global.chathook[i].main,
                 globals: { 
-                    __dirname: path.join(__dirname, "..", "..", "plugins"), 
+                    __dirname: path.join(__dirname, "..", "..", "plugins"),
+                    Buffer: Buffer,
                     global: global.globalC,
                     console: console,
                     process: process,

@@ -9,6 +9,7 @@ var fs = require("fs");
 
 var shell = os.platform() === "win32" ? "powershell.exe" : "bash";
 ;
+
 let dfcf = require("../core/util/defaultConfig.js").normal()
 let ccf = require("../core/util/defaultConfig.js").core()
 

@@ -156,7 +156,6 @@ lcf()
 //Save Config
 const savebutton = document.querySelector('#save')
 savebutton.onclick = function (){
-    send("Setting", "Saving...")
     dfcf.bot_info.botname = document.getElementById('botname').value
     dfcf.bot_info.lang = document.getElementById('lang').value
     dfcf.facebook.FBemail = document.getElementById('fbemail').value
@@ -216,7 +215,7 @@ var ipc = require("electron").ipcRenderer;
 
 ipc.on("setDefaultConfig", (event, data)=>{
     if(data.accept){
-        send("Setting", "Reset config sussed!")
+        send("Setting", "Reset config success!")
         var cf = require(path.join(__dirname,"..", "core", "util", "defaultConfig.js"));
         dfcf = cf.normal();
         ccf = cf.core();

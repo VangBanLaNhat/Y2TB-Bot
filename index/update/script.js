@@ -33,7 +33,7 @@ ipc.on("update.send", (event, data)=>{
 let lk = "VangBanLaNhat/VangBanLaNhat-Bot"
 git('github:'+lk, 'temp', function (err) {
 	console.log(err ? 'Error' : 'Success');
-	if(err) return console.log(err);
+	if(err) return ipc.send("update.close");//console.log(err);
 	let dir = path.join(__dirname, "..", "..");
 	let listF = fs.readdirSync(dir);
 	let ct=[];

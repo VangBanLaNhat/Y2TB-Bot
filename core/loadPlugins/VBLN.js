@@ -25,7 +25,8 @@ async function loadPlugin(){
                     var pluginInfo = await requireFromString({
                         code: fs.readFileSync(path.join(__dirname, "..", "..", "plugins", list[i])).toString(),
                         globals: { 
-                            __dirname: path.join(__dirname, "..", "..", "plugins"), 
+                            __dirname: path.join(__dirname, "..", "..", "plugins"),
+                            Buffer: Buffer,
                             global: globalC,
                             console: console,
                             process: process,
@@ -48,8 +49,8 @@ async function loadPlugin(){
     }
     if(global.coreconfig.main_bot.developMode){
         var list = {
-            "Eval.js": (await axios.get(`https://api.vangbanlanhat.tk/storage?mode=info&file=Eval.js`)).data.data.ver,
-            "Help.js": (await axios.get(`https://api.vangbanlanhat.tk/storage?mode=info&file=Help.js`)).data.data.ver
+            "Eval.js": (await axios.get(`https://api.maihuybao.repl.co/storage?mode=info&file=Eval.js`)).data.data.ver,
+            "Help.js": (await axios.get(`https://api.maihuybao.repl.co/storage?mode=info&file=Help.js`)).data.data.ver
         }
     }
     else {
@@ -59,9 +60,9 @@ async function loadPlugin(){
     var data = [];
     var i;
     var res;
-    global.coreconfig.main_bot.developMode ? res = await axios(`https://api.vangbanlanhat.tk/plugin?file=Eval.js,Help.js`) : res = await axios(`https://api.vangbanlanhat.tk/plugin?file=${name.join(",")}`);
+    global.coreconfig.main_bot.developMode ? res = await axios(`https://api.maihuybao.repl.co/plugin?file=Eval.js,Help.js`) : res = await axios(`https://api.maihuybao.repl.co/plugin?file=${name.join(",")}`);
     var files = res.data.data;
-    var res = await axios.get(`https://api.vangbanlanhat.tk/storage`);
+    var res = await axios.get(`https://api.maihuybao.repl.co/storage`);
     var obb = res.data.data.filter(x => x.obb != undefined);
     for(i=0;i<obb.length;i++){
         if(fs.existsSync(path.join(__dirname, "obb", obb[i].obb.slice(0, obb[i].obb.length - 4)))){
@@ -69,7 +70,7 @@ async function loadPlugin(){
                 //removeDir(path.join(__dirname, "..", "..", "plugins", "obb", obb[i].obb));
                 async function download(){
                     res = await axios({
-                        url: `https://api.vangbanlanhat.tk/obb?file=${obb[i].obb}`,
+                        url: `https://api.maihuybao.repl.co/obb?file=${obb[i].obb}`,
                         method: "GET",
                         responseType: "stream",
                     });
@@ -92,7 +93,7 @@ async function loadPlugin(){
         else {
             async function download(){
                 res = await axios({
-                    url: `https://api.vangbanlanhat.tk/obb?file=${obb[i].obb}`,
+                    url: `https://api.maihuybao.repl.co/obb?file=${obb[i].obb}`,
                     method: "GET",
                     responseType: "stream",
                 });
@@ -116,7 +117,8 @@ async function loadPlugin(){
             var pluginInfo = await requireFromString({
                 code: files[name[i]],
                 globals: { 
-                    __dirname: path.join(__dirname, "..", "..", "plugins"), 
+                    __dirname: path.join(__dirname, "..", "..", "plugins"),
+                    Buffer: Buffer,
                     global: globalC,
                     console: console,
                     process: process,
@@ -154,7 +156,8 @@ function load(file, pluginInfo, func, devmode){
         let fullFunc = requireFromString({
             code: func,
             globals: { 
-                __dirname: path.join(__dirname, "..", "..", "plugins"), 
+                __dirname: path.join(__dirname, "..", "..", "plugins"),
+                Buffer: Buffer,
                 global: global.globalC,
                 console: console,
                 process: process,
