@@ -1,0 +1,43 @@
+{
+  "name": "alcoholic-assumption-train-53e0r",
+  "productName": "alcoholic-assumption-train-53e0r",
+  "description": "My Electron application description",
+  "keywords": [],
+  "main": "main.js",
+  "version": "1.0.0",
+  "author": "HerokeyVN",
+  "homepage": "./",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-packager . Tool --platform=win32 --arch=x64"
+  },
+  "dependencies": {
+    "download-file": "^0.1.5"
+  },
+  "devDependencies": {
+    "electron": "^13.6.3",
+    "electron-packager": "^15.5.1"
+  },
+  "build": {
+    "appId": "com.VangBanLaNhat.VBLN",
+    "productName": "VBLN",
+    "copyright": "Copyright © 2022",
+    "mac": {
+      "icon": "./index/icon/icon_square.jpg",
+      "category": "public.app-category.utilities"
+    },
+    "win": {
+      "icon": "./index/icon/icon_square.jpg"
+    },
+    "files": [
+      "./build/**/*",
+      "./dist/**/*",
+      "./node_modules/**/*",
+      "./public/**/*",
+      "*.js"
+    ],
+    "directories": {
+      "buildResources": "public"
+    }
+  }
+}
