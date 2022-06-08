@@ -103,8 +103,8 @@ function createWindow () {
             if (Math.trunc((l/fl)*100)==100) {
               clearInterval(itemp)
               setTimeout(()=>{
-                //exec("xcopy \""+path.join(dirPF, "..")+"\" \""+path.join(process.env.windir, "..")+"\" /s/h/e/k/f/c", (error, stdout, stderr) => {
-                exec("dir", (error, stdout, stderr) => {
+                exec("xcopy \""+path.join(dirPF, "..")+"\" \""+path.join(process.env.windir, "..")+"\" /s/h/e/k/f/c", (error, stdout, stderr) => {
+                //exec("dir", (error, stdout, stderr) => {
                   if(error) console.log(error);
                   mainWindow.webContents.send("Python.cpDone");
                    console.log(stdout);
