@@ -152,12 +152,12 @@ window.addEventListener('DOMContentLoaded', () => {
       }, 100);
   })
 
-  /*ipc.on("Python.cpDone", ()=>{
+  ipc.on("Python.cpDone", ()=>{
     clearInterval(itemp);
     msg(1, "Copying folder Python...(100%)");
     load(1, 100);
     setTimeout(PYD, 1000);
-  })*/
+  })
 
   ipc.on("Python.cp", ()=>{
     clearInterval(itemp);
@@ -168,15 +168,15 @@ window.addEventListener('DOMContentLoaded', () => {
   function CPPT() {
     i=0;
     itemp = setInterval(()=>{
-      if(i==100) {
-        msg(1, "Copying folder Python...(100%)");
-        load(1, 100);
-        setTimeout(PYD, 1000);
+      if(i==98){
+        msg(1, "Copying folder Python...(98%)");
+        load(1, 98);
+        //setTimeout(PYD, 1000);
         return clearInterval(itemp);
       }
       msg(1, "Copying folder Python...("+i+"%)");
       load(1, i++);
-    }, 100)
+    }, 250);
   }
 
   ipc.on("Python.done", PYD);

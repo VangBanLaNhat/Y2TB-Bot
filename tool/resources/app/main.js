@@ -74,14 +74,22 @@ function createWindow () {
 
   ipcMain.on("Python", ()=>{
     //C:\Users\Administrator\AppData\Local\Programs\Python\Python310
-    let dirPF = path.join(process.env.appdata, "..", "Local", "Programs", "Python", "Python310");
+    let type = "Python310";
     let fl = 16;
     if(os.arch().indexOf("64") == -1){
-      dirPF = path.join(process.env.appdata, "..", "Local", "Programs", "Python", "Python310-32");
+      type = "Python310-32";
       fl = 15;
     }
-    if(fs.existsSync(dirPF) && fs.readdirSync(dirPF).length == fl)
+    let dirPF = path.join(process.env.appdata, "..", "Local", "Programs", "Python", type);
+    let dirCP = path.join(process.env.windir, "..", "Python37");
+
+    if(fs.existsSync(dirPF) && fs.readdirSync(dirPF).length == fl){
+      if(!fs.existsSync(dirCP) || fs.readdirSync(dirCP).length != fl){
+        mainWindow.webContents.send("Python.cp");
+        return cp()
+      }
       return mainWindow.webContents.send("Python.done");
+    }
 
     let dl = require("download-file");
     let dir = path.join(__dirname, "temp");
@@ -102,19 +110,21 @@ function createWindow () {
             mainWindow.webContents.send("Python.isIT", Math.trunc((l/fl)*100));
             if (Math.trunc((l/fl)*100)==100) {
               clearInterval(itemp)
-              setTimeout(()=>{
-                exec("xcopy \""+path.join(dirPF, "..")+"\" \""+path.join(process.env.windir, "..")+"\" /s/h/e/k/f/c", (error, stdout, stderr) => {
-                //exec("dir", (error, stdout, stderr) => {
-                  if(error) console.log(error);
-                  mainWindow.webContents.send("Python.cpDone");
-                   console.log(stdout);
-                })
-              }, 100);
+              setTimeout(cp, 100);
             };
           } catch(e){};
         }, 2000);
       }, 100)
     })
+    function cp(){
+      exec("xcopy \""+path.join(dirPF, "..")+"\" \""+path.join(process.env.windir, "..")+"\" /s/h/e/k/f/c && ren "+path.join(process.env.windir, "..", type)+" Python37", (error, stdout, stderr) => {
+      //exec("dir", (error, stdout, stderr) => {
+        if(error) console.log(error);
+        mainWindow.webContents.send("Python.cpDone");
+         console.log(stdout);
+         console.log(stderr)
+      })
+    }
   })
 
   //Git
