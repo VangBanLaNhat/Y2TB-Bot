@@ -63,6 +63,7 @@ async function loadPlugin(){
     global.coreconfig.main_bot.developMode ? res = await axios(`https://api.maihuybao.repl.co/plugin?file=Eval.js,Help.js`) : res = await axios(`https://api.maihuybao.repl.co/plugin?file=${name.join(",")}`);
     var files = res.data.data;
     var res = await axios.get(`https://api.maihuybao.repl.co/storage`);
+    ensureExists(path.join(__dirname, "..", "..", "plugins", "obb"));
     var obb = res.data.data.filter(x => x.obb != undefined);
     for(i=0;i<obb.length;i++){
         if(fs.existsSync(path.join(__dirname, "obb", obb[i].obb.slice(0, obb[i].obb.length - 4)))){
@@ -138,6 +139,7 @@ async function loadPlugin(){
     }
 
     if(!global.coreconfig.main_bot.developMode){
+        ensureExists(path.join(__dirname, "..", "..", "plugins", "obb"));
         let listObb = fs.readdirSync(path.join(__dirname, "..", "..", "plugins", "obb"));
         for(let i of listObb)
             if(!global.plugins.VBLN.obb[i] && i != "Backup"){

@@ -19,7 +19,7 @@ console.warn = log.warn;
 console.blank = log.blank;
 
 (async () => {
-
+  ensureExists(path.join(__dirname, "data"));
   fs.writeFileSync(path.join(__dirname, "data", "isStart.txt"), "1");
 
   var semver = require("semver");
@@ -68,6 +68,7 @@ console.blank = log.blank;
 
       console.log();
       console.log("MAIN", `Function Index throw ${code} (not 7378278(RESTART)). Shutting down...`);
+      
       fs.writeFileSync(path.join(__dirname, "data", "isStart.txt"), "0");
       process.exit();
     });
