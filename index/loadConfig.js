@@ -195,7 +195,7 @@ savebutton.onclick = function (){
         //console.log(window.ipcRenderer);
         fs.writeFileSync(path.join(__dirname,"..", "udata", "config.json"), JSON.stringify(dfcf, null, 4), {mode: 0o666});
         fs.writeFileSync(path.join(__dirname,"..", "core", "coreconfig.json"), JSON.stringify(ccf, null, 4), {mode: 0o666});
-        send("Setting", "Save sussed!")
+        send("Setting", "Save success!")
     }
     catch(err){
         send("Error", err)
