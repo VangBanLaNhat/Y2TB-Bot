@@ -69,6 +69,9 @@ header a{
 header .message{
   transform: translateX(100px) translateY(7.5px)
 }
+header #config_header{
+  display: none;
+}
 
 /*content*/
 .gnrct, .avcct {
