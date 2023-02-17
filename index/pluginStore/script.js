@@ -1,17 +1,50 @@
-var axios = require("axios");
-var fs = require("fs");
-var path = require("path");
+const axios = require("axios");
+const fs = require("fs");
+const path = require("path");
 
-var listPlugins = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "..", "plugins", "pluginList.json")));
-var configBot = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "..", "udata", "config.json")));
-var iso639_1 = configBot.bot_info.lang.split("_")[0];
+const listPlugins = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "..", "plugins", "pluginList.json")));
+const configBot = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "..", "udata", "config.json")));
+const iso639_1 = configBot.bot_info.lang.split("_")[0];
 
 console.log(iso639_1);
 
-async function getList(n) {
-	var l = await axios({url: `https://api.maihuybao.repl.co/pluginstore?page=${n}`})
+// async function getList(n) {
+// 	var l = await axios({url: `https://raw.githubusercontent.com/VangBanLaNhat/Package-for-VangBanLaNhatBot/main/Plugin/PluginInfo.json`})
 
-	return l.data;
+// 	return l.data;
+// }
+
+async function getList(n, m) {
+	let l = await axios({ url: `https://raw.githubusercontent.com/VangBanLaNhat/Package-for-VangBanLaNhatBot/main/Plugin/PluginInfo.json` })
+	n = !n?n+1:n;
+	let plugin = l.data;
+	let total = [];
+	let max = 10;
+	max = m ? m : max;
+	let pages = Math.ceil(plugin.length / max);
+	let length = plugin.length;
+  
+	let start = Math.ceil(plugin.length / pages) * (n - 1);
+	let end = Math.ceil(plugin.length / pages) * n - 1;
+	end = end < length - 1 ? end : length - 1;
+  
+	for (let i = start; i <= end; i++) {
+	  total.push({
+		file: plugin[i].file,
+		author: plugin[i].author,
+		vi: plugin[i].vi,
+		en: plugin[i].en,
+		ver: plugin[i].ver,
+	  });
+	}
+	return {
+	  status: {
+	    total: length,
+	    pages: pages,
+	    max: (!m ? max : m),
+	    data: total
+	  }
+	};
 }
 
 var apid = [];
