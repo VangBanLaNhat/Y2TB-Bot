@@ -15,6 +15,8 @@ async function loadPlugin() {
     !global.plugins.VBLN ? global.plugins.VBLN = {} : "";
     !global.plugins.VBLN.command ? global.plugins.VBLN.command = {} : "";
 
+    
+    ensureExists(path.join(__dirname, "..", "..", "plugins", "obb"));
     if (global.coreconfig.main_bot.developMode) {
         log.log("Plugins(VBLN)", "In developer mode only develop plugin and plugin eval, help, devtool can load!");
         var list = scanDir(".js", path.join(__dirname, "..", "..", "plugins"));
@@ -134,9 +136,10 @@ async function loadPlugin() {
 
 async function load(file, pluginInfo, func, devmode) {
     try {
-        if (pluginInfo.obb) {
+        if (pluginInfo.obb && (!fs.existsSync(path.join(__dirname, "..", "..", "plugins", "obb", pluginInfo.obb)) || pluginInfo.version != global.data.pluginTemp[pluginInfo.pluginName])) {
             console.warn(pluginInfo.pluginName, "Updating obb: " + pluginInfo.obb);
             try{
+                if(fs.existsSync(path.join(__dirname, "..", "..", "plugins", "obb", pluginInfo.obb))) fs.unlinkSync(path.join(__dirname, "..", "..", "plugins", "obb", pluginInfo.obb));
                 await downloadfile(pluginInfo.obb + ".zip");
                 let zip = new AdmZip(path.join(__dirname, "..", "..", "plugins", "obb", pluginInfo.obb + ".zip"));
                 zip.extractAllTo(path.join(__dirname, "..", "..", "plugins", "obb", pluginInfo.obb), true);
@@ -156,6 +159,7 @@ async function load(file, pluginInfo, func, devmode) {
             "loginFunc": fullFunc[pluginInfo.loginFunc],
             "lang": false
         } : "";
+        global.data.pluginTemp[pluginInfo.pluginName] = pluginInfo.version;
         !global.plugins.VBLN.plugins.listen ? global.plugins.VBLN.plugins.listen = {
             "lang": true
         } : "";
@@ -280,7 +284,6 @@ async function downloadfile(linkDir) {
     //const content = Buffer.from(response.data.content, 'base64').toString();
 
     let url = response.data.download_url;
-    ensureExists(path.join(__dirname, "..", "..", "plugins", "obb"));
     let name = path.join(__dirname, "..", "..", "plugins", "obb", response.data.name);
     try {
         const response = await axios({

@@ -73,7 +73,7 @@ async function start() {
 			//fs.writeFileSync(path.join(__dirname, "data", "prdata.json"), JSON.stringify(global.prdata, null, 4), {mode: 0o666});
 		}
 		catch (err) {
-			log.err("Data", "Can't auto save data with error: " + err);
+			if(err != 'TypeError [ERR_INVALID_ARG_TYPE]: The "data" argument must be of type string or an instance of Buffer, TypedArray, or DataView. Received undefined') log.err("Data", "Can't auto save data with error: " + err);
 		}
 	}, global.coreconfig.main_bot.dataSaveTime * 1000)
 

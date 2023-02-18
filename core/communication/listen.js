@@ -72,7 +72,7 @@ async function mess(event, api) {
                 try {
                     let rq = evelStringSync(global.plugins[i].command[ms[0]].main);
                     var func = global.plugins[i].command[ms[0]].mainFunc;
-                    console.log(rq)
+                    //console.log(rq)
                     await rq[func](event, api);
                 }
                 catch (err) {
