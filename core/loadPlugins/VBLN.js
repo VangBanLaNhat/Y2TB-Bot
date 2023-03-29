@@ -43,7 +43,10 @@ async function loadPlugin() {
         "Help.js": "0.0.0"
     } : "";
     if (global.coreconfig.main_bot.developMode) {
-        var list = global.data.pluginTemp
+        var list = {
+            "Eval.js": "0.0.0",
+            "Help.js": "0.0.0"
+        }
     }
     else {
         var list = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "..", "plugins", "pluginList.json")).toString());
