@@ -12,7 +12,7 @@
     "build": "electron-packager . Tool --platform=win32 --arch=x64"
   },
   "dependencies": {
-    "download-file": "^0.1.5"
+    "axios": "^1.3.4"
   },
   "devDependencies": {
     "electron": "^13.6.3",
