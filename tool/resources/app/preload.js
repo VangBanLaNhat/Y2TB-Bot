@@ -1,7 +1,7 @@
 var ipc = require("electron").ipcRenderer;
 const { exec } = require('child_process');
 
-window.addEventListener('DOMContentLoaded', async () => {
+window.addEventListener('DOMContentLoaded', () => {
   function msg(number, s) {
     number = !number ? 0 : number;
     s = !s ? "Loading..." : s;
@@ -101,20 +101,23 @@ window.addEventListener('DOMContentLoaded', async () => {
     ipc.on("VS2017.isIT", (event, data) => {
       if (data == 0) return;
       if (data == 100) {
-        load(1, 98);
-        msg(1, "Installing VS 2017...(98%)");
-        setTimeout(() => {
-          load(1, 100);
-          msg(1, "Installing VS 2017...(100%)");
-          hidePC();
-          load(0, 1);
-          python();
-        }, 1* 5 * 1000);
+        load(1, 90);
+        msg(1, "Installing Visual C++ tools for CMake...(90%)");
+        ipc.send("VS2017.checkSDK");
         return;
       }
       load(1, data);
       msg(1, "Installing VS 2017...(" + data + "%)");
     })
+
+    ipc.on("VS2017.checkSDK.done", () => {
+      load(1, 100);
+      msg(1, "Installing VS 2017...(100%)");
+      hidePC();
+      load(0, 1);
+      python();
+    })
+
     ipc.on("VS2017.done", () => {
       clearInterval(itemp);
       hidePC();

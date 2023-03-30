@@ -63,7 +63,8 @@ function createWindow() {
     }, (e) => {
       mainWindow.webContents.send("VS2017", e);
       if (e) return;
-      exec(`cd "${path.join(__dirname, "temp")}" && start ./VS2017.exe --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64`);
+      exec(`cd "${path.join(__dirname, "temp")}" && start ./VS2017.exe --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 Microsoft.VisualStudio.Component.VC.CoreBuildTools Microsoft.VisualStudio.Component.VC.Redist.14.Latest Microsoft.VisualStudio.Component.VC.CMake.Project Microsoft.VisualStudio.Component.TestTools.BuildTools`);
+      //Microsoft.VisualStudio.Component.Windows10SDK.17763
       itemp = setInterval(() => {
         try {
           let l = fs.readdirSync(dirPF).length;
@@ -72,6 +73,25 @@ function createWindow() {
         } catch (e) { };
       }, 2000);
     })
+  })
+
+  ipcMain.on("VS2017.checkSDK", ()=>{
+    var cmakeCheck = setInterval(async () => {
+      try{
+        var tasklist = await getListTasks();
+        var checking = 0;
+        for(let i of tasklist)
+          if(i.imageName == "setup.exe"){
+            console.log(i)
+            checking++;
+          }
+      } catch(e) {console.log(e)};
+      
+      if(checking < 2){
+        clearInterval(cmakeCheck);
+        mainWindow.webContents.send("VS2017.checkSDK.done");
+      }
+    }, 10 * 1000);
   })
 
   //Python
@@ -319,4 +339,9 @@ async function dl(url, json, callback) {
   }
   let dir = path.join(json.directory, json.filename);
   down.data.pipe(fs.createWriteStream(dir).on("finish", callback));
+}
+
+async function getListTasks(){
+  let tasklist = await (import('tasklist'));
+  return (await tasklist.tasklist());
 }
