@@ -27,8 +27,25 @@ function createWindow() {
     }
   })
 
+  const updateWindow = new BrowserWindow({
+    width: 400,
+    height: 150,
+    resizable: false,
+    maximizable: false,
+    minimizable: false,
+    frame: false,
+    center: true,
+    skipTaskbar: false,
+    icon: path.join(__dirname, "img", "icon_square.jpg"),
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false
+    }
+  })
+
   // and load the index.html of the app.
-  mainWindow.loadFile('index.html');
+  if(fs.existsSync(path.join(__dirname, "..", "..", "..", "data", "update.json")) && fs.existsSync(path.join(__dirname, "..", "..", "..", "node_modules"))) updateWindows.loadFile(path.join(__dirname, "update", "index.html"));
+  else mainWindow.loadFile('index.html');
 
   ipcMain.on("menu", (e, d) => {
     if (d == "close") mainWindow.close()
@@ -36,7 +53,7 @@ function createWindow() {
   })
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  //mainWindow.webContents.openDevTools()
   Menu.setApplicationMenu(mn);
 
   //Install.

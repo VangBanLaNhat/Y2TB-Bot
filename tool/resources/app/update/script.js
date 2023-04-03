@@ -19,15 +19,20 @@ const save = {
 	]
 }
 
+let infoUpdate = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "..", "..", "..", "data", "update.json")));
+document.getElementById("cvs").innerHTML += infoUpdate.current;
+document.getElementById("lvs").innerHTML += infoUpdate.latest;
 
-let lastt, curr;
 
-ipc.on("update.send", (event, data)=>{
-	lastt = data.latest;
-	curr = data.current;
-	document.getElementById("cvs").innerHTML += curr;
-	document.getElementById("lvs").innerHTML += lastt;
-})
+
+// let lastt, curr;
+
+// ipc.on("update.send", (event, data)=>{
+// 	lastt = data.latest;
+// 	curr = data.current;
+// 	document.getElementById("cvs").innerHTML += curr;
+// 	document.getElementById("lvs").innerHTML += lastt;
+// })
 
 //require(path.join(__dirname, "..", "..", "core", "util", "dlUpdate.js"))();
 
@@ -35,7 +40,7 @@ let lk = "VangBanLaNhat/VangBanLaNhat-Bot"
 git('github:'+lk, 'temp', function (err) {
 	console.log(err ? 'Error' : 'Success');
 	if(err) return ipc.send("update.close");//console.log(err);
-	let dir = path.join(__dirname, "..", "..");
+	let dir = path.join(__dirname, "..", "..", "..", "..");
 	let listF = fs.readdirSync(dir);
 	let ct=[];
 	for(let i of save.file){
@@ -68,6 +73,7 @@ git('github:'+lk, 'temp', function (err) {
 			fs.writeFileSync(path.join(dir, i.path), i.content);
 		}
 	}
+	removeDir(path.join(dir, "node_modules"));
 
 	ipc.send("update.close");
 })
