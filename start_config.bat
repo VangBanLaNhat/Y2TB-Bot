@@ -28,4 +28,9 @@ if not exist ./node_modules (
 	start Tool.exe
 	exit
 )
+if exist "./data/update.json" (
+	cd tool
+	start Tool.exe
+	exit
+)
 npm run app
