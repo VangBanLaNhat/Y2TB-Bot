@@ -247,7 +247,12 @@ function createWindow() {
     //console.log(Object.keys(LMD));
     let array = Object.keys(LMD);
 
-    ins(0);
+    exec("npm -v", (e, stdout, stder) => {
+      console.log(stdout.split(".")[0]);
+      if(stdout.split(".")[0] != "8")
+        exec("npm i -g npm@8", ()=>{ins(0)});
+      else ins(0);
+    })
     function ins(i) {
       let inf = array[i];
       let pl = "";
