@@ -61,7 +61,7 @@ function createWindow() {
   })
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  //mainWindow.webContents.openDevTools();
   Menu.setApplicationMenu(mn);
 
   //Install.
@@ -88,7 +88,7 @@ function createWindow() {
     }, (e) => {
       mainWindow.webContents.send("VS2017", e);
       if (e) return;
-      exec(`cd "${path.join(__dirname, "temp")}" && start ./VS2017.exe --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 Microsoft.VisualStudio.Component.VC.CoreBuildTools Microsoft.VisualStudio.Component.VC.Redist.14.Latest Microsoft.VisualStudio.Component.VC.CMake.Project Microsoft.VisualStudio.Component.TestTools.BuildTools`);
+      exec(`cd "${path.join(__dirname, "temp")}" && start ./VS2017.exe --passive --wait --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 Microsoft.VisualStudio.Component.VC.CoreBuildTools Microsoft.VisualStudio.Component.VC.Redist.14.Latest Microsoft.VisualStudio.Component.VC.CMake.Project Microsoft.VisualStudio.Component.TestTools.BuildTools`);
       //Microsoft.VisualStudio.Component.Windows10SDK.17763
       itemp = setInterval(() => {
         try {
