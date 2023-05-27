@@ -1,10 +1,7 @@
-var fs = require("fs");
+const fs = require("fs");
 const path = require("path");
 const process = require("process");
-var log = require(path.join(__dirname, "..", "util", "log.js"));
-var { requireFromString } = require('module-from-string');
-
-
+const log = require(path.join(__dirname, "..", "util", "log.js"));
 
 var langMap = {
     "exitCM": {
@@ -47,7 +44,6 @@ async function listen(err, event, api) {
             break;
     }
 
-    //chathook(event, api);
     addLang();
     if (checkList(event.senderID, event.threadID)) mess(event, api);
 }
@@ -70,10 +66,11 @@ async function mess(event, api) {
                 event.body = event.body.join(" ");
 
                 try {
-                    let rq = evelStringSync(global.plugins[i].command[ms[0]].main);
-                    var func = global.plugins[i].command[ms[0]].mainFunc;
-                    //console.log(rq)
-                    await rq[func](event, api);
+                    let name = global.plugins[i].command[ms[0]].namePlugin;
+                    let mainFunc = global.plugins[i].plugins[name].fullFunc;
+                    let func = global.plugins[i].command[ms[0]].mainFunc;
+                    
+                    await mainFunc[func](event, api);
                 }
                 catch (err) {
                     log.err(global.plugins[i].command[ms[0]].namePlugin, err)
@@ -98,66 +95,16 @@ async function chathook(event, api) {
     } catch (_) { }
     for (var i in global.chathook) {
         try {
-            let rq = evelStringSync(global.chathook[i].main);
-            var func = global.chathook[i].func
-            var rt = rq[func](event, api);
+        	let name = global.chathook[i].main;
+            let mainFunc = global.plugins.VBLN.plugins[name].fullFunc
+            var func = global.chathook[i].func;
+            
+            mainFunc[func](event, api);
         }
         catch (err) {
             log.err(i, err);
         }
     }
-}
-
-async function evelString(str, linkDir) {
-    linkDir = linkDir ? linkDir : path.join(__dirname, "..", "..", "plugins");
-    return await requireFromString(str, {
-        useCurrentGlobal: true,
-        __dirname: linkDir,
-        globals: {
-            __dirname: linkDir,
-            console: console,
-            clearInterval: clearInterval,
-            clearTimeout: clearTimeout,
-            setInterval: setInterval,
-            setTimeout: setTimeout,
-            global: globalC
-        }
-    });
-}
-
-function evelStringSync(str, linkDir) {
-    linkDir = linkDir ? linkDir : path.join(__dirname, "..", "..", "plugins");
-    return requireFromString(str, {
-        useCurrentGlobal: true,
-        __dirname: linkDir,
-        globals: {
-            __dirname: linkDir,
-            console: console,
-            clearInterval: clearInterval,
-            clearTimeout: clearTimeout,
-            setInterval: setInterval,
-            setTimeout: setTimeout,
-            data: global.data,
-            global: globalC
-        }
-    })
-}
-
-async function evelStringInit(str, linkDir) {
-    linkDir = linkDir ? linkDir : path.join(__dirname, "..", "..", "plugins");
-    globalC.process = global.process;
-    return await requireFromString(str, {
-        useCurrentGlobal: true,
-        __dirname: linkDir,
-        plugins: globalC.plugins,
-        globals: {
-
-            global,
-            __dirname: linkDir,
-            plugins: globalC.plugins,
-        }
-    }).init();
-    //return true;
 }
 
 function checkList(uid, tid) {

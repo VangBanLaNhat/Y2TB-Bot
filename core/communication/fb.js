@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const listen = require(path.join(__dirname, "listen.js"))
 var log = require(path.join(__dirname, "..", "util", "log.js"));
-var { requireFromString } = require('module-from-string');
+//var { requireFromString } = require('module-from-string');
 
 
 module.exports = async (appState, loginOptions) => {
@@ -26,7 +26,8 @@ module.exports = async (appState, loginOptions) => {
         log.log("Manager","Login successfuly!");
         for(let i in global.plugins.VBLN.plugins){
             try{
-                await global.plugins.VBLN.plugins[i].loginFunc();
+                await global.plugins.VBLN.plugins[i].loginFunc(api);
+                delete global.plugins.VBLN.plugins[i].loginFunc;
             } catch(e){}
         }
         try{
