@@ -57,7 +57,7 @@ function createWindow(a) {
 		height: 710,
 		resizable: false,
 		maximizable: false,
-		icon: path.join(__dirname, "icon", "icon_square.jpg"),
+		icon: path.join(__dirname, "icon", "logo.ico"),
 		webPreferences: {
 			preload: path.join(__dirname, 'preload.js'),
 			nodeIntegration: true,
@@ -113,7 +113,7 @@ function createWindow(a) {
 			height: 710,
 			minWidth: 800,
 			minHeight: 710,
-			icon: path.join(__dirname, "icon", "icon_square.jpg"),
+			icon: path.join(__dirname, "icon", "logo.ico"),
 			webPreferences: {
 				nodeIntegration: true,
 				contextIsolation: false
@@ -196,7 +196,7 @@ function createWindow(a) {
 			frame: false,
 			center: true,
 			skipTaskbar: false,
-			icon: path.join(__dirname, "icon", "icon_square.jpg"),
+			icon: path.join(__dirname, "icon", "logo.ico"),
 			webPreferences: {
 				nodeIntegration: true,
 				contextIsolation: false
