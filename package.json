@@ -1,5 +1,5 @@
 {
-  "name": "vangbanlanhat-bot",
+  "name": "Y2TB-bot",
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/VangBanLaNhat/vangbanlanhat-bot.git"
+    "url": "git+https://github.com/VangBanLaNhat/Y2TB-bot.git"
   },
   "keywords": [
     "chatbot",
@@ -21,9 +21,9 @@
   "author": "Kaysil <kaysilminer@gmail.com> (kaysil.net), HerokeyVN <herokey2018@gmail.com>, HyTommy <hygameo2@gmail.com>",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/VangBanLaNhat/vangbanlanhat-bot/issues"
+    "url": "https://github.com/VangBanLaNhat/Y2TB-bot/issues"
   },
-  "homepage": "https://github.com/VangBanLaNhat/vangbanlanhat-bot#readme",
+  "homepage": "https://github.com/VangBanLaNhat/Y2TB-bot#readme",
   "dependencies": {
     "@octokit/rest": "",
     "adm-zip": "",
@@ -53,11 +53,11 @@
     "productName": "Y2TB",
     "copyright": "Copyright © 2022",
     "mac": {
-      "icon": "./index/icon/icon_square.jpg",
+      "icon": "./index/icon/logo.ico",
       "category": "public.app-category.utilities"
     },
     "win": {
-      "icon": "./index/icon/icon_square.jpg"
+      "icon": "./index/icon/logo.ico"
     },
     "files": [
       "./build/**/*",
