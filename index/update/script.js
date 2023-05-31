@@ -31,7 +31,7 @@ ipc.on("update.send", (event, data)=>{
 
 //require(path.join(__dirname, "..", "..", "core", "util", "dlUpdate.js"))();
 
-let lk = "VangBanLaNhat/VangBanLaNhat-Bot"
+let lk = "VangBanLaNhat/Y2TB-Bot"
 git('github:'+lk, 'temp', function (err) {
 	console.log(err ? 'Error' : 'Success');
 	if(err) return ipc.send("update.close");//console.log(err);

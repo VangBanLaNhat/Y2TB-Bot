@@ -1,5 +1,5 @@
 {
-  "name": "vangbanlanhat-bot",
+  "name": "y2tb-bot",
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/VangBanLaNhat/vangbanlanhat-bot.git"
+    "url": "git+https://github.com/VangBanLaNhat/y2tb-bot.git"
   },
   "keywords": [
     "chatbot",
@@ -21,9 +21,9 @@
   "author": "Kaysil <kaysilminer@gmail.com> (kaysil.net), HerokeyVN <herokey2018@gmail.com>, HyTommy <hygameo2@gmail.com>",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/VangBanLaNhat/vangbanlanhat-bot/issues"
+    "url": "https://github.com/VangBanLaNhat/y2tb-bot/issues"
   },
-  "homepage": "https://github.com/VangBanLaNhat/vangbanlanhat-bot#readme",
+  "homepage": "https://github.com/VangBanLaNhat/y2tb-bot#readme",
   "dependencies": {
     "adm-zip": "^0.5.9",
     "axios": "^0.21.4",

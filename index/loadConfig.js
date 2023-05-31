@@ -9,7 +9,7 @@ const CLICK_MESSAGE = 'Notification clicked!'
 var a;
 
 try {
-    fetch('https://raw.githubusercontent.com/VangBanLaNhat/VangBanLaNhat-Bot/master/package.json')
+    fetch('https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-Bot/master/package.json')
         .then(res => res.text())
         .then(json => {
             a = json;

@@ -80,9 +80,9 @@ console.blank = log.blank;
 
   //Check Update
   let text;
-  //https://raw.githubusercontent.com/VangBanLaNhat/VangBanLaNhat-Bot/master/package.json
+  //https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-Bot/master/package.json
     //https://raw.githubusercontent.com/VangBanLaNhat/Y2TBBot/main/package.json
-    let link = "https://raw.githubusercontent.com/VangBanLaNhat/VangBanLaNhat-Bot/master/package.json"
+    let link = "https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-Bot/master/package.json"
   try{
     let vs = await fetch(link);
     text = await vs.text();
@@ -98,7 +98,7 @@ console.blank = log.blank;
   }
   let json = JSON.parse(text)
   if(json.version != "1.0.0"){
-    let lk = "VangBanLaNhat/VangBanLaNhat-Bot"
+    let lk = "VangBanLaNhat/Y2TB-Bot"
     git('github:VangBanLaNhat/Y2TBBot', 'temp', async function (err) {
       //console.log(err ? 'Error' : 'Success');
       // bcccct =1;
