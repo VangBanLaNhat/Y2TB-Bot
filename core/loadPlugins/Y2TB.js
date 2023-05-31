@@ -21,13 +21,13 @@ const scanDir = require(path.join(__dirname, "..", "util", "scanDir.js"));
 !global.temp.loadPlugin ? global.temp.loadPlugin = {}:"";
 
 async function loadPlugin() {
-	!global.plugins.VBLN ? global.plugins.VBLN = {}: "";
-	!global.plugins.VBLN.command ? global.plugins.VBLN.command = {}: "";
+	!global.plugins.Y2TB ? global.plugins.Y2TB = {}: "";
+	!global.plugins.Y2TB.command ? global.plugins.Y2TB.command = {}: "";
 
 
 	ensureExists(path.join(__dirname, "..", "..", "plugins", "obb"));
 	if (global.coreconfig.main_bot.developMode) {
-		log.log("Plugins(VBLN)", "In developer mode only develop plugin and plugin eval, help, devtool can load!");
+		log.log("Plugins(Y2TB)", "In developer mode only develop plugin and plugin eval, help, devtool can load!");
 		var list = scanDir(".js", path.join(__dirname, "..", "..", "plugins"));
 		ensureExists(path.join(__dirname, "..", "..", "plugins", "cache"));
 		var listFile = [];
@@ -41,7 +41,7 @@ async function loadPlugin() {
 					load(list[i], pluginInfo, func, true);
 				}
 				catch (err) {
-					log.err("Plugins(VBLN)", "Can't load \"" + list[i] + "\" with error: " + err);
+					log.err("Plugins(Y2TB)", "Can't load \"" + list[i] + "\" with error: " + err);
 					!global.temp.loadPlugin.stderr ? global.temp.loadPlugin.stderr = []:"";
 					global.temp.loadPlugin.stderr.push({
 						plugin: list[i],
@@ -134,7 +134,7 @@ async function loadPlugin() {
 			await load(name[i], pluginInfo, func);
 		}
 		catch (err) {
-			log.err("Plugins(VBLN)", "Can't load \"" + name[i] + "\" with error: " + err)
+			log.err("Plugins(Y2TB)", "Can't load \"" + name[i] + "\" with error: " + err)
 			!global.temp.loadPlugin.stderr ? global.temp.loadPlugin.stderr = []:"";
 			global.temp.loadPlugin.stderr.push({
 				plugin: list[i],
@@ -146,7 +146,7 @@ async function loadPlugin() {
         ensureExists(path.join(__dirname, "..", "..", "plugins", "obb"));
         let listObb = fs.readdirSync(path.join(__dirname, "..", "..", "plugins", "obb"));
         for (let i of listObb)
-            if (!global.plugins.VBLN.obb[i] && i != "Backup") {
+            if (!global.plugins.Y2TB.obb[i] && i != "Backup") {
                 ensureExists(path.join(__dirname, "..", "..", "plugins", "obb", "Backup"));
                 let zip = new AdmZip();
                 zip.addLocalFolder(path.join(__dirname, "..", "..", "plugins", "obb", i))
@@ -185,8 +185,8 @@ async function load(file, pluginInfo, func, devmode) {
 		
 		//Push plugin info to global
 		
-		!global.plugins.VBLN.plugins ? global.plugins.VBLN.plugins = {}: "";
-		!global.plugins.VBLN.plugins[pluginInfo.pluginName] ? global.plugins.VBLN.plugins[pluginInfo.pluginName] = {
+		!global.plugins.Y2TB.plugins ? global.plugins.Y2TB.plugins = {}: "";
+		!global.plugins.Y2TB.plugins[pluginInfo.pluginName] ? global.plugins.Y2TB.plugins[pluginInfo.pluginName] = {
 			"author": pluginInfo.author,
 			"version": pluginInfo.version,
 			"loginFunc": fullFunc[pluginInfo.loginFunc],
@@ -194,20 +194,20 @@ async function load(file, pluginInfo, func, devmode) {
 			"lang": false
 		}: "";
 		global.data.pluginTemp[pluginInfo.pluginName] = pluginInfo.version;
-		!global.plugins.VBLN.plugins.listen ? global.plugins.VBLN.plugins.listen = {
+		!global.plugins.Y2TB.plugins.listen ? global.plugins.Y2TB.plugins.listen = {
 			"lang": true
 		}: "";
 
-		!global.plugins.VBLN.obb ? global.plugins.VBLN.obb = {}: "";
-		pluginInfo.obb ? global.plugins.VBLN.obb[pluginInfo.obb] = pluginInfo.pluginName: "";
+		!global.plugins.Y2TB.obb ? global.plugins.Y2TB.obb = {}: "";
+		pluginInfo.obb ? global.plugins.Y2TB.obb[pluginInfo.obb] = pluginInfo.pluginName: "";
 
 		for (var i in pluginInfo.commandList) {
-			!global.plugins.VBLN.command[i] ? global.plugins.VBLN.command[i] = {}: "";
-			!global.plugins.VBLN.command[i].help ? global.plugins.VBLN.command[i].namePlugin = pluginInfo.pluginName: "";
-			!global.plugins.VBLN.command[i].help ? global.plugins.VBLN.command[i].help = pluginInfo.commandList[i].help: "";
-			!global.plugins.VBLN.command[i].tag ? global.plugins.VBLN.command[i].tag = pluginInfo.commandList[i].tag: "";
-			//!global.plugins.VBLN.command[i].main ? global.plugins.VBLN.command[i].main = pluginInfo.pluginName: "";
-			!global.plugins.VBLN.command[i].mainFunc ? global.plugins.VBLN.command[i].mainFunc = pluginInfo.commandList[i].mainFunc: "";
+			!global.plugins.Y2TB.command[i] ? global.plugins.Y2TB.command[i] = {}: "";
+			!global.plugins.Y2TB.command[i].help ? global.plugins.Y2TB.command[i].namePlugin = pluginInfo.pluginName: "";
+			!global.plugins.Y2TB.command[i].help ? global.plugins.Y2TB.command[i].help = pluginInfo.commandList[i].help: "";
+			!global.plugins.Y2TB.command[i].tag ? global.plugins.Y2TB.command[i].tag = pluginInfo.commandList[i].tag: "";
+			//!global.plugins.Y2TB.command[i].main ? global.plugins.Y2TB.command[i].main = pluginInfo.pluginName: "";
+			!global.plugins.Y2TB.command[i].mainFunc ? global.plugins.Y2TB.command[i].mainFunc = pluginInfo.commandList[i].mainFunc: "";
 		}
 		
 		//Load language 
@@ -217,7 +217,7 @@ async function load(file, pluginInfo, func, devmode) {
 				fs.writeFileSync(path.join(__dirname, "..", "..", "lang", `${pluginInfo.pluginName}.json`), JSON.stringify(pluginInfo.langMap, null, 4), {
 					mode: 0o666
 				});
-				global.plugins.VBLN.plugins[pluginInfo.pluginName].lang = true;
+				global.plugins.Y2TB.plugins[pluginInfo.pluginName].lang = true;
 
 			} else {
 				if (!fs.existsSync(path.join(__dirname, "..", "..", "lang", `${pluginInfo.pluginName}.json`))) {
@@ -250,7 +250,7 @@ async function load(file, pluginInfo, func, devmode) {
 						mode: 0o666
 					});
 				}
-				global.plugins.VBLN.plugins[pluginInfo.pluginName].lang = true;
+				global.plugins.Y2TB.plugins[pluginInfo.pluginName].lang = true;
 			}
 		}
 		
@@ -262,7 +262,7 @@ async function load(file, pluginInfo, func, devmode) {
 				fs.writeFileSync(path.join(__dirname, "..", "..", "udata", "Plugins config", `${pluginInfo.pluginName}.json`), JSON.stringify(pluginInfo.config, null, 4), {
 					mode: 0o666
 				});
-				global.plugins.VBLN.plugins[pluginInfo.pluginName].config = true;
+				global.plugins.Y2TB.plugins[pluginInfo.pluginName].config = true;
 			} else {
 				if (!fs.existsSync(path.join(__dirname, "..", "..", "udata", "Plugins config", `${pluginInfo.pluginName}.json`))) {
 					if (!fs.existsSync(path.join(__dirname, "..", "..", "lang", "backup", `${pluginInfo.pluginName}.json`)))
@@ -294,7 +294,7 @@ async function load(file, pluginInfo, func, devmode) {
 						mode: 0o666
 					});
 				}
-				global.plugins.VBLN.plugins[pluginInfo.pluginName].config = true;
+				global.plugins.Y2TB.plugins[pluginInfo.pluginName].config = true;
 			}
 		}
 		
@@ -310,10 +310,10 @@ async function load(file, pluginInfo, func, devmode) {
 			//console.log(fullFunc);
 			fullFunc[pluginInfo.onload](pluginInfo);
 		}
-		global.coreconfig.main_bot.developMode ? log.log("Plugins(VBLN)", "Loaded devplugin: " + pluginInfo.pluginName + " " + pluginInfo.version + " by " + pluginInfo.author): log.log("Plugins(VBLN)", "Loaded plugin: " + pluginInfo.pluginName + " " + pluginInfo.version + " by " + pluginInfo.author)
+		global.coreconfig.main_bot.developMode ? log.log("Plugins(Y2TB)", "Loaded devplugin: " + pluginInfo.pluginName + " " + pluginInfo.version + " by " + pluginInfo.author): log.log("Plugins(Y2TB)", "Loaded plugin: " + pluginInfo.pluginName + " " + pluginInfo.version + " by " + pluginInfo.author)
 	}
 	catch (err) {
-		log.err("Plugins(VBLN)", "Can't load \"" + file + "\" with error: " + err);
+		log.err("Plugins(Y2TB)", "Can't load \"" + file + "\" with error: " + err);
 		!global.temp.loadPlugin.stderr ? global.temp.loadPlugin.stderr = []:"";
 		global.temp.loadPlugin.stderr.push({
 			plugin: file,
@@ -336,7 +336,7 @@ function installmd(file, pluginInfo) {
 			//if (!ch) {
 			if (!fs.existsSync(path.join(__dirname, "..", "..", "node_modules", i, "package.json"))) {
 
-				log.warn("Plugins(VBLN)", "Installing Node_module \"" + i + "\" for plugin \"" + pluginInfo.pluginName + "\":\n");
+				log.warn("Plugins(Y2TB)", "Installing Node_module \"" + i + "\" for plugin \"" + pluginInfo.pluginName + "\":\n");
 				if (pluginInfo.nodeDepends[i] != "") {
 					cmd.execSync(`npm install --save ${i}@${pluginInfo.nodeDepends[i]}`, {
 						stdio: "inherit",
@@ -359,7 +359,7 @@ async function getFileContent(linkDir) {
 	try {
 		const response = await octokit.repos.getContent({
 			owner: "VangBanLaNhat",
-			repo: "VBLN-data",
+			repo: "Y2TB-data",
 			path: "PluginStorage/" + linkDir,
 			ref: "main"
 		});
@@ -376,7 +376,7 @@ async function getFileContent(linkDir) {
 async function downloadfile(linkDir) {
 	const response = await octokit.repos.getContent({
 		owner: "VangBanLaNhat",
-		repo: "VBLN-data",
+		repo: "Y2TB-data",
 		path: "PluginStorage/obb/" + linkDir,
 		ref: "main"
 	});

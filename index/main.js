@@ -42,8 +42,8 @@ contextMenu({
 let mainWindow;
 let confirmWindow;
 
-app.setAppUserModelId("VBLN");
-app.setName("VBLN");
+app.setAppUserModelId("Y2TB");
+app.setName("Y2TB");
 app.setUserTasks([
 
 ])
@@ -215,7 +215,7 @@ function createWindow(a) {
 	}
 
 	ipc.on("update", (event, data) => {
-		exec("cd \"" + path.join(__dirname, "..") + "\" && start VBLN.exe", (e, o, err) => {
+		exec("cd \"" + path.join(__dirname, "..") + "\" && start Y2TB.exe", (e, o, err) => {
 			console.log(e); console.log(o); console.log(err);
 			mainWindow.close();
 			app.quit();

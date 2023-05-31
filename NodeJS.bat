@@ -3,4 +3,4 @@
 cls
 if not exist %windir%\..\"Program Files (x86)"\"Microsoft Visual Studio" (
 start WiBuildTool.bat
-)else start VBLN.exe
+)else start Y2TB.exe

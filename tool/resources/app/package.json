@@ -20,8 +20,8 @@
     "electron-packager": "^15.5.1"
   },
   "build": {
-    "appId": "com.VangBanLaNhat.VBLN",
-    "productName": "VBLN",
+    "appId": "com.VangBanLaNhat.Y2TB",
+    "productName": "Y2TB",
     "copyright": "Copyright © 2019",
     "mac": {
       "icon": "./index/icon/icon_square.jpg",

@@ -14,7 +14,7 @@ function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 500,
     height: 500,
-    title: 'VBLN Install',
+    title: 'Y2TB Install',
     resizable: false,
     maximizable: false,
     minimizable: false,
@@ -308,7 +308,7 @@ function createWindow() {
   ipcMain.on("Start", () => {
     console.log(1);
     exec("echo y|rmdir /s temp", () => {
-      exec("cd \"" + path.join(__dirname, "..", "..", "..") + "\" && start VBLN.exe", (e, o, err) => {
+      exec("cd \"" + path.join(__dirname, "..", "..", "..") + "\" && start Y2TB.exe", (e, o, err) => {
         console.log(e); console.log(o); console.log(err);
         mainWindow.close()
       });
