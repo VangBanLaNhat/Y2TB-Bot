@@ -7,7 +7,7 @@ setTimeout(function(){
     document.getElementById('content').style.display= 'block';
     document.getElementById('header').style.display= 'flex';
     document.getElementById('footer').style.display= 'flex';
-}, 5.5*1000*1)
+}, 0*1000*1)
 //tab
 const gnr = document.querySelector('header #gnr')
 document.getElementById('gnr').style.background= '#29282d';
