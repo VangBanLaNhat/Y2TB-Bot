@@ -19,7 +19,7 @@ function createWindow() {
     maximizable: false,
     minimizable: false,
     frame: false,
-    icon: path.join(__dirname, "img", "icon_square.jpg"),
+    icon: path.join(__dirname, "img", "icon_square.png"),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
@@ -36,7 +36,7 @@ function createWindow() {
       frame: false,
       center: true,
       skipTaskbar: false,
-      icon: path.join(__dirname, "img", "icon_square.jpg"),
+      icon: path.join(__dirname, "img", "icon_square.png"),
       webPreferences: {
         nodeIntegration: true,
         contextIsolation: false
