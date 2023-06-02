@@ -33,9 +33,4 @@ if exist "./data/update.json" (
 	start Tool.exe
 	exit
 )
-if exist "./update" (
-	cd tool
-	start Tool.exe
-	exit
-)
 npm run app

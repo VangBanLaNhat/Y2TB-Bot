@@ -73,13 +73,13 @@ for (var i = 0; i < ll.length; i++) {
 
 		let minus = ["tool", "plugins"];
 
-		let listFile = fs.readdirSync(path.join(pathFile, "Y2TB-Bot-main"));
+		let listFile = fs.readdirSync(path.join(pathFile, "Y2TB-Bot-master"));
 		// delete require.cache[require.resolve("./core/util/log.js")];
 		// delete require.cache[require.resolve("./core/util/scanDir.js")]
 		for (let i of listFile)
 			if (minus.indexOf(i) == -1) {
-				if (!fs.lstatSync(path.join(pathFile, "Y2TB-Bot-main", i)).isFile()) copyFolder(path.join(pathFile, "Y2TB-Bot-main", i), path.join(pathFile, "..", i));
-				else fs.renameSync(path.join(pathFile, "Y2TB-Bot-main", i), path.join(pathFile, "..", i));
+				if (!fs.lstatSync(path.join(pathFile, "Y2TB-Bot-master", i)).isFile()) copyFolder(path.join(pathFile, "Y2TB-Bot-master", i), path.join(pathFile, "..", i));
+				else fs.renameSync(path.join(pathFile, "Y2TB-Bot-master", i), path.join(pathFile, "..", i));
 			}
 		console.log("Update", "Complete update. Proceed to restart...");
 		process.exit(7378278);

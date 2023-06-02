@@ -17,11 +17,12 @@ try {
                 a.replace("\\n\\r", "\n")
             }
             json = JSON.parse(a);
+            let vern = (JSON.parse(fs.readFileSync(path.join(__dirname, "..", "package.json")))).version;
 
-            if (json.version != "1.0.0") {
+            if (json.version != vern) {
                 ensureExists(path.join(__dirname, "..", "data"));
                 fs.writeFileSync(path.join(__dirname, "..", "data", "update.json"), JSON.stringify({
-                    current: "1.0.0",
+                    current: vern,
                     latest: json.version
                 }))
                 ipc.send("update"/*, {

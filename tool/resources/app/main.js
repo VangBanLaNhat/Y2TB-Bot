@@ -62,7 +62,7 @@ function createWindow() {
     })
 
     ipcMain.on("update.close", (e, d) => {
-      if(d) exec("start "+path.join(__dirname, "..", "..", "..", "Y2TB.exe"));
+      if(d) exec("cd \"" + path.join(__dirname, "..", "..", "..") + "\" && start Y2TB.exe");
       setTimeout(() => updateWindow.close(), 1000);
     })
   }
@@ -99,7 +99,6 @@ function createWindow() {
   mainWindow.loadFile('index.html');
 
   if(fs.existsSync(path.join(__dirname, "..", "..", "..", "data", "update.json"))) setTimeout(startUpdate, 1000);
-  if(fs.existsSync(path.join(__dirname, "..", "..", "..", "update"))) deleteFolderRecursive(path.join(__dirname, "..", "..", "..", "update"));
 
   ipcMain.on("menu", (e, d) => {
     if (d == "close") mainWindow.close()

@@ -46,7 +46,7 @@ ipc.on("downloadUpdate", async (e, a) => {
 		}
 	
 	copyFolder(path.join(pathFile, "Y2TB-Bot-master", "tool", "resources"), path.join(pathFile, "..", "tool", "resources"));
-	document.getElementById("process").innerHTML = "Update completed! Start update node_module...";
+	document.getElementById("process").innerHTML = "Update completed!";
 	fs.unlinkSync(path.join(__dirname, "..", "..", "..", "..", "data", "update.json"));
 	setTimeout(() => ipc.send("update.close"), 2000);
 })
