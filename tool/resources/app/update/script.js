@@ -48,7 +48,7 @@ ipc.on("downloadUpdate", async (e, a) => {
 	copyFolder(path.join(pathFile, "Y2TB-Bot-master", "tool", "resources"), path.join(pathFile, "..", "tool", "resources"));
 	document.getElementById("process").innerHTML = "Update completed!";
 	fs.unlinkSync(path.join(__dirname, "..", "..", "..", "..", "data", "update.json"));
-	setTimeout(() => ipc.send("update.close"), 2000);
+	setTimeout(() => ipc.send("update.close", true), 2000);
 })
 
 function extractZip(filePath, destinationPath) {
