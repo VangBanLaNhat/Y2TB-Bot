@@ -26,9 +26,7 @@ function createWindow() {
       contextIsolation: false
     }
   })
-
-  //Core Update 
-  function startUpdate() {
+  function startUpdate () {
     const updateWindow = new BrowserWindow({
       width: 400,
       height: 200,
@@ -46,59 +44,17 @@ function createWindow() {
     })
 
     updateWindow.loadFile(path.join(__dirname, "update", "index.html"));
-    updateWindow.webContents.openDevTools();
-
+    
     mainWindow.close();
-
-    ipcMain.on("downloadUpdate", async (e, d) => {
-      let pathFile = path.join(__dirname, "..", "..", "..", "update");
-      console.log(pathFile);
-      try {
-        await downloadUpdate(pathFile);
-        updateWindow.webContents.send("downloadUpdate", {});
-      } catch (error) {
-        updateWindow.webContents.send("downloadUpdate", { err: error });
-      }
-    })
-
-    ipcMain.on("update.close", (e, d) => {
-      if(d) exec("start "+path.join(__dirname, "..", "..", "..", "Y2TB.exe"));
-      setTimeout(() => updateWindow.close(), 1000);
-    })
   }
 
-  async function downloadUpdate(pathFile) {
-    let url = 'https://github.com/VangBanLaNhat/Y2TB-Bot/archive/refs/heads/master.zip';
-
-    ensureExists(pathFile);
-
-    try {
-      const response = await axios({
-        url,
-        method: 'GET',
-        responseType: 'stream'
-      });
-
-      const writer = fs.createWriteStream(path.join(pathFile, "update.zip"));
-
-      response.data.pipe(writer);
-
-      return new Promise((resolve, reject) => {
-        writer.on('finish', resolve);
-        writer.on('error', reject);
-      });
-    } catch (error) {
-      console.error("Update", 'Error downloading file: ' + error);
-      process.exit(504);
-    }
-  }
-
-
+  
 
   // and load the index.html of the app.
   mainWindow.loadFile('index.html');
 
-  if (fs.existsSync(path.join(__dirname, "..", "..", "..", "data", "update.json")) && fs.existsSync(path.join(__dirname, "..", "..", "..", "node_modules"))) setTimeout(startUpdate, 1000);
+  if(fs.existsSync(path.join(__dirname, "..", "..", "..", "data", "update.json"))) setTimeout(startUpdate, 1000);
+  if(fs.existsSync(path.join(__dirname, "..", "..", "..", "update"))) deleteFolderRecursive(path.join(__dirname, "..", "..", "..", "update"));
 
   ipcMain.on("menu", (e, d) => {
     if (d == "close") mainWindow.close()
@@ -112,7 +68,7 @@ function createWindow() {
   //Install.
 
   ipcMain.on("choco", () => {
-
+    
   })
 
   ipcMain.on("VS2017", () => {
@@ -145,19 +101,19 @@ function createWindow() {
     })
   })
 
-  ipcMain.on("VS2017.checkSDK", () => {
+  ipcMain.on("VS2017.checkSDK", ()=>{
     var cmakeCheck = setInterval(async () => {
-      try {
+      try{
         var tasklist = await getListTasks();
         var checking = 0;
-        for (let i of tasklist)
-          if (i.imageName == "setup.exe") {
+        for(let i of tasklist)
+          if(i.imageName == "setup.exe"){
             console.log(i)
             checking++;
           }
-      } catch (e) { console.log(e) };
-
-      if (checking < 2) {
+      } catch(e) {console.log(e)};
+      
+      if(checking < 2){
         clearInterval(cmakeCheck);
         mainWindow.webContents.send("VS2017.checkSDK.done");
       }
@@ -294,8 +250,8 @@ function createWindow() {
 
     exec("npm -v", (e, stdout, stder) => {
       console.log(stdout.split(".")[0]);
-      if (stdout.split(".")[0] != "8")
-        exec("npm i -g npm@8", () => { ins(0) });
+      if(stdout.split(".")[0] != "8")
+        exec("npm i -g npm@8", ()=>{ins(0)});
       else ins(0);
     })
     function ins(i) {
@@ -416,7 +372,26 @@ async function dl(url, json, callback) {
   down.data.pipe(fs.createWriteStream(dir).on("finish", callback));
 }
 
-async function getListTasks() {
+async function getListTasks(){
   let tasklist = await (import('tasklist'));
   return (await tasklist.tasklist());
+}
+
+
+function deleteFolderRecursive(folderPath) {
+	if (fs.existsSync(folderPath)) {
+		fs.readdirSync(folderPath).forEach((file) => {
+			const curPath = folderPath + '/' + file;
+
+			if (fs.lstatSync(curPath).isDirectory()) {
+				deleteFolderRecursive(curPath);
+			} else {
+				fs.unlinkSync(curPath);
+			}
+		});
+
+		fs.rmdirSync(folderPath);
+	} else {
+		console.log('Folder does not exist.');
+	}
 }
