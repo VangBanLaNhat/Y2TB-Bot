@@ -46,7 +46,7 @@ function createWindow() {
     })
 
     updateWindow.loadFile(path.join(__dirname, "update", "index.html"));
-    updateWindow.webContents.openDevTools();
+    //updateWindow.webContents.openDevTools();
 
     mainWindow.close();
 
