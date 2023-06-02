@@ -1,7 +1,7 @@
 {
-  "name": "alcoholic-assumption-train-53e0r",
-  "productName": "alcoholic-assumption-train-53e0r",
-  "description": "My Electron application description",
+  "name": "Tools",
+  "productName": "Tools",
+  "description": "No desc",
   "keywords": [],
   "main": "main.js",
   "version": "1.0.0",
@@ -12,6 +12,7 @@
     "build": "electron-packager . Tool --platform=win32 --arch=x64"
   },
   "dependencies": {
+    "adm-zip": "",
     "axios": "",
     "tasklist": ""
   },

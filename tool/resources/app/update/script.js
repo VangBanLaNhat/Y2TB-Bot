@@ -1,8 +1,9 @@
 var ipc = require("electron").ipcRenderer;
 const path = require("path");
-const git = require("download-git-repo");
 const fs = require("fs");
-const fse = require("fs-extra");
+const axios = require("axios");
+const AdmZip = require("adm-zip");
+const { pipeline } = require('stream');
 
 const save = {
 	file: ["core/coreconfig.json"],
@@ -36,86 +37,157 @@ document.getElementById("lvs").innerHTML += infoUpdate.latest;
 
 //require(path.join(__dirname, "..", "..", "core", "util", "dlUpdate.js"))();
 
-let lk = "VangBanLaNhat/Y2TB-Bot"
-git('github:'+lk, 'temp', function (err) {
-	console.log(err ? 'Error' : 'Success');
-	if(err) return ipc.send("update.close");//console.log(err);
-	let dir = path.join(__dirname, "..", "..", "..", "..");
-	let listF = fs.readdirSync(dir);
-	let ct=[];
-	for(let i of save.file){
-		if(fs.existsSync(path.join(dir, i))){
-			ct.push({
-				content: fs.readFileSync(path.join(dir, i)),
-				path: i
-			})
-		}
-		
-	}
-	for(let f of listF){
-		if(fs.lstatSync(path.join(dir, f)).isFile()){
-            fs.unlinkSync(path.join(dir, f));
-        } else if(save.folder.indexOf(f) == -1){
-        	removeDir(path.join(dir, f));
-        }
-	}
-	let listFUD = fs.readdirSync(path.join(__dirname, "..", "..", "temp"));
-	for(let f of listFUD){
-		console.log(f)
-		fse.moveSync(path.join(__dirname, "..", "..", "temp", f), path.join(dir, f), { overwrite: true });
-	}
-	for(let i of ct){
-		let fd = i.path.split("/");
-		fd.length = fd.length-1;
-		fd = fd.join("/");
-		console.log(ensureExists(path.join(dir ,fd)))
-		if(fs.existsSync(path.join(dir, i.path))){
-			fs.writeFileSync(path.join(dir, i.path), i.content);
-		}
-	}
-	removeDir(path.join(dir, "node_modules"));
+//let lk = "VangBanLaNhat/Y2TB-Bot"
+// git('github:'+lk, 'temp', function (err) {
+// 	console.log(err ? 'Error' : 'Success');
+// 	if(err) return ipc.send("update.close");//console.log(err);
+// 	let dir = path.join(__dirname, "..", "..", "..", "..");
+// 	let listF = fs.readdirSync(dir);
+// 	let ct=[];
+// 	for(let i of save.file){
+// 		if(fs.existsSync(path.join(dir, i))){
+// 			ct.push({
+// 				content: fs.readFileSync(path.join(dir, i)),
+// 				path: i
+// 			})
+// 		}
 
-	ipc.send("update.close");
+// 	}
+// 	for(let f of listF){
+// 		if(fs.lstatSync(path.join(dir, f)).isFile()){
+//             fs.unlinkSync(path.join(dir, f));
+//         } else if(save.folder.indexOf(f) == -1){
+//         	removeDir(path.join(dir, f));
+//         }
+// 	}
+// 	let listFUD = fs.readdirSync(path.join(__dirname, "..", "..", "temp"));
+// 	for(let f of listFUD){
+// 		console.log(f)
+// 		fse.moveSync(path.join(__dirname, "..", "..", "temp", f), path.join(dir, f), { overwrite: true });
+// 	}
+// 	for(let i of ct){
+// 		let fd = i.path.split("/");
+// 		fd.length = fd.length-1;
+// 		fd = fd.join("/");
+// 		console.log(ensureExists(path.join(dir ,fd)))
+// 		if(fs.existsSync(path.join(dir, i.path))){
+// 			fs.writeFileSync(path.join(dir, i.path), i.content);
+// 		}
+// 	}
+// 	removeDir(path.join(dir, "node_modules"));
+
+// 	ipc.send("update.close");
+// })
+document.getElementsByClassName("done")[0].style.display = "none";
+document.getElementById("process").innerHTML = "Downloading Update...";
+
+ipc.send("downloadUpdate");
+
+ipc.on("downloadUpdate", async (e, a) => {
+	if (a.err) {
+		document.getElementById("process").innerHTML = "Error has arisen during the download process! Please try again later";
+		console.error(a.err);
+		setTimeout(() => ipc.send("update.close"), 5000);
+	}
+	else document.getElementById("process").innerHTML = "Complete download update!"
+
+	let pathFile = path.join(__dirname, "..", "..", "..", "..", "update");
+
+	try {
+		await extractZip(path.join(pathFile, "update.zip"), pathFile);
+		fs.unlinkSync(path.join(pathFile, "update.zip"));
+		document.getElementById("process").innerHTML = "Extraction completed!"
+	} catch (error) {
+		fs.unlinkSync(path.join(pathFile, "update.zip"));
+		console.error("Update", error);
+		setTimeout(() => ipc.send("update.close"), 5000);
+	}
+
+	document.getElementById("process").innerHTML = "Starting update..."
+	let minus = ["tool", "plugins"];
+
+	let listFile = fs.readdirSync(path.join(pathFile, "Y2TB-Bot-master"));
+
+	for (let i of listFile)
+		if (minus.indexOf(i) == -1) {
+			if (!fs.lstatSync(path.join(pathFile, "Y2TB-Bot-master", i)).isFile()) copyFolder(path.join(pathFile, "Y2TB-Bot-master", i), path.join(pathFile, "..", i));
+			else fs.renameSync(path.join(pathFile, "Y2TB-Bot-master", i), path.join(pathFile, "..", i));
+		}
+	
+	copyFolder(path.join(pathFile, "Y2TB-Bot-master", "tool", "resources"), path.join(pathFile, "..", "tool", "resources"));
+	document.getElementById("process").innerHTML = "Update completed! Start update node_module...";
+	setTimeout(() => ipc.send("update.close"), 2000);
 })
 
-function removeDir(path) {
-  if (fs.existsSync(path)) {
-    const files = fs.readdirSync(path)
+function extractZip(filePath, destinationPath) {
+	return new Promise((resolve, reject) => {
+		const zip = new AdmZip(filePath);
+		zip.extractAllToAsync(destinationPath, true, (error) => {
+			if (error) {
+				console.error('Error extracting zip file:', error);
+				reject(error);
+				process.exit(504);
+			} else {
+				resolve();
+			}
+		});
+	});
+}
 
-    if (files.length > 0) {
-      files.forEach(function(filename) {
-        if (fs.statSync(path + "/" + filename).isDirectory()) {
-         	removeDir(path + "/" + filename)
-        } else {
-        	try{
-				fs.unlinkSync(path + "/" + filename);
-				console.log(path + "/" + filename);
-			}catch(e){}
-        }
-      })
-      fs.rmdirSync(path)
-    } else {
-      fs.rmdirSync(path)
-    }
-  } else {
-    console.log("Directory path not found.")
-  }
+function copyFolder(sourcePath, destinationPath) {
+	try {
+		ensureExists(destinationPath);
+
+		const files = fs.readdirSync(sourcePath);
+
+		files.forEach((file) => {
+			const sourceFile = path.join(sourcePath, file);
+			const destinationFile = path.join(destinationPath, file);
+
+			if (fs.lstatSync(sourceFile).isFile()) {
+				fs.copyFileSync(sourceFile, destinationFile);
+			} else {
+				copyFolder(sourceFile, destinationFile);
+			}
+		});
+
+	} catch (error) {
+		console.error("Update", 'Error copying folder: ' + error);
+	}
+}
+
+function deleteFolderRecursive(folderPath) {
+	if (fs.existsSync(folderPath)) {
+		fs.readdirSync(folderPath).forEach((file) => {
+			const curPath = folderPath + '/' + file;
+
+			if (fs.lstatSync(curPath).isDirectory()) {
+				deleteFolderRecursive(curPath);
+			} else {
+				fs.unlinkSync(curPath);
+			}
+		});
+
+		fs.rmdirSync(folderPath);
+	} else {
+		console.log('Folder does not exist.');
+	}
 }
 
 function ensureExists(path, func, mask) {
-  if (typeof mask != 'number') {
-    mask = 0o777;
-  }
-  try {
-    fs.mkdirSync(path, {
-      mode: mask,
-      recursive: true
-    });
-    //func();
-    return;
-  } catch (ex) {
-    return {
-      err: ex
-    };
-  }
+	if (typeof mask != 'number') {
+		mask = 0o777;
+	}
+	try {
+		fs.mkdirSync(path, {
+			mode: mask,
+			recursive: true
+		});
+		//func();
+		return;
+	} catch (ex) {
+		return {
+			err: ex
+		};
+	}
 }
