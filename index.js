@@ -34,7 +34,7 @@ for (var i = 0; i < ll.length; i++) {
 	console.log("Update", "Checking update...");
 	let vern = (JSON.parse(fs.readFileSync(path.join(__dirname, "package.json")))).version;
 	try {
-		var verg = (await axios.get('https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-Bot-lite-noPanel/main/package.json')).data.version;
+		var verg = (await axios.get('https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-Bot/master/package.json')).data.version;
 	} catch (e) {
 		console.error("Update", e, "Failed to connect to to the server!");
 		process.exit(504);
@@ -219,7 +219,7 @@ process.on('exit', function (code) {
 });
 
 async function downloadUpdate(pathFile) {
-	let url = 'https://github.com/VangBanLaNhat/Y2TB-Bot/archive/refs/heads/main.zip';
+	let url = 'https://github.com/VangBanLaNhat/Y2TB-Bot/archive/refs/heads/master.zip';
 
 	ensureExists(pathFile);
 
