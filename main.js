@@ -79,82 +79,69 @@ console.blank = log.blank;
   }
 
   //Check Update
-  let text;
-  //https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-Bot/master/package.json
-    //https://raw.githubusercontent.com/VangBanLaNhat/Y2TBBot/main/package.json
-    let link = "https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-Bot/master/package.json"
-  try{
-    let vs = await fetch(link);
-    text = await vs.text();
-  }catch(e){
-    text == "404: Not Found";
-  };
-  if(text == "404: Not Found"){
-    if(link=="https://raw.githubusercontent.com/VangBanLaNhat/Y2TBBot/main/package.json") return console.error("UPDATE", "Can't connect to Github. Existing...") //text = "{\"version\": \"1.0.0\"}";
-    return await loader(true);
-  }
-  while(text.indexOf("\\n\\r") != -1){
-      text.replace("\\n\\r", "\n")
-  }
-  let json = JSON.parse(text)
-  if(json.version != "1.0.0"){
-    let lk = "VangBanLaNhat/Y2TB-Bot"
-    git('github:VangBanLaNhat/Y2TBBot', 'temp', async function (err) {
-      //console.log(err ? 'Error' : 'Success');
-      // bcccct =1;
-      if(err) return console.log(err); //code tiep di, t đang cài cho Dung cái thoi =)) dạ :))))
-      let dir = path.join(__dirname);
-      let listF = fs.readdirSync(dir);
-      let ct=[];
-      for(let i of save.file){
-        if(fs.existsSync(path.join(dir, i))){
-          ct.push({
-            content: fs.readFileSync(path.join(dir, i)),
-            path: i
-          })
-        }
+  // let text;
+  // //https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-Bot/master/package.json
+  //   //https://raw.githubusercontent.com/VangBanLaNhat/Y2TBBot/main/package.json
+  //   let link = "https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-Bot/master/package.json"
+  // try{
+  //   let vs = await fetch(link);
+  //   text = await vs.text();
+  // }catch(e){
+  //   text == "404: Not Found";
+  // };
+  // if(text == "404: Not Found"){
+  //   if(link=="https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-Bot/main/package.json") return console.error("UPDATE", "Can't connect to Github. Existing...") //text = "{\"version\": \"1.0.0\"}";
+  //   return await loader(true);
+  // }
+  // while(text.indexOf("\\n\\r") != -1){
+  //     text.replace("\\n\\r", "\n")
+  // }
+  // let json = JSON.parse(text)
+  // if(json.version != "1.0.0"){
+  //   let lk = "VangBanLaNhat/Y2TB-Bot"
+  //   git('github:VangBanLaNhat/Y2TBBot', 'temp', async function (err) {
+  //     //console.log(err ? 'Error' : 'Success');
+  //     // bcccct =1;
+  //     if(err) return console.log(err); //code tiep di, t đang cài cho Dung cái thoi =)) dạ :))))
+  //     let dir = path.join(__dirname);
+  //     let listF = fs.readdirSync(dir);
+  //     let ct=[];
+  //     for(let i of save.file){
+  //       if(fs.existsSync(path.join(dir, i))){
+  //         ct.push({
+  //           content: fs.readFileSync(path.join(dir, i)),
+  //           path: i
+  //         })
+  //       }
         
-      }
-      for(let f of listF){
-        if(fs.lstatSync(path.join(dir, f)).isFile()){
-                  fs.unlinkSync(path.join(dir, f));
-              } else if(save.folder.indexOf(f) == -1){
-                removeDir(path.join(dir, f));
-              }
-      }
-      let listFUD = fs.readdirSync(path.join(__dirname, "temp"));
-      for(let f of listFUD){
-        //console.log(f)
-        fse.moveSync(path.join(__dirname, "temp", f), path.join(dir, f), { overwrite: true });
-      }
-      for(let i of ct){
-        let fd = i.path.split("/");
-        fd.length = fd.length-1;
-        fd = fd.join("/");
-        console.log(ensureExists(path.join(dir ,fd)))
-        if(fs.existsSync(path.join(dir, i.path)))
-          fs.writeFileSync(path.join(dir, i.path), i.content);
-      }
-      await loader(true);
-    })
-  } else await loader(true);
+  //     }
+  //     for(let f of listF){
+  //       if(fs.lstatSync(path.join(dir, f)).isFile()){
+  //                 fs.unlinkSync(path.join(dir, f));
+  //             } else if(save.folder.indexOf(f) == -1){
+  //               removeDir(path.join(dir, f));
+  //             }
+  //     }
+  //     let listFUD = fs.readdirSync(path.join(__dirname, "temp"));
+  //     for(let f of listFUD){
+  //       //console.log(f)
+  //       fse.moveSync(path.join(__dirname, "temp", f), path.join(dir, f), { overwrite: true });
+  //     }
+  //     for(let i of ct){
+  //       let fd = i.path.split("/");
+  //       fd.length = fd.length-1;
+  //       fd = fd.join("/");
+  //       console.log(ensureExists(path.join(dir ,fd)))
+  //       if(fs.existsSync(path.join(dir, i.path)))
+  //         fs.writeFileSync(path.join(dir, i.path), i.content);
+  //     }
+  //     await loader(true);
+  //   })
+  // } else 
+  await loader(true);
   
   /**/
 })();
-
-const save = {
-  file: ["core/coreconfig.json"],
-  folder: [
-    ".git",
-    "data",
-    "lang",
-    "logs",
-    "node_modules",
-    "plugins",
-    "temp",
-    "udata"
-  ]
-}
 
 function removeDir(path) {
   if (fs.existsSync(path)) {
