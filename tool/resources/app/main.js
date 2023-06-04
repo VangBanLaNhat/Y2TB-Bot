@@ -98,7 +98,7 @@ function createWindow() {
   // and load the index.html of the app.
   mainWindow.loadFile('index.html');
 
-  if(fs.existsSync(path.join(__dirname, "..", "..", "..", "data", "update.json"))) setTimeout(startUpdate, 1000);
+  if(fs.existsSync(path.join(__dirname, "..", "..", "..", "data", "update.json"))) setTimeout(startUpdate, 700);
 
   ipcMain.on("menu", (e, d) => {
     if (d == "close") mainWindow.close()
