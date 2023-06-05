@@ -1,5 +1,8 @@
 # Y2TB Bot
-<img src="https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-Bot/master/index/icon/icon.png" alt="Y2TB Bot Logo" width="200">
+<p align="center">
+  <img src="https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-Bot/master/index/icon/icon.png" alt="Y2TB Bot Logo" width="200">
+</p>
+
 
 
 ## Description
