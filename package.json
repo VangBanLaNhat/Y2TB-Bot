@@ -24,6 +24,9 @@
     "url": "https://github.com/VangBanLaNhat/Y2TB-bot/issues"
   },
   "homepage": "https://github.com/VangBanLaNhat/Y2TB-bot#readme",
+  "overrides": {
+    "nan": "github:tec27/nan#remove_accessor_signature"
+  },
   "dependencies": {
     "@octokit/rest": "",
     "adm-zip": "",
