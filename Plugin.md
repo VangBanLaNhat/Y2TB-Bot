@@ -1,6 +1,6 @@
 # Creating a New Plugin for Y2TB bot
 
-This document will guide you through the process of creating a new plugin for [Your Program Name]. Plugins allow you to extend the functionality of the program by adding custom commands and features. You will be following the structure and conventions used in the sample plugin provided.
+This document will guide you through the process of creating a new plugin for Y2TB. Plugins allow you to extend the functionality of the program by adding custom commands and features. You will be following the structure and conventions used in the sample plugin provided.
 
 ## Plugin Structure
 
