@@ -143,6 +143,7 @@ module.exports = {
 	init
 };
 ```
+An example [here](https://github.com/VangBanLaNhat/Y2TB-data/blob/main/PluginStorage/restart.js)
 ## Plugin Functions
 - init(): The initialization function that sets up the plugin and returns an object containing plugin metadata, command definitions, language translations, etc. This function is called when the plugin is loaded.
 
