@@ -13,6 +13,10 @@ Y2TB Bot is a Messenger chatbot that can turn your Facebook account into a funny
 
 Plugins store system with a variety of Plugins and easy to install
 
+## Create plugin
+
+You want to create a plugin for bot? Document [here](https://github.com/VangBanLaNhat/Y2TB-Bot/blob/master/Plugin.md)
+
 ## Installation
 
 You can install it easily by double clicking on the ".exe" file. Link to download: https://github.com/VangBanLaNhat/Y2TB-Bot/releases/
