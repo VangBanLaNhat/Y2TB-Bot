@@ -83,6 +83,7 @@ function init() {
 		"chathook": "np", //function will always be called when receiving message even without prefix
 		"onload": "onload", //function will be run during plugin load
 		"loginFunc": "login", //Function will be called on successful Facebook login
+  "obb": "The required directory name for the plugin is in /plugins/obb",
 		"author": "Creator's name",
 		"version": "Plugin version"
 	}
@@ -177,6 +178,8 @@ An example [here](https://github.com/VangBanLaNhat/Y2TB-data/blob/main/PluginSto
 - onload: The name of the function that will be run during plugin load.
 
 - loginFunc: The name of the function that will be called on successful Facebook login.
+
+- obb: The required directory name for the plugin is in /plugins/obb
 
 - author: The name of the plugin's creator.
 
