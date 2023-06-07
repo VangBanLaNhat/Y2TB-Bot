@@ -185,6 +185,16 @@ An example [here](https://github.com/VangBanLaNhat/Y2TB-data/blob/main/PluginSto
 
 - version: The version of the plugin.
 
+## Global variable
+- `global.data`: The variable saves the entire data system of the bot
+- `global.config` and `global.coreconfig`: The variable that stores the bot's normal settings and advanced settings, respectively. You can see the default settings [here](https://github.com/VangBanLaNhat/Y2TB-Bot/blob/master/core/util/defaultConfig.js)
+- `global.temp`: Temporary data storage variables of the bot system as well as plugins
+- `global.lang`: Variables save the language system of plugins
+- `global.configPl`: Variables save the settings of the plugins
+
+## Fca
+You can see the documentation of the api [here](https://github.com/VangBanLaNhat/fca-unofficial/blob/master/DOCS.md)
+
 ## Customizing the Plugin
 To create your own plugin, you can follow these steps:
 
