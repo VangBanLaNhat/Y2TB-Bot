@@ -53,37 +53,37 @@ function init() {
 			"node_module2": "1.1.1"
 		},
 		"langMap":{
-            "translation code 1":{
-                "desc": "Describe the function of translation",
-                "vi_VN": "Translation in Vietnamese {0}",
-                "en_US": "Translation in English {0}",
-                "args": {
-                	"{0}":{
-                		"vi_VN": "Describe the function of the variable in Vietnamese",
-                		"en_US": "Describe the function of the variable in English"
-                	}
-                }
-            },
-            "translation code 2":{
-                "desc": "Describe the function of translation",
-                "vi_VN": "Translation in Vietnamese {1}",
-                "en_US": "Translation in English {1}",
-                "args": {
-                	"{1}":{
-                		"vi_VN": "Describe the function of the variable in Vietnamese",
-                		"en_US": "Describe the function of the variable in English"
-                	}
-                }
-            }
-        },
+			"translation code 1":{
+				"desc": "Describe the function of translation",
+				"vi_VN": "Translation in Vietnamese {0}",
+				"en_US": "Translation in English {0}",
+				"args": {
+					"{0}":{
+						"vi_VN": "Describe the function of the variable in Vietnamese",
+						"en_US": "Describe the function of the variable in English"
+					}
+				}
+			},
+			"translation code 2":{
+				"desc": "Describe the function of translation",
+				"vi_VN": "Translation in Vietnamese {1}",
+				"en_US": "Translation in English {1}",
+				"args": {
+					"{1}":{
+						"vi_VN": "Describe the function of the variable in Vietnamese",
+						"en_US": "Describe the function of the variable in English"
+					}
+				}
+			}
+		},
 		"config": {
-		    "config 1": "value 1",
-		    "config 2": "value 2"
+			"config 1": "value 1",
+			"config 2": "value 2"
 		},
 		"chathook": "np", //function will always be called when receiving message even without prefix
 		"onload": "onload", //function will be run during plugin load
-		"loginFunc": "login", //Function will be called on successful Facebook login
-  "obb": "The required directory name for the plugin is in /plugins/obb",
+		"loginFunc": "login", //Function will be called on successful Facebook loginFunc
+		"obb": "The required directory name for the plugin is in /plugins/obb",
 		"author": "Creator's name",
 		"version": "Plugin version"
 	}
@@ -99,27 +99,27 @@ function cmd1(data, api, adv) {
   
 	//The variable lang will contain the lang map declared in the plugins init functions
   
-    /*
-    *rlang is a function that will return the corresponding translation when passed the translation code.
-    */
+	/*
+	*rlang is a function that will return the corresponding translation when passed the translation code.
+	*/
 	//For example: 
-    let langTemp = rlang("translation code 1")
-    //Now the langTemp variable will store the value "Translation in English {0}"
+	let langTemp = rlang("translation code 1")
+	//Now the langTemp variable will store the value "Translation in English {0}"
   
 	//The iso639 variable will save the language code in iso639 format. Example: en_US
   
 	//The config variable will store the plugin's settings as declared in the init functions
   
 	/*
-    *replaceMap is a function that will automatically replace values based on a json object entered by the user
-    */
+	*replaceMap is a function that will automatically replace values based on a json object entered by the user
+	*/
 	//For example:
 	let map = {
 		"{0}": "botchat",
 		"{1}": "Y2TB"
 	}
 	let str = "I'm a {0} named {1}"
-    let res = replaceMap(str, map)
+	let res = replaceMap(str, map)
 	//Now the res variable will store the value "I'm a botchat named Y2TB"
 }
 function cmd2(data, api, adv){
