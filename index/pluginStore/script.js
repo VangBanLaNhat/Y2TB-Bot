@@ -15,7 +15,7 @@ console.log(iso639_1);
 // }
 
 async function getList(n, m) {
-	let l = await axios({ url: `https://raw.githubusercontent.com/VangBanLaNhat/Package-for-Y2TB_Bot/main/Plugin/PluginInfo.json` })
+	let l = await axios({ url: `https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-data/main/PluginInfo.json` })
 	n = !n?n+1:n;
 	let plugin = l.data;
 	let total = [];
