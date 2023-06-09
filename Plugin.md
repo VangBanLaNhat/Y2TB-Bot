@@ -129,7 +129,7 @@ function chathook(data, api, adv){
 	//code
 }
 function onload(info){
-	//The variable info will store all the data returned from the init . function
+	//The variable info will store all the data returned from the init function
 }
 function login(api, adv){
 	//code
