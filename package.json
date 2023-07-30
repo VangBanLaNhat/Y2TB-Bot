@@ -1,13 +1,13 @@
 {
   "name": "Y2TB-bot",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "",
   "main": "main.js",
   "scripts": {
     "start": "node main.js",
     "test": "electron ./index/main.js",
     "app": "electron ./index/main.js",
-    "rebuild": "electron-rebuild"
+    "rebuild": "electron-rebuild -w node-pty"
   },
   "repository": {
     "type": "git",
@@ -28,20 +28,19 @@
     "nan": "github:tec27/nan#remove_accessor_signature"
   },
   "dependencies": {
-    "@octokit/rest": "",
-    "adm-zip": "",
-    "axios": "",
+    "@octokit/rest": "^20.0.1",
+    "adm-zip": "^0.5.10",
+    "axios": "^1.4.0",
     "dotenv": "^10.0.0",
     "download-git-repo": "^3.0.2",
-    "electron": "^13.6.3",
+    "electron": "",
     "electron-context-menu": "^3.1.1",
-    "electron-rebuild": "^3.2.0",
+    "enc": "^0.4.0",
     "event-stream": "^4.0.1",
     "fca-unofficial": "github:VangBanLaNhat/fca-unofficial",
     "luxon": "^2.0.0",
-    "enc": "",
     "node-fetch": "^2.6.7",
-    "node-pty": "^0.10.1",
+    "node-pty": "",
     "readline": "^1.3.0",
     "stream": "^0.0.2",
     "stream-buffers": "^3.0.2",
@@ -71,5 +70,8 @@
     "directories": {
       "buildResources": "public"
     }
+  },
+  "devDependencies": {
+    "@electron/rebuild": ""
   }
 }

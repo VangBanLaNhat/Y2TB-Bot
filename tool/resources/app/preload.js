@@ -1,5 +1,6 @@
 var ipc = require("electron").ipcRenderer;
-const { exec } = require('child_process');
+// const { exec } = require('child_process');
+//const isAdmin = require('is-admin');
 
 window.addEventListener('DOMContentLoaded', () => {
   function msg(number, s) {
@@ -63,16 +64,176 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   //run
+  ipc.send("checkAdmin");
 
-  // function choco() {
-  //   msg(0, "Checking Chocolatey support...");
-  //   ipc.send("choco");
-  //   ipc.on("choco", (event, e)=>{
+  ipc.on("checkAdmin", (event, e) => {
+    if(e) choco();
+    else VS2017();
+  })
+
+  function choco() {
+    msg(0, "Start installing the package installer...");
+    ipc.send("pkg.install");
+    let i = 0;
+    showPC();
+    ipc.on("pkg.install.on", ()=>{
+      i++;
+      let pc = Math.trunc(((i/22)/100)*10000);
+      msg(1, "Installing Chocolatey... (" + pc + "%)");
+      load(1, pc);
+      //console.log(i);
+    })
+    ipc.on("pkg.install", (event, e)=>{
+      msg(0, "Cannot install Chocolatey. Perform manual installation!");
+      load(1, 0);
+      hidePC();
+      console.log(event);
+      console.log(e);
+      VS2017();
+    } )
+
+    ipc.on("pkg.install.done", (event, e)=>{
+      msg(0, "Complete the chocolatey installation!");
+      hidePC();
+      VS2017C()
+    })
+  }
+
+  // Install packages using Chocolatey
+
+  /* Visual Studio */
+
+  function VS2017C(){
+    msg(0, "Installing Visual Studio 2017...");
+    ipc.send("VS2017C");
+    let i = 0;
+    msg(1, "Installing Visual Studio 2017... (0%)");
+    showPC();
+
+    ipc.on("VS2017C.on", ()=>{
+      i++;
+      let pc = Math.trunc(((i/540)/100)*10000);
+      msg(1, "Installing Visual Studio 2017... (" + pc + "%)");
+      load(1, pc);
+      //console.log(i);
+    })
+    ipc.on("VS2017C.error", (event, e)=>{
+      msg(0, "Cannot install Visual Studio 2017! Please try again!");
+      load(1, 0);
+      hidePC();
+      console.log(event);
+      console.log(e);
+    } )
+
+    ipc.on("VS2017C.done", (event, e)=>{
+      msg(0, "Complete the Visual Studio 2017 installation!");
+      load(0, 1);
+      hidePC();
       
-  //   } )
-  // }
+      pythonC();
+    })
+  }
 
-  VS2017();
+  /* Python */
+
+  function pythonC(){
+    msg(0, "Installing Python...");
+    ipc.send("pythonC");
+    let i = 0;
+    msg(1, "Installing Python... (0%)");
+    showPC();
+
+    ipc.on("pythonC.on", ()=>{
+      i++;
+      let pc = Math.trunc(((i/26)/100)*10000);
+      msg(1, "Installing Python... (" + pc + "%)");
+      load(1, pc);
+      //console.log(i);
+    })
+    ipc.on("pythonC.error", (event, e)=>{
+      msg(0, "Cannot install Python! Please try again!");
+      load(1, 0);
+      hidePC();
+      console.log(event);
+      console.log(e);
+    } )
+
+    ipc.on("pythonC.done", (event, e)=>{
+      msg(0, "Complete the Python installation!");
+      load(0, 2);
+      hidePC();
+      
+      gitC();
+    })
+  }
+
+  /* Git */
+
+  function gitC(){
+    msg(0, "Installing Git...");
+    ipc.send("gitC");
+    let i = 0;
+    msg(1, "Installing Git... (0%)");
+    showPC();
+
+    ipc.on("gitC.on", ()=>{
+      i++;
+      let pc = Math.trunc(((i/20)/100)*10000);
+      msg(1, "Installing Git... (" + pc + "%)");
+      load(1, pc);
+      //console.log(i);
+    })
+    ipc.on("gitC.error", (event, e)=>{
+      msg(0, "Cannot install Git! Please try again!");
+      load(1, 0);
+      hidePC();
+      console.log(event);
+      console.log(e);
+    } )
+
+    ipc.on("gitC.done", (event, e)=>{
+      msg(0, "Complete the Git installation!");
+      load(0, 3);
+      hidePC();
+      
+      nodejsC();
+    })
+  }
+
+  /* NodeJS */
+
+  function nodejsC(){
+    msg(0, "Installing NodeJS(LTS)...");
+    ipc.send("nodejsC");
+    let i = 0;
+    msg(1, "Installing NodeJS... (0%)");
+    showPC();
+
+    ipc.on("nodejsC.on", ()=>{
+      i++;
+      let pc = Math.trunc(((i/16)/100)*10000);
+      msg(1, "Installing NodeJS... (" + pc + "%)");
+      load(1, pc);
+      //console.log(i);
+    })
+    ipc.on("nodejsC.error", (event, e)=>{
+      msg(0, "Cannot install NodeJS(LTS)! Please try again!");
+      load(1, 0);
+      hidePC();
+      console.log(event);
+      console.log(e);
+    } )
+
+    ipc.on("nodejsC.done", (event, e)=>{
+      msg(0, "Complete the NodeJS(LTS) installation!");
+      load(0, 4);
+      hidePC();
+      
+      IMD();
+    })
+  }
+
+  // Perform manual installation
 
   function VS2017() {
     msg(0, "Installing Visual Studio 2017...");
@@ -88,6 +249,7 @@ window.addEventListener('DOMContentLoaded', () => {
       clearInterval(itemp);
       if (e) {
         hidePC();
+        console.error(e);
         msg(0, "Pause!");
         return msg(2, "Unable to connect to \"microsoft.com\". Please check your network connection and try again!");
       }
@@ -145,6 +307,7 @@ window.addEventListener('DOMContentLoaded', () => {
     clearInterval(itemp);
     if (e) {
       hidePC();
+      console.error(e);
       msg(0, "Pause!");
       return msg(2, "Unable to connect to \"python.org\". Please check your network connection and try again!");
     }
@@ -160,42 +323,42 @@ window.addEventListener('DOMContentLoaded', () => {
     if (data == 0) return;
     load(1, data);
     msg(1, "Installing Python...(" + data + "%)");
-    if (data == 100)
-      setTimeout(() => {
-        msg(1, "Copying folder Python...(0%)");
-        load(1, 0);
-        CPPT();
-      }, 100);
+    if (data == 100) PYD();
+      // setTimeout(() => {
+      //   msg(1, "Copying folder Python...(0%)");
+      //   load(1, 0);
+      //   CPPT();
+      // }, 100);
   })
 
-  ipc.on("Python.cpDone", () => {
-    clearInterval(itemp);
-    msg(1, "Copying folder Python...(100%)");
-    load(1, 100);
-    setTimeout(PYD, 1000);
-  })
+  // ipc.on("Python.cpDone", () => {
+  //   clearInterval(itemp);
+  //   msg(1, "Copying folder Python...(100%)");
+  //   load(1, 100);
+  //   setTimeout(PYD, 1000);
+  // })
 
-  ipc.on("Python.cp", () => {
-    clearInterval(itemp);
-    msg(1, "Copying folder Python...(0%)");
-    load(1, 0);
-    CPPT();
-  })
-  function CPPT() {
-    i = 0;
-    itemp = setInterval(() => {
-      if (i == 98) {
-        msg(1, "Copying folder Python...(98%)");
-        load(1, 98);
-        //setTimeout(PYD, 1000);
-        return clearInterval(itemp);
-      }
-      msg(1, "Copying folder Python...(" + i + "%)");
-      load(1, i++);
-    }, 250);
-  }
+  // ipc.on("Python.cp", () => {
+  //   clearInterval(itemp);
+  //   msg(1, "Copying folder Python...(0%)");
+  //   load(1, 0);
+  //   CPPT();
+  // })
+  // function CPPT() {
+  //   i = 0;
+  //   itemp = setInterval(() => {
+  //     if (i == 98) {
+  //       msg(1, "Copying folder Python...(98%)");
+  //       load(1, 98);
+  //       //setTimeout(PYD, 1000);
+  //       return clearInterval(itemp);
+  //     }
+  //     msg(1, "Copying folder Python...(" + i + "%)");
+  //     load(1, i++);
+  //   }, 250);
+  // }
 
-  ipc.on("Python.done", PYD);
+  // ipc.on("Python.done", PYD);
 
   //Git
 
@@ -293,7 +456,9 @@ window.addEventListener('DOMContentLoaded', () => {
   //Module
 
   function IMD() {
-    clearInterval(itemp)
+    try{
+      clearInterval(itemp);
+    }catch(e){}
     hidePC();
     msg(0, "Installing Module...");
     load(0, 4);

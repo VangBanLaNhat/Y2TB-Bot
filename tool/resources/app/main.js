@@ -2,7 +2,8 @@
 const { app, BrowserWindow, Menu, ipcMain } = require('electron');
 const fs = require("fs");
 const path = require('path');
-const { exec } = require('child_process');
+const { exec, spawn } = require('child_process');
+//const package = require('node-sys');
 
 const axios = require("axios");
 const os = require("os");
@@ -62,7 +63,7 @@ function createWindow() {
     })
 
     ipcMain.on("update.close", (e, d) => {
-      if(d) exec("cd \"" + path.join(__dirname, "..", "..", "..") + "\" && start Y2TB.exe");
+      if (d) exec("cd \"" + path.join(__dirname, "..", "..", "..") + "\" && start Y2TB.exe");
       setTimeout(() => updateWindow.close(), 1000);
     })
   }
@@ -98,7 +99,7 @@ function createWindow() {
   // and load the index.html of the app.
   mainWindow.loadFile('index.html');
 
-  if(fs.existsSync(path.join(__dirname, "..", "..", "..", "data", "update.json"))) setTimeout(startUpdate, 700);
+  if (fs.existsSync(path.join(__dirname, "..", "..", "..", "data", "update.json"))) setTimeout(startUpdate, 700);
 
   ipcMain.on("menu", (e, d) => {
     if (d == "close") mainWindow.close()
@@ -109,11 +110,183 @@ function createWindow() {
   //mainWindow.webContents.openDevTools();
   Menu.setApplicationMenu(mn);
 
+  //Check admin
+
+  ipcMain.on("checkAdmin", () =>{
+    import('is-admin').then(async (isAdmin) => {
+      console.log(isAdmin.default.isAdmin);
+      if(await isAdmin.default()) mainWindow.webContents.send("checkAdmin", true);
+      else mainWindow.webContents.send("checkAdmin", false);
+    }).catch((error) => {
+      console.error('Error:', error.message);
+      //mainWindow.webContents.send("checkAdmin", false);
+    });  
+  })
+
   //Install.
 
-  ipcMain.on("choco", () => {
+  ipcMain.on("pkg.install", () => {
+    const command = 'Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString(\'https://chocolatey.org/install.ps1\'))';
+    // checking chocolatey
+    exec(`where chocolatey`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`${error.message}`);
+        
+        // Install package
+        let child = spawn('powershell', ['-Command', command]);
 
+        child.stdout.on('data', (data) => {
+          console.log(`stdout: ${data}`);
+          mainWindow.webContents.send("pkg.install.on");
+        });
+
+        child.stderr.on('data', (data) => {
+          console.error(`stderr: ${data}`);
+          mainWindow.webContents.send("pkg.install.on");
+        });
+
+        child.on('close', (code) => {
+          if (code !== 0) {
+            console.error(`Error: process exited with code ${code}`);
+            mainWindow.webContents.send("pkg.install", { error: `Error: process exited with code ${code}` });
+            return;
+          }
+          mainWindow.webContents.send("pkg.install.done");
+          console.log('Chocolatey installed successfully.');
+        });
+        return;
+      }
+
+      if (stdout) {
+        
+        mainWindow.webContents.send("pkg.install.done");
+      }
+    });
   })
+
+  // Install packages using Chocolatey
+
+  /* Visual Studio */
+
+  ipcMain.on("VS2017C", () => {
+    let child = spawn("choco", ['install', '-y', 'visualstudio2017-workload-vctools', '--force']);
+
+    child.stdout.on('data', (data) => {
+      console.log(`stdout: ${data}`);
+      mainWindow.webContents.send("VS2017C.on");
+    });
+    
+    child.stderr.on('data', (data) => {
+      console.error(`stderr: ${data}`);
+    });
+    
+    child.on('error', (error) => {
+      console.error(`Error: ${error.message}`);
+      mainWindow.webContents.send("VS2017C.error", { error: error.message });
+    });
+    
+    child.on('close', (code) => {
+      if (code == 0) {
+        console.log('Visual Studio Code installed successfully.');
+        mainWindow.webContents.send("VS2017C.done");
+      } else {
+        console.error(`Child process exited with code ${code}`);
+        mainWindow.webContents.send("VS2017C.error", { error: `Child process exited with code ${code}` });
+      }
+    });
+  })
+
+  /* Python */
+
+  ipcMain.on("pythonC", () => {
+    let child = spawn("choco", ['install', '-y', 'python', '--force']);
+
+    child.stdout.on('data', (data) => {
+      console.log(`stdout: ${data}`);
+      if(data.indexOf("Progress:") == -1) mainWindow.webContents.send("pythonC.on");
+    });
+    
+    child.stderr.on('data', (data) => {
+      console.error(`stderr: ${data}`);
+    });
+    
+    child.on('error', (error) => {
+      console.error(`Error: ${error.message}`);
+      mainWindow.webContents.send("pythonC.error", { error: error.message });
+    });
+    
+    child.on('close', (code) => {
+      if (code == 0) {
+        console.log('Python installed successfully.');
+        mainWindow.webContents.send("pythonC.done");
+      } else {
+        console.error(`Child process exited with code ${code}`);
+        mainWindow.webContents.send("pythonC.error", { error: `Child process exited with code ${code}` });
+      }
+    });
+  })
+
+  /* Git */
+
+  ipcMain.on("gitC", () => {
+    let child = spawn("choco", ['install', '-y', 'git', '--force']);
+
+    child.stdout.on('data', (data) => {
+      console.log(`stdout: ${data}`);
+      if(data.indexOf("Progress:") == -1) mainWindow.webContents.send("gitC.on");
+    });
+    
+    child.stderr.on('data', (data) => {
+      console.error(`stderr: ${data}`);
+    });
+    
+    child.on('error', (error) => {
+      console.error(`Error: ${error.message}`);
+      mainWindow.webContents.send("gitC.error", { error: error.message });
+    });
+    
+    child.on('close', (code) => {
+      if (code == 0) {
+        console.log('Git installed successfully.');
+        mainWindow.webContents.send("gitC.done");
+      } else {
+        console.error(`Child process exited with code ${code}`);
+        mainWindow.webContents.send("gitC.error", { error: `Child process exited with code ${code}` });
+      }
+    });
+  })
+
+  /* NodeJS */
+
+  ipcMain.on("nodejsC", () => {
+    let child = spawn("choco", ['install', '-y', 'nodejs-lts', '--force']);
+
+    child.stdout.on('data', (data) => {
+      console.log(`stdout: ${data}`);
+      if(data.indexOf("Progress:") == -1) mainWindow.webContents.send("nodejsC.on");
+    });
+    
+    child.stderr.on('data', (data) => {
+      console.error(`stderr: ${data}`);
+    });
+    
+    child.on('error', (error) => {
+      console.error(`Error: ${error.message}`);
+      mainWindow.webContents.send("nodejsC.error", { error: error.message });
+    });
+    
+    child.on('close', (code) => {
+      if (code == 0) {
+        console.log('NodeJS(LTS) installed successfully.');
+        mainWindow.webContents.send("nodejsC.done");
+      } else {
+        console.error(`Child process exited with code ${code}`);
+        mainWindow.webContents.send("nodejsC.error", { error: `Child process exited with code ${code}` });
+      }
+    });
+  })
+
+  // Perform manual installation
 
   ipcMain.on("VS2017", () => {
     let dirPF = path.join(process.env.windir, "..", "Program Files (x86)", "Microsoft Visual Studio", "2017", "BuildTools");
@@ -133,7 +306,15 @@ function createWindow() {
     }, (e) => {
       mainWindow.webContents.send("VS2017", e);
       if (e) return;
-      exec(`cd "${path.join(__dirname, "temp")}" && start ./VS2017.exe --passive --wait --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 Microsoft.VisualStudio.Component.VC.CoreBuildTools Microsoft.VisualStudio.Component.VC.Redist.14.Latest Microsoft.VisualStudio.Component.VC.CMake.Project Microsoft.VisualStudio.Component.TestTools.BuildTools`);
+      exec(`cd "${path.join(__dirname, "temp")}" && start ./VS2017.exe --passive --wait --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 Microsoft.VisualStudio.Component.VC.CoreBuildTools Microsoft.VisualStudio.Component.VC.Redist.14.Latest Microsoft.VisualStudio.Component.VC.CMake.Project Microsoft.VisualStudio.Component.TestTools.BuildTools`, (e) => {
+        if (e) {
+          try{
+            setTimeout(() => clearInterval(item), 1000);
+          } catch(_){}
+          console.error(e);
+          return mainWindow.webContents.send("VS2017", e);
+        }
+      });
       //Microsoft.VisualStudio.Component.Windows10SDK.17763
       itemp = setInterval(() => {
         try {
@@ -167,21 +348,17 @@ function createWindow() {
   //Python
 
   ipcMain.on("Python", () => {
-    //C:\Users\Administrator\AppData\Local\Programs\Python\Python310
-    let type = "Python310";
+    //C:\Users\LENOVO\AppData\Local\Programs\Python\Python311
+    let type = "Python311";
     let fl = 16;
     if (os.arch().indexOf("64") == -1) {
-      type = "Python310-32";
+      type = "Python311-32";
       fl = 15;
     }
     let dirPF = path.join(process.env.appdata, "..", "Local", "Programs", "Python", type);
-    let dirCP = path.join(process.env.windir, "..", "Python37");
+    //let dirCP = path.join(process.env.windir, "..", "Python37");
 
     if (fs.existsSync(dirPF) && fs.readdirSync(dirPF).length == fl) {
-      if (!fs.existsSync(dirCP) || fs.readdirSync(dirCP).length != fl) {
-        mainWindow.webContents.send("Python.cp");
-        return cp()
-      }
       return mainWindow.webContents.send("Python.done");
     }
 
@@ -189,21 +366,28 @@ function createWindow() {
     let dir = path.join(__dirname, "temp");
     ensureExists(dir);
 
-    let link = os.arch().indexOf("64") != -1 ? "https://www.python.org/ftp/python/3.10.4/python-3.10.4-amd64.exe" : "https://www.python.org/ftp/python/3.10.4/python-3.10.4.exe";
+    let link = os.arch().indexOf("64") != -1 ? "https://www.python.org/ftp/python/3.11.4/python-3.11.4-amd64.exe" : "https://www.python.org/ftp/python/3.11.4/python-3.11.4.exe";
     dl(link, {
       directory: dir,
       filename: "Python.exe"
     }, (e) => {
       mainWindow.webContents.send("Python", e);
       if (e) return;
-      exec("cd \"" + path.join(__dirname, "temp") + "\" && start ./Python.exe");
+      exec("cd \"" + path.join(__dirname, "temp") + "\" && start ./Python.exe", (e) => {
+        if (e) {
+          try{
+            setTimeout(() => clearInterval(item), 1000);
+          } catch(_){}
+          console.error(e);
+          return mainWindow.webContents.send("Python", e);
+        }
+      });
       itemp = setInterval(() => {
         try {
           let l = fs.readdirSync(dirPF).length;
           mainWindow.webContents.send("Python.isIT", Math.trunc((l / fl) * 100));
           if (Math.trunc((l / fl) * 100) == 100) {
             clearInterval(itemp)
-            setTimeout(cp, 100);
           };
         } catch (e) { };
       }, 2000);
@@ -240,7 +424,15 @@ function createWindow() {
       mainWindow.webContents.send("Git", e);
       if (e) return console.log(e);
 
-      exec("cd \"" + path.join(__dirname, "temp") + "\" && start ./Git.exe");
+      exec("cd \"" + path.join(__dirname, "temp") + "\" && start ./Git.exe", (e) => {
+        if (e) {
+          try{
+            setTimeout(() => clearInterval(item), 1000);
+          } catch(_){}
+          console.error(e);
+          return mainWindow.webContents.send("Git", e);
+        }
+      });
       itemp = setInterval(() => {
         try {
           let l = fs.readdirSync(dirPF).length;
@@ -263,7 +455,7 @@ function createWindow() {
     //let dl = require("download-file");
     let dir = path.join(__dirname, "temp");
     ensureExists(dir);
-    let link = os.arch().indexOf("64") != -1 ? "https://nodejs.org/dist/v16.15.0/node-v16.15.0-x64.msi" : "https://nodejs.org/dist/v16.15.0/node-v16.15.0-x86.msi";
+    let link = os.arch().indexOf("64") != -1 ? "https://nodejs.org/dist/v18.17.0/node-v18.17.0-x64.msi" : "https://nodejs.org/dist/v16.15.0/node-v18.17.0-x86.msi";
 
     dl(link, {
       directory: dir,
@@ -273,7 +465,15 @@ function createWindow() {
       if (e) return console.log(e);
 
       setTimeout(() => {
-        exec("cd \"" + path.join(__dirname, "temp") + "\" && start ./NodeJS.msi");
+        exec("cd \"" + path.join(__dirname, "temp") + "\" && start ./NodeJS.msi", (e) => {
+          if (e) {
+            try{
+              setTimeout(() => clearInterval(item), 1000);
+            } catch(_){}
+            console.error(e);
+            return mainWindow.webContents.send("NodeJS", e);
+          }
+        });
         itemp = setInterval(() => {
           try {
             let l = fs.readdirSync(dirPF).length;
@@ -292,12 +492,13 @@ function createWindow() {
     //console.log(Object.keys(LMD));
     let array = Object.keys(LMD);
 
-    exec("npm -v", (e, stdout, stder) => {
-      console.log(stdout.split(".")[0]);
-      if (stdout.split(".")[0] != "8")
-        exec("npm i -g npm@8", () => { ins(0) });
-      else ins(0);
-    })
+    // exec("npm -v", (e, stdout, stder) => {
+    //   console.log(stdout.split(".")[0]);
+    //   if (stdout.split(".")[0] != "8")
+    //     exec("npm i -g npm@8", () => { ins(0) });
+    //   else ins(0);
+    // })
+    ins(0);
     function ins(i) {
       let inf = array[i];
       let pl = "";
@@ -414,6 +615,20 @@ async function dl(url, json, callback) {
   }
   let dir = path.join(json.directory, json.filename);
   down.data.pipe(fs.createWriteStream(dir).on("finish", callback));
+}
+
+function deleteDir(dirPath) {
+  if (fs.existsSync(dirPath)) {
+    fs.readdirSync(dirPath).forEach(file => {
+      const curPath = path.join(dirPath, file);
+      if (fs.lstatSync(curPath).isDirectory()) {
+        deleteDirectoryRecursive(curPath);
+      } else {
+        fs.unlinkSync(curPath);
+      }
+    });
+    fs.rmdirSync(dirPath);
+  }
 }
 
 async function getListTasks() {
