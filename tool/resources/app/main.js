@@ -112,15 +112,15 @@ function createWindow() {
 
   //Check admin
 
-  ipcMain.on("checkAdmin", () =>{
+  ipcMain.on("checkAdmin", () => {
     import('is-admin').then(async (isAdmin) => {
       console.log(isAdmin.default.isAdmin);
-      if(await isAdmin.default()) mainWindow.webContents.send("checkAdmin", true);
+      if (await isAdmin.default()) mainWindow.webContents.send("checkAdmin", true);
       else mainWindow.webContents.send("checkAdmin", false);
     }).catch((error) => {
       console.error('Error:', error.message);
       //mainWindow.webContents.send("checkAdmin", false);
-    });  
+    });
   })
 
   //Install.
@@ -128,10 +128,10 @@ function createWindow() {
   ipcMain.on("pkg.install", () => {
     const command = 'Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString(\'https://chocolatey.org/install.ps1\'))';
     // checking chocolatey
-    exec(`where chocolatey`, (error, stdout, stderr) => {
+    exec(`where choco`, (error, stdout, stderr) => {
       if (error) {
         console.error(`${error.message}`);
-        
+
         // Install package
         let child = spawn('powershell', ['-Command', command]);
 
@@ -158,7 +158,7 @@ function createWindow() {
       }
 
       if (stdout) {
-        
+
         mainWindow.webContents.send("pkg.install.done");
       }
     });
@@ -175,16 +175,16 @@ function createWindow() {
       console.log(`stdout: ${data}`);
       mainWindow.webContents.send("VS2017C.on");
     });
-    
+
     child.stderr.on('data', (data) => {
       console.error(`stderr: ${data}`);
     });
-    
+
     child.on('error', (error) => {
       console.error(`Error: ${error.message}`);
       mainWindow.webContents.send("VS2017C.error", { error: error.message });
     });
-    
+
     child.on('close', (code) => {
       if (code == 0) {
         console.log('Visual Studio Code installed successfully.');
@@ -203,18 +203,18 @@ function createWindow() {
 
     child.stdout.on('data', (data) => {
       console.log(`stdout: ${data}`);
-      if(data.indexOf("Progress:") == -1) mainWindow.webContents.send("pythonC.on");
+      if (data.indexOf("Progress:") == -1) mainWindow.webContents.send("pythonC.on");
     });
-    
+
     child.stderr.on('data', (data) => {
       console.error(`stderr: ${data}`);
     });
-    
+
     child.on('error', (error) => {
       console.error(`Error: ${error.message}`);
       mainWindow.webContents.send("pythonC.error", { error: error.message });
     });
-    
+
     child.on('close', (code) => {
       if (code == 0) {
         console.log('Python installed successfully.');
@@ -233,18 +233,18 @@ function createWindow() {
 
     child.stdout.on('data', (data) => {
       console.log(`stdout: ${data}`);
-      if(data.indexOf("Progress:") == -1) mainWindow.webContents.send("gitC.on");
+      if (data.indexOf("Progress:") == -1) mainWindow.webContents.send("gitC.on");
     });
-    
+
     child.stderr.on('data', (data) => {
       console.error(`stderr: ${data}`);
     });
-    
+
     child.on('error', (error) => {
       console.error(`Error: ${error.message}`);
       mainWindow.webContents.send("gitC.error", { error: error.message });
     });
-    
+
     child.on('close', (code) => {
       if (code == 0) {
         console.log('Git installed successfully.');
@@ -263,18 +263,18 @@ function createWindow() {
 
     child.stdout.on('data', (data) => {
       console.log(`stdout: ${data}`);
-      if(data.indexOf("Progress:") == -1) mainWindow.webContents.send("nodejsC.on");
+      if (data.indexOf("Progress:") == -1) mainWindow.webContents.send("nodejsC.on");
     });
-    
+
     child.stderr.on('data', (data) => {
       console.error(`stderr: ${data}`);
     });
-    
+
     child.on('error', (error) => {
       console.error(`Error: ${error.message}`);
       mainWindow.webContents.send("nodejsC.error", { error: error.message });
     });
-    
+
     child.on('close', (code) => {
       if (code == 0) {
         console.log('NodeJS(LTS) installed successfully.');
@@ -308,9 +308,9 @@ function createWindow() {
       if (e) return;
       exec(`cd "${path.join(__dirname, "temp")}" && start ./VS2017.exe --passive --wait --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 Microsoft.VisualStudio.Component.VC.CoreBuildTools Microsoft.VisualStudio.Component.VC.Redist.14.Latest Microsoft.VisualStudio.Component.VC.CMake.Project Microsoft.VisualStudio.Component.TestTools.BuildTools`, (e) => {
         if (e) {
-          try{
+          try {
             setTimeout(() => clearInterval(item), 1000);
-          } catch(_){}
+          } catch (_) { }
           console.error(e);
           return mainWindow.webContents.send("VS2017", e);
         }
@@ -349,57 +349,55 @@ function createWindow() {
 
   ipcMain.on("Python", () => {
     //C:\Users\LENOVO\AppData\Local\Programs\Python\Python311
-    let type = "Python311";
-    let fl = 16;
-    if (os.arch().indexOf("64") == -1) {
-      type = "Python311-32";
-      fl = 15;
-    }
-    let dirPF = path.join(process.env.appdata, "..", "Local", "Programs", "Python", type);
-    //let dirCP = path.join(process.env.windir, "..", "Python37");
+    exec(`where python`, (error, stdout, stderr) => {
+      if (!error) return mainWindow.webContents.send("Python.done");
+      let type = "Python311";
+      let fl = 16;
+      if (os.arch().indexOf("64") == -1) {
+        type = "Python311-32";
+        fl = 15;
+      }
+      let dirPF = path.join(process.env.appdata, "..", "Local", "Programs", "Python", type);
 
-    if (fs.existsSync(dirPF) && fs.readdirSync(dirPF).length == fl) {
-      return mainWindow.webContents.send("Python.done");
-    }
+      //let dl = require("download-file");
+      let dir = path.join(__dirname, "temp");
+      ensureExists(dir);
 
-    //let dl = require("download-file");
-    let dir = path.join(__dirname, "temp");
-    ensureExists(dir);
-
-    let link = os.arch().indexOf("64") != -1 ? "https://www.python.org/ftp/python/3.11.4/python-3.11.4-amd64.exe" : "https://www.python.org/ftp/python/3.11.4/python-3.11.4.exe";
-    dl(link, {
-      directory: dir,
-      filename: "Python.exe"
-    }, (e) => {
-      mainWindow.webContents.send("Python", e);
-      if (e) return;
-      exec("cd \"" + path.join(__dirname, "temp") + "\" && start ./Python.exe", (e) => {
-        if (e) {
-          try{
-            setTimeout(() => clearInterval(item), 1000);
-          } catch(_){}
-          console.error(e);
-          return mainWindow.webContents.send("Python", e);
-        }
-      });
-      itemp = setInterval(() => {
-        try {
-          let l = fs.readdirSync(dirPF).length;
-          mainWindow.webContents.send("Python.isIT", Math.trunc((l / fl) * 100));
-          if (Math.trunc((l / fl) * 100) == 100) {
-            clearInterval(itemp)
-          };
-        } catch (e) { };
-      }, 2000);
-    })
-    function cp() {
-      exec("xcopy \"" + path.join(dirPF, "..") + "\" \"" + path.join(process.env.windir, "..") + "\" /s/h/e/k/f/c && ren " + path.join(process.env.windir, "..", type) + " Python37", (error, stdout, stderr) => {
-        //exec("dir", (error, stdout, stderr) => {
-        if (error) console.log(error);
-        mainWindow.webContents.send("Python.cpDone");
-        console.log(stdout);
-        console.log(stderr)
+      let link = os.arch().indexOf("64") != -1 ? "https://www.python.org/ftp/python/3.11.4/python-3.11.4-amd64.exe" : "https://www.python.org/ftp/python/3.11.4/python-3.11.4.exe";
+      dl(link, {
+        directory: dir,
+        filename: "Python.exe"
+      }, (e) => {
+        mainWindow.webContents.send("Python", e);
+        if (e) return;
+        exec("cd \"" + path.join(__dirname, "temp") + "\" && start ./Python.exe", (e) => {
+          if (e) {
+            try {
+              setTimeout(() => clearInterval(item), 1000);
+            } catch (_) { }
+            console.error(e);
+            return mainWindow.webContents.send("Python", e);
+          }
+        });
+        itemp = setInterval(() => {
+          try {
+            let l = fs.readdirSync(dirPF).length;
+            mainWindow.webContents.send("Python.isIT", Math.trunc((l / fl) * 100));
+            if (Math.trunc((l / fl) * 100) == 100) {
+              clearInterval(itemp)
+            };
+          } catch (e) { };
+        }, 2000);
       })
+      function cp() {
+        exec("xcopy \"" + path.join(dirPF, "..") + "\" \"" + path.join(process.env.windir, "..") + "\" /s/h/e/k/f/c && ren " + path.join(process.env.windir, "..", type) + " Python37", (error, stdout, stderr) => {
+          //exec("dir", (error, stdout, stderr) => {
+          if (error) console.log(error);
+          mainWindow.webContents.send("Python.cpDone");
+          console.log(stdout);
+          console.log(stderr)
+        })
+      }
     }
   })
 
@@ -426,9 +424,9 @@ function createWindow() {
 
       exec("cd \"" + path.join(__dirname, "temp") + "\" && start ./Git.exe", (e) => {
         if (e) {
-          try{
+          try {
             setTimeout(() => clearInterval(item), 1000);
-          } catch(_){}
+          } catch (_) { }
           console.error(e);
           return mainWindow.webContents.send("Git", e);
         }
@@ -467,9 +465,9 @@ function createWindow() {
       setTimeout(() => {
         exec("cd \"" + path.join(__dirname, "temp") + "\" && start ./NodeJS.msi", (e) => {
           if (e) {
-            try{
+            try {
               setTimeout(() => clearInterval(item), 1000);
-            } catch(_){}
+            } catch (_) { }
             console.error(e);
             return mainWindow.webContents.send("NodeJS", e);
           }
