@@ -398,7 +398,7 @@ function createWindow() {
           console.log(stderr)
         })
       }
-    }
+    })
   })
 
   //Git
