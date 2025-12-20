@@ -196,7 +196,7 @@ for (var i = 0; i < ll.length; i++) {
 	
 	console.blank();
 
-	//login facebook!!!
+// 	//login facebook!!!
 
 	var loginstate;
 	(!(fs.existsSync(path.join(__dirname, "udata", "fbstate.json"))) && fbCredentials.email == "" && fbCredentials.password == "") ? loginstate = false : loginstate = true
