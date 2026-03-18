@@ -1,9 +1,9 @@
 //Require stuffs
 
-require("dotenv").config();
+require("dotenv").config({ path: require("path").join(__dirname, "..", "config", "config.env") });
 const fs = require("fs");
 const path = require("path");
-const login = require("ws3-fca");
+const login = require("fca-unofficial");
 const readline = require("readline");
 const axios = require("axios");
 const AdmZip = require("adm-zip");
@@ -12,6 +12,8 @@ var lx = require("luxon");
 var log = require("./core/util/log.js"); log.sync();
 var scanDir = require("./core/util/scanDir.js");
 
+const ROOT = path.join(__dirname, "..");
+
 const linkUpdate = "https://github.com/VangBanLaNhat/Y2TB-Bot-lite-noPanel/archive/refs/heads/main.zip";
 const versionUpdate = "https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-Bot-lite-noPanel/main/package.json";
 const folderUpdate = "Y2TB-Bot-lite-noPanel-main";
@@ -19,14 +21,14 @@ const folderUpdate = "Y2TB-Bot-lite-noPanel-main";
 //Write logs
 
 var dt = lx.DateTime.now().setZone("Asia/Ho_Chi_Minh");
-ensureExists(path.join(__dirname, "logs"));
+ensureExists(path.join(ROOT, "logs"));
 global.logStart = `${dt.day}D${dt.month}M${dt.year}Y.T${dt.hour}H${dt.minute}M${dt.second}S`;
-var ll = scanDir(".txt", path.join(__dirname, "logs"));
+var ll = scanDir(".txt", path.join(ROOT, "logs"));
 for (var i = 0; i < ll.length; i++) {
 	var lll = ll[i].slice(0, 2);
 	lll = lll.replace("D", "");
 	if (dt.day.toString() != lll) {
-		fs.unlinkSync(path.join(__dirname, "logs", ll[i]));
+		fs.unlinkSync(path.join(ROOT, "logs", ll[i]));
 	}
 }
 
@@ -36,7 +38,7 @@ for (var i = 0; i < ll.length; i++) {
 
 	//Main update
 	console.log("Update", "Checking update...");
-	let vern = (JSON.parse(fs.readFileSync(path.join(__dirname, "package.json")))).version;
+	let vern = (JSON.parse(fs.readFileSync(path.join(ROOT, "package.json")))).version;
 	try {
 		var verg = (await axios.get(versionUpdate)).data.version;
 	} catch (e) {
@@ -44,11 +46,11 @@ for (var i = 0; i < ll.length; i++) {
 		process.exit(504);
 	}
 
-	if (fs.existsSync(path.join(__dirname, "update"))) {
+	if (fs.existsSync(path.join(ROOT, "update"))) {
 		console.warn("Update", "Proceed to update node_modules...")
-		deleteFolderRecursive(path.join(__dirname, "update"));
-		if(!fs.existsSync(path.join(__dirname, "data", "user.json"))){
-			let listModule = (JSON.parse(fs.readFileSync(path.join(__dirname, "package.json")))).dependencies;
+		deleteFolderRecursive(path.join(ROOT, "update"));
+		if(!fs.existsSync(path.join(ROOT, "data", "user.json"))){
+			let listModule = (JSON.parse(fs.readFileSync(path.join(ROOT, "package.json")))).dependencies;
 			let listInstall = "";
 			for(let i in listModule){
 				listInstall += " " + i;
@@ -66,7 +68,7 @@ for (var i = 0; i < ll.length; i++) {
 
 	if (vern != verg) {
 		console.warn("Update", "The new update has been discovered. Proceed to download the imported version...");
-		let pathFile = path.join(__dirname, "update");
+		let pathFile = path.join(ROOT, "update");
 		try {
 			await downloadUpdate(pathFile);
 			console.log("Update", 'Download the update completed!');
@@ -133,8 +135,8 @@ for (var i = 0; i < ll.length; i++) {
 	}
 	setInterval(function () {
 		try {
-			fs.writeFileSync(path.join(__dirname, "data", "data.json"), JSON.stringify(global.data, null, 4), { mode: 0o666 });
-			fs.writeFileSync(path.join(__dirname, "data", "user.json"), JSON.stringify(global.userInfo, null, 4), { mode: 0o666 });
+			fs.writeFileSync(path.join(ROOT, "data", "data.json"), JSON.stringify(global.data, null, 4), { mode: 0o666 });
+			fs.writeFileSync(path.join(ROOT, "data", "user.json"), JSON.stringify(global.userInfo, null, 4), { mode: 0o666 });
 		}
 		catch (err) {
 			if (err != 'TypeError [ERR_INVALID_ARG_TYPE]: The "data" argument must be of type string or an instance of Buffer, TypedArray, or DataView. Received undefined') console.error("Data", "Can't auto save data with error: " + err);
@@ -145,7 +147,7 @@ for (var i = 0; i < ll.length; i++) {
 
 	console.log("Plugin", "Loading Plugins...")
 	try {
-		ensureExists(path.join(__dirname, "lang"));
+		ensureExists(path.join(ROOT, "lang"));
 		await require("./core/util/loadPlugin.js")();
 
 		process.reload = async () => {
@@ -184,7 +186,10 @@ for (var i = 0; i < ll.length; i++) {
 		password: global.config.facebook.FBpassword
 	}
 	console.log("Manager", "Loading User-credentials...");
-	if (fs.existsSync(path.join(__dirname, "udata", "fbstate.json"))) {
+	const fbStatePath = path.join(ROOT, "config", "fbstate.json");
+	const fbStateAlt = path.join(ROOT, "config", "fbsstate.json");
+	const fbStateExisting = fs.existsSync(fbStatePath) ? fbStatePath : (fs.existsSync(fbStateAlt) ? fbStateAlt : null);
+	if (fbStateExisting) {
 		console.log("Facebook", `=> Login account using FBstate`)
 	} else if (fbCredentials.email == "" && fbCredentials.password == "") {
 		console.error("Facebook", "=> No FBstate and FBCredentials blank "); 
@@ -199,7 +204,7 @@ for (var i = 0; i < ll.length; i++) {
 // 	//login facebook!!!
 
 	var loginstate;
-	(!(fs.existsSync(path.join(__dirname, "udata", "fbstate.json"))) && fbCredentials.email == "" && fbCredentials.password == "") ? loginstate = false : loginstate = true
+	(!fbStateExisting && fbCredentials.email == "" && fbCredentials.password == "") ? loginstate = false : loginstate = true
 	if (loginstate) {
 		let loginOptions = {
 			"logLevel": global.coreconfig.facebook.logLevel,
@@ -210,7 +215,7 @@ for (var i = 0; i < ll.length; i++) {
 			"autoMarkRead": global.config.facebook.autoMarkRead
 		}
 		console.log("Manager", "Logging...")
-		let appStatePath = path.join(__dirname, "udata", "fbstate.json");
+		let appStatePath = fbStateExisting || path.join(ROOT, "config", "fbstate.json");
 		let appState = {};
 		if (fs.existsSync(appStatePath)) {
 			//login using appstate
@@ -243,6 +248,9 @@ for (var i = 0; i < ll.length; i++) {
 				appState = api.getAppState();
 				require("./core/communication/fb.js")(appState, loginOptions);
 				fs.writeFileSync(appStatePath, JSON.stringify(appState, null, "\t"));
+				if (fbStateExisting && fbStateExisting !== appStatePath && fs.existsSync(fbStateExisting)) {
+					fs.unlinkSync(fbStateExisting);
+				}
 			});
 		}
 	}
@@ -254,10 +262,10 @@ process.on('unhandledRejection', (reason, promise) => {
 
 process.on('exit', function (code) {
 	try {
-		fs.writeFileSync(path.join(__dirname, "data", "data.json"), JSON.stringify(global.data, null, 4), { mode: 0o666 });
-		fs.writeFileSync(path.join(__dirname, "data", "user.json"), JSON.stringify(global.userInfo, null, 4), { mode: 0o666 });
+		fs.writeFileSync(path.join(ROOT, "data", "data.json"), JSON.stringify(global.data, null, 4), { mode: 0o666 });
+		fs.writeFileSync(path.join(ROOT, "data", "user.json"), JSON.stringify(global.userInfo, null, 4), { mode: 0o666 });
 		console.log("Data", "Saved data!")
-		//fs.writeFileSync(path.join(__dirname, "data", "prdata.json"), JSON.stringify(global.prdata, null, 4), {mode: 0o666});
+			//fs.writeFileSync(path.join(ROOT, "data", "prdata.json"), JSON.stringify(global.prdata, null, 4), {mode: 0o666});
 	}
 	catch (err) {
 		if (err != 'TypeError [ERR_INVALID_ARG_TYPE]: The "data" argument must be of type string or an instance of Buffer, TypedArray, or DataView. Received undefined') console.error("Data", "Can't auto save data with error: " + err);

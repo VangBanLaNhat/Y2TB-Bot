@@ -4,15 +4,17 @@ const stripBom = require("strip-bom");
 const log = require(path.join(__dirname, "log.js"));
 const scanDir = require(path.join(__dirname, "scanDir.js"));
 
+const ROOT = path.join(__dirname, "..", "..", "..");
+
 function loadLang() {
     !global.lang ? global.lang = {}:"";
-    var dirLang = path.join(__dirname, "..", "..", "lang");
+  var dirLang = path.join(ROOT, "lang");
     ensureExists(path.join(dirLang, "backup"));
     var listLang = scanDir(".json", dirLang);
-    var plugins = [];
-    /*Object.keys(global.plugins.Y2TB.command).forEach(x => {
-        plugins.indexOf(global.plugins.Y2TB.command[x].namePlugin) == -1 ? plugins.push(global.plugins.Y2TB.command[x].namePlugin) : "";
-    });*/
+  if (!global.plugins || !global.plugins.Y2TB || !global.plugins.Y2TB.plugins) {
+    log.warn("Languages", "Plugin registry not ready; skip language load");
+    return;
+  }
     for (var i = 0; i < listLang.length; i++) {
         var pluginName = listLang[i].split(".")[0];
         //pluginName.splice(pluginName.length-1,1);

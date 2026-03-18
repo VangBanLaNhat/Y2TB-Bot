@@ -1,0 +1,8 @@
+ignoredBuiltDependencies:
+  - '@ffmpeg-installer/linux-x64'
+
+onlyBuiltDependencies:
+  - '@biomejs/biome'
+  - canvas
+  - deasync
+  - es5-ext

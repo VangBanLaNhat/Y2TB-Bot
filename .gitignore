@@ -117,9 +117,18 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-udata/fbsstate.json
-udata/config.json
-core/coreconfig.json
+config/fbstate.json
+config/fbsstate.json
+config/config.env
 
-lang/
 data/
+logs/
+update/
+plugins/
+fb_dtsg_data.json
+lang/
+plugins/obb/
+config/plugins/
+plugins/cache/
+
+self-note.txt
