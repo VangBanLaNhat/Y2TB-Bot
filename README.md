@@ -14,48 +14,43 @@ cd Y2TB-Bot-lite-noPanel-main
 npm install
 
 # Cấu hình
-# 1) Sửa thông tin bot và account tại udata/config.json
-# 2) Điều chỉnh tham số lõi tại core/coreconfig.json
+# 1) Sửa thông tin bot và account tại config/config.env (copy từ config/config.env.example)
 
 npm start
 ```
 
 ### Thông tin đăng nhập
-- Ưu tiên đặt file `udata/fbstate.json` (appstate) để đăng nhập không cần mật khẩu.
-- Nếu không có, điền `facebook.FBemail` và `facebook.FBpassword` trong `udata/config.json` (cẩn trọng với bảo mật tài khoản).
+- Ưu tiên đặt file `config/fbstate.json` (appstate) để đăng nhập không cần mật khẩu.
+- Nếu không có, điền `Y2TB_CFG_FACEBOOK_FBEMAIL` và `Y2TB_CFG_FACEBOOK_FBPASSWORD` trong `config/config.env` (cẩn trọng với bảo mật tài khoản).
 
 ## Cấu trúc hiện tại
 ```
 .
-├─ main.js                # Tiến trình giám sát/restart index.js
-├─ index.js               # Luồng chính: cập nhật, nạp config, data, plugin, đăng nhập FB
-├─ core/
-│  ├─ communication/      # Kết nối Facebook (fb.js)
-│  ├─ loadPlugins/        # Plugin lõi (tự nạp)
-│  └─ util/               # Tiện ích: config/data loader, log, scanDir, ...
-├─ plugins/               # Plugin do người dùng thêm; danh sách tại pluginList.json
-├─ data/                  # data.json, user.json (tự sinh, không commit)
-├─ udata/                 # config người dùng, fbstate; nên giữ riêng tư
-├─ lang/                  # Chuỗi ngôn ngữ, Help.json
-├─ logs/                  # Log xoay vòng theo ngày
-├─ err.js                 # Xử lý lỗi (nếu dùng)
-├─ package.json           # Thông tin gói, script npm
+├─ src/
+│  ├─ main.js            # Tiến trình giám sát/restart src/index.js
+│  ├─ index.js           # Luồng chính: cập nhật, nạp config, data, plugin, đăng nhập FB
+│  ├─ core/              # communication/, loadPlugins/, util/
+│  └─ plugins/           # Plugin chính; danh sách tại pluginList.json
+├─ config/               # Config env + sample, fbstate/fbsstate, plugins/
+├─ data/                 # data.json, user.json (tự sinh, không commit)
+├─ lang/                 # Chuỗi ngôn ngữ, Help.json
+├─ logs/                 # Log xoay vòng theo ngày
+├─ err.js                # Xử lý lỗi (nếu dùng)
+├─ package.json          # Thông tin gói, script npm
 └─ README.md
 ```
 
 ## Cấu hình
-- `udata/config.json`
-	- `bot_info.botname`, `bot_info.lang`
-	- `facebook.prefix`, `admin`, `autoMarkRead`, `selfListen`, `UIDmode`, `blackList`, `whiteList`
-	- `FBemail` / `FBpassword` chỉ cần khi không có `fbstate.json`
-- `core/coreconfig.json`
-	- `main_bot.dataSaveTime` (giây), `developMode`, `toggleLog`, `toggleDebug`
-	- `facebook.logLevel`, `userAgent`, `listenEvents`, `updatePresence`
+- `config/config.env.example` → copy sang `config/config.env` rồi chỉnh.
+- Cấu hình chính dùng biến môi trường:
+	- Config thường: `Y2TB_CFG_<SECTION>_<KEY>`
+	- Core config: `Y2TB_CORE_<SECTION>_<KEY>`
 
 ## Plugin
-- Đặt plugin người dùng tại `plugins/` và khai báo trong `plugins/pluginList.json`.
-- Plugin lõi nằm trong `core/loadPlugins/`, được `loadPlugin.js` tự động nạp.
-- Cần ngôn ngữ hay config riêng: thêm file vào `lang/` hoặc `udata/Plugins config/` tùy plugin.
+- Đặt plugin người dùng tại `src/plugins/` và khai báo trong `src/plugins/pluginList.json`.
+- Plugin lõi nằm trong `src/core/loadPlugins/`, được `loadPlugin.js` tự động nạp.
+- Cần ngôn ngữ hay config riêng: thêm file vào `lang/` hoặc `config/plugins/` tùy plugin.
+- Config runtime của plugin vẫn dùng file JSON trong `config/plugins/`.
 
 ## Dữ liệu & log
 - Runtime data: `data/data.json`, `data/user.json` (tự lưu định kỳ; không chỉnh tay khi bot đang chạy).
@@ -65,11 +60,9 @@ npm start
 - `index.js` kiểm tra version GitHub, tải về vào thư mục `update/` rồi tự khởi động lại với mã thoát `7378278`.
 - Không sửa tay thư mục `update/`; để bot tự xoá sau khi hoàn tất.
 
-## Gợi ý cải tổ cấu trúc (chưa áp dụng)
-- Tách mã nguồn vào `src/` và giữ `data/` / `logs/` ngoài: `src/runtime/index.js`, `src/core/...`, `src/plugins/`.
-- Đưa cấu hình mẫu ra `config/config.example.json` và `config/coreconfig.example.json`, rồi ignore bản thật.
-- Gom script CLI (xuất fbstate, reset data, lint) vào `scripts/`.
-- Thêm `docs/` cho hướng dẫn plugin và API nội bộ.
+## Ghi chú
+- Runtime data và log nằm ngoài `src/`; không commit `data/`, `logs/`, `update/`, `config/config.env`, `config/fbstate.json`, `config/fbsstate.json`.
+- Nếu đổi vị trí thư mục, nhớ cập nhật biến `ROOT` trong các file nguồn.
 
 ## Lệnh hữu ích
 - `npm start` / `npm test`: chạy bot

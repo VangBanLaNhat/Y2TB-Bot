@@ -1,8 +1,10 @@
-const login = require("ws3-fca")
+const login = require("fca-unofficial")
 const fs = require("fs");
 const path = require("path");
 const listen = require(path.join(__dirname, "listen.js"))
 var log = require(path.join(__dirname, "..", "util", "log.js"));
+
+const ROOT = path.join(__dirname, "..", "..", "..");
 
 module.exports = async (appState, loginOptions) => {
     var opts = loginOptions;
@@ -10,7 +12,10 @@ module.exports = async (appState, loginOptions) => {
 	
     login({ appState }, opts, async (err, api) => {
         if (err) {
-            fs.unlinkSync(path.join(__dirname, "..", "..", "udata", "fbstate.json"));
+            const fbStatePath = path.join(ROOT, "config", "fbstate.json");
+            const fbStateAlt = path.join(ROOT, "config", "fbsstate.json");
+            if (fs.existsSync(fbStatePath)) fs.unlinkSync(fbStatePath);
+            else if (fs.existsSync(fbStateAlt)) fs.unlinkSync(fbStateAlt);
             log.err("Login", err);
             process.exit(1);
         }

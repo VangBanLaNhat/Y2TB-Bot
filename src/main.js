@@ -6,13 +6,15 @@
 const childProcess = require("child_process");
 const fs = require("fs");
 const path = require("path");
+const semver = require("semver");
 const log = require("./core/util/log.js"); log.sync();
 
+const ROOT = path.join(__dirname, "..");
+
 (async () => {
-  ensureExists(path.join(__dirname, "data"));
+  ensureExists(path.join(ROOT, "data"));
   // fs.writeFileSync(path.join(__dirname, "data", "isStart.txt"), "1");
 
-  var semver = require("semver");
   var nodeVersion = semver.parse(process.version);
   if (nodeVersion.major < 16) {
     console.error("MAIN", "ERROR: Node.JS 16+ required in this version!");
@@ -38,8 +40,8 @@ const log = require("./core/util/log.js"); log.sync();
       console.log();
       console.log("MAIN", `7378278(RESTART) error code found. Restarting...`);
     }
-    child = childProcess.spawn("node", ["--trace-warnings", "index.js"], {
-      cwd: __dirname,
+    child = childProcess.spawn("node", ["--trace-warnings", path.join(__dirname, "index.js")], {
+      cwd: ROOT,
       maxBuffer: 16384 * 1024,
       stdio: 'inherit',
       shell: true

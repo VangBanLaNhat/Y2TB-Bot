@@ -40,7 +40,7 @@ async function mess(event, api) {
 	//Convert necessary function
 	eval(strFunc);
     //Running Chathook...
-    chathook(event, api);
+	await chathook(event, api);
     //Running Command...
     if (event.body != undefined && event.body.slice(0, global.config.facebook.prefix.length) == global.config.facebook.prefix) {
         var cml = event.body.slice(global.config.facebook.prefix.length, event.body.length);
@@ -73,11 +73,11 @@ async function mess(event, api) {
                     	getThreadInfo
                     };
                     
-                    await mainFunc[func](event, api, adv);
+					await mainFunc[func](event, api, adv);
                 }
                 catch (err) {
-                    log.err(global.plugins[i].command[ms[0]].namePlugin, err)
-                    api.sendMessage(err, event.threadID, event.messageID);
+					log.err(global.plugins[i].command[ms[0]].namePlugin, err);
+					api.sendMessage(err && err.message ? err.message : String(err), event.threadID, event.messageID);
                 }
 
                 check = true;
@@ -102,23 +102,27 @@ async function chathook(event, api) {
     for (var i in global.chathook) {
         try {
         	let name = global.chathook[i].main;
-            let mainFunc = global.plugins.Y2TB.plugins[name].fullFunc
+			if (!global.plugins || !global.plugins.Y2TB || !global.plugins.Y2TB.plugins[name]) {
+				log.warn("Chathook", `Skip ${name} because plugin not loaded`);
+				continue;
+			}
+			let mainFunc = global.plugins.Y2TB.plugins[name].fullFunc
             var func = global.chathook[i].func;
             
             let adv = {
             	pluginName: name,
-            	lang: global.lang[name],
-            	rlang: (inp)=>{
-            		return global.lang[name][inp][global.config.bot_info.lang];
-            	},
+	            lang: global.lang[name],
+	            rlang: (inp)=>{
+	            	return global.lang[name] ? global.lang[name][inp][global.config.bot_info.lang] : inp;
+	            },
             	iso639: global.config.bot_info.lang,
-            	config: global.configPl[name],
+	            config: global.configPl[name],
             	replaceMap: replaceMap,
             	getUserInfo,
             	getThreadInfo
             };
             
-            mainFunc[func](event, api, adv);
+			await mainFunc[func](event, api, adv);
         }
         catch (err) {
             log.err(i, err);

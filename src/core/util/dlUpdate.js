@@ -4,7 +4,7 @@ const fse = require("fs-extra");
 const path = require("path");
 
 const save = {
-	file: ["core/coreconfig.json"],
+	file: ["config/config.env"],
 	folder: [
 		".git",
 		"data",
@@ -13,7 +13,7 @@ const save = {
 		"node_modules",
 		"plugins",
 		"temp",
-		"udata"
+		"config"
 	]
 }
 
