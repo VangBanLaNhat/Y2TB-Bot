@@ -27,6 +27,7 @@
     "dotenv": "^10.0.0",
     "enc": "",
     "event-stream": "^4.0.1",
+    "fca-unofficial": "github:VangBanLaNhat/fca-unofficial",
     "fs-extra": "^10.1.0",
     "luxon": "^3.7.2",
     "node-fetch": "^2.6.1",
@@ -37,7 +38,6 @@
     "stream-buffers": "^3.0.2",
     "strip-bom": "^4.0.0",
     "sync-request": "^6.1.0",
-    "wait-for-stuff": "^1.4.0",
-    "fca-unofficial": "github:VangBanLaNhat/fca-unofficial"
+    "wait-for-stuff": "^1.4.0"
   }
 }

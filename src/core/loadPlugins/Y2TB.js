@@ -1,60 +1,14 @@
-const axios = require('axios');
-const AdmZip = require("adm-zip");
 const fs = require('fs');
 const path = require("path");
+const stripBom = require("strip-bom");
 const cmd = require('child_process');
-const vm = require("vm");
-const { Octokit } = require("@octokit/rest");
-const octokit = new Octokit({});
 const log = require(path.join(__dirname, "..", "util", "log.js"));
-const scanDir = require(path.join(__dirname, "..", "util", "scanDir.js"));
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const ROOT = path.join(__dirname, "..", "..", "..");
 const dirPlugins = path.join(ROOT, "plugins");
 
 !global.temp ? global.temp = {} : "";
 !global.temp.loadPlugin ? global.temp.loadPlugin = {} : "";
-
-const FILE_KEY_RE = /^[A-Za-z0-9._-]+\.js$/;
-
-function safeGetPluginInfo(code, fileName) {
-	try {
-		const sandbox = {
-			module: { exports: {} },
-			exports: {},
-			require: (mod) => {
-				const allow = ["path", "fs", "os", "util"];
-				if (allow.includes(mod)) return require(mod);
-				return {};
-			},
-			console,
-			process,
-			Buffer,
-			setTimeout,
-			setInterval,
-			clearTimeout,
-			clearInterval,
-			__dirname: dirPlugins,
-			global: {
-				coreconfig: { main_bot: {} },
-				config: { economyConfig: {}, xpc: {}, weather: {}, arrowchat: {} },
-				data: {},
-				temp: {}
-			}
-		};
-		sandbox.config = sandbox.global.config;
-		sandbox.data = sandbox.global.data;
-		sandbox.temp = sandbox.global.temp;
-		sandbox.global = sandbox;
-		vm.runInNewContext(`${code}\n;module.exports;`, sandbox, { filename: fileName || "plugin.js" });
-		const exported = sandbox.module.exports || sandbox.exports;
-		if (exported && typeof exported.init === "function") return exported.init();
-	} catch (e) {
-		log.warn("Plugins(Y2TB)", `safe init failed for ${fileName}: ${e.message || e}`);
-	}
-	return null;
-}
 
 function collectMissingDeps(entries) {
 	const needs = new Set();
@@ -73,25 +27,85 @@ function collectMissingDeps(entries) {
 
 function npmBatchInstall(pkgs) {
 	if (!pkgs || !pkgs.length) return;
-	const env = Object.assign({}, process.env, {
+	const npmEnv = Object.assign({}, process.env, {
 		npm_config_yes: "true",
 		npm_config_audit: "false",
 		npm_config_fund: "false",
 		npm_config_legacy_peer_deps: "true"
 	});
-	const cmdline = `npm install --no-save --no-package-lock --legacy-peer-deps ${pkgs.join(" ")}`;
-	log.warn("Plugins(Y2TB)", `Batch installing: ${pkgs.join(", ")}`);
+
+	// Keep only one spec per package name, prefer versioned spec if present.
+	const byName = {};
+	for (const spec of pkgs) {
+		if (!spec) continue;
+		const at = spec.lastIndexOf("@");
+		const name = at > 0 ? spec.slice(0, at) : spec;
+		const current = byName[name];
+		if (!current || spec.includes("@")) byName[name] = spec;
+	}
+	const uniquePkgs = Object.values(byName);
+
+	let hasPnpm = false;
 	try {
-		cmd.execSync(cmdline, { stdio: "inherit", env, shell: true });
-		return;
+		cmd.execSync("pnpm -v", { stdio: "ignore", env: process.env, shell: true });
+		hasPnpm = true;
 	} catch (e) {
-		log.warn("Plugins(Y2TB)", `Batch install error, retrying per-package with --force: ${e.message || e}`);
-		for (const pkg of pkgs) {
+		hasPnpm = false;
+	}
+
+	if (hasPnpm) {
+		const batchCmd = `pnpm add ${uniquePkgs.join(" ")} --save-prod=false --save-dev=false --ignore-workspace-root-check`;
+		log.warn("Plugins(Y2TB)", `Installing dependencies via pnpm (single batch): ${uniquePkgs.join(", ")}`);
+		const packageJsonPath = path.join(ROOT, "package.json");
+		const pnpmLockPath = path.join(ROOT, "pnpm-lock.yaml");
+		const packageJsonBefore = fs.existsSync(packageJsonPath) ? fs.readFileSync(packageJsonPath, "utf8") : null;
+		const pnpmLockBefore = fs.existsSync(pnpmLockPath) ? fs.readFileSync(pnpmLockPath, "utf8") : null;
+		try {
+			cmd.execSync(batchCmd, {
+				stdio: "inherit",
+				env: process.env,
+				shell: true
+			});
+			return;
+		} catch (e) {
+			log.warn("Plugins(Y2TB)", `pnpm batch install failed, fallback npm one-by-one: ${e.message || e}`);
+		} finally {
+			// pnpm add always updates manifests/lockfile; restore originals to keep runtime installs ephemeral.
 			try {
-				cmd.execSync(`npm install --no-save --no-package-lock --legacy-peer-deps --force ${pkg}`, { stdio: "inherit", env, shell: true });
-			} catch (er) {
-				log.warn("Plugins(Y2TB)", `Install failed for ${pkg}: ${er.message || er}`);
+				if (packageJsonBefore !== null) fs.writeFileSync(packageJsonPath, packageJsonBefore, { mode: 0o666 });
+			} catch (restoreErr) {
+				log.warn("Plugins(Y2TB)", `Failed to restore package.json after pnpm add: ${restoreErr.message || restoreErr}`);
 			}
+			try {
+				if (pnpmLockBefore !== null) fs.writeFileSync(pnpmLockPath, pnpmLockBefore, { mode: 0o666 });
+			} catch (restoreErr) {
+				log.warn("Plugins(Y2TB)", `Failed to restore pnpm-lock.yaml after pnpm add: ${restoreErr.message || restoreErr}`);
+			}
+		}
+	}
+
+	log.warn("Plugins(Y2TB)", `Installing dependencies one-by-one (npm fallback): ${uniquePkgs.join(", ")}`);
+
+	for (const pkg of uniquePkgs) {
+		try {
+			cmd.execSync(`npm install --no-save --no-package-lock --legacy-peer-deps ${pkg}`, {
+				stdio: "inherit",
+				env: npmEnv,
+				shell: true
+			});
+			continue;
+		} catch (er) {
+			log.warn("Plugins(Y2TB)", `Install retry with --force for ${pkg}: ${er.message || er}`);
+		}
+
+		try {
+			cmd.execSync(`npm install --no-save --no-package-lock --legacy-peer-deps --force ${pkg}`, {
+				stdio: "inherit",
+				env: npmEnv,
+				shell: true
+			});
+		} catch (er2) {
+			log.warn("Plugins(Y2TB)", `Install failed for ${pkg}: ${er2.message || er2}`);
 		}
 	}
 }
@@ -102,108 +116,71 @@ async function loadPlugins() {
 	!global.plugins.Y2TB.command ? global.plugins.Y2TB.command = {} : "";
 	!global.plugins.Y2TB.plugins ? global.plugins.Y2TB.plugins = {} : "";
 	!global.data ? global.data = {} : "";
-	!global.data.pluginTemp ? global.data.pluginTemp = {
-		"Eval.js": "0.0.0",
-		"Help.js": "0.0.0",
-		"pluginsStore.js": "0.0.0"
-	} : "";
-
-	global.data.pluginTemp = normalizePluginTemp(global.data.pluginTemp);
-
-	ensureExists(path.join(dirPlugins, "obb"));
-
-	let list = [];
-	let useDevMode = global.coreconfig.main_bot.developMode;
-	const defaults = Object.keys(global.data.pluginTemp);
-
-	const localList = scanDir(".js", dirPlugins);
-	if (useDevMode) log.log("Plugins(Y2TB)", "Developer mode: only load defaults + local plugins (no remote list)");
 
 	ensureExists(dirPlugins);
-	const listPath = path.join(dirPlugins, "pluginList.json");
-	if (!fs.existsSync(listPath)) {
-		fs.writeFileSync(listPath, "{}", { mode: 0o666 });
-	}
-	let listFromFile = [];
-	if (!useDevMode) {
-		let raw = "{}";
-		try {
-			raw = fs.readFileSync(listPath, "utf8") || "{}";
-		} catch (e) {
-			log.warn("Plugins(Y2TB)", `pluginList.json unreadable, using empty list: ${e}`);
-		}
-		let jsonList = {};
-		try {
-			jsonList = JSON.parse(raw);
-		} catch (e) {
-			log.warn("Plugins(Y2TB)", `pluginList.json invalid JSON, using empty list: ${e}`);
-			jsonList = {};
-		}
-		listFromFile = Object.keys(jsonList);
-	}
-
-	list = Array.from(new Set(useDevMode
-		? [...defaults, ...localList]
-		: [...defaults, ...localList, ...listFromFile, "pluginsStore.js"]
-	)).map(n => n.endsWith('.js') ? n : `${n}.js`);
-	list = Array.from(new Set(list));
-
-	if (!list.length) {
-		log.warn("Plugins(Y2TB)", "No plugins found (local/core/pluginList all empty)");
-	}
 
 	const pluginEntries = [];
-	for (let name of list) {
+	const children = fs.readdirSync(dirPlugins);
+	for (const child of children) {
+		const pluginDir = path.join(dirPlugins, child);
+		if (!fs.existsSync(pluginDir) || !fs.lstatSync(pluginDir).isDirectory()) continue;
+
+		const manifestPath = path.join(pluginDir, "plugin.json");
+		if (!fs.existsSync(manifestPath) || !fs.lstatSync(manifestPath).isFile()) continue;
+
 		try {
-			const candidates = [name.endsWith('.js') ? name : `${name}.js`];
-			let func = null;
-			let fileUsed = null;
-			let loadedFromRemote = false;
-			let lastFetchError = null;
+			const rawManifest = stripBom(fs.readFileSync(manifestPath, { encoding: "utf8" }));
+			const pluginInfo = JSON.parse(rawManifest);
+			if (!pluginInfo || typeof pluginInfo !== "object") throw new Error("Invalid plugin.json");
 
-			for (const fileName of candidates) {
-				const localPath = path.join(dirPlugins, fileName);
-				if (useDevMode) {
-					if (fs.existsSync(localPath) && fs.lstatSync(localPath).isFile()) {
-						func = fs.readFileSync(localPath).toString();
-						fileUsed = fileName;
-						break;
-					}
-					continue;
-				}
+			if (!pluginInfo.pluginMain || typeof pluginInfo.pluginMain !== "string") {
+				pluginInfo.pluginMain = `${child}.js`;
+			}
+			if (!pluginInfo.pluginName || typeof pluginInfo.pluginName !== "string") {
+				pluginInfo.pluginName = child;
+			}
 
-				for (let attempt = 1; attempt <= 3; attempt++) {
-					try {
-						func = await getFileContent(fileName);
-					} catch (e) {
-						lastFetchError = e;
-						log.warn("Plugins(Y2TB)", `Fetch failed ${fileName} (attempt ${attempt}/3): ${e.message || e}`);
+			const pluginMainPath = path.join(pluginDir, pluginInfo.pluginMain);
+			if (!fs.existsSync(pluginMainPath) || !fs.lstatSync(pluginMainPath).isFile()) {
+				throw new Error(`Missing plugin main file: ${pluginInfo.pluginMain}`);
+			}
+
+			let configDefault = null;
+			const pluginConfigPath = path.join(pluginDir, "config.json");
+			if (fs.existsSync(pluginConfigPath) && fs.lstatSync(pluginConfigPath).isFile()) {
+				try {
+					const rawConfig = stripBom(fs.readFileSync(pluginConfigPath, { encoding: "utf8" }));
+					const parsedConfig = JSON.parse(rawConfig);
+					if (parsedConfig && typeof parsedConfig === "object" && !Array.isArray(parsedConfig)) {
+						configDefault = parsedConfig;
+					} else {
+						log.warn("Plugins(Y2TB)", `${pluginInfo.pluginName} config.json is not an object. Ignored.`);
 					}
-					if (func) {
-						fileUsed = fileName;
-						loadedFromRemote = true;
-						break;
-					}
-					if (attempt < 3) await delay(500);
-				}
-				if (func) break;
-				if (fs.existsSync(localPath) && fs.lstatSync(localPath).isFile()) {
-					func = fs.readFileSync(localPath).toString();
-					fileUsed = fileName;
-					break;
+				} catch (e) {
+					log.warn("Plugins(Y2TB)", `${pluginInfo.pluginName} invalid config.json: ${e.message || e}`);
 				}
 			}
-			if (!func || !fileUsed) {
-				const detail = lastFetchError ? ` (last error: ${lastFetchError.message || lastFetchError})` : "";
-				throw new Error(`Cannot fetch plugin ${name}${detail}`);
-			}
-			const previewInfo = safeGetPluginInfo(func, fileUsed);
-			pluginEntries.push({ name, func, fileUsed, loadedFromRemote, previewInfo });
+
+			const func = fs.readFileSync(pluginMainPath, { encoding: "utf8" });
+
+			pluginEntries.push({
+				name: pluginInfo.pluginName,
+				fileUsed: pluginInfo.pluginMain,
+				pluginMainPath,
+				func,
+				previewInfo: pluginInfo,
+				pluginInfo,
+				configDefault
+			});
 		} catch (err) {
-			log.err("Plugins(Y2TB)", `Can't load "${name}" with error: ${err}`);
+			log.err("Plugins(Y2TB)", `Can't prepare plugin folder "${child}" with error: ${err}`);
 			!global.temp.loadPlugin.stderr ? global.temp.loadPlugin.stderr = [] : "";
-			global.temp.loadPlugin.stderr.push({ plugin: name, error: err });
+			global.temp.loadPlugin.stderr.push({ plugin: child, error: err });
 		}
+	}
+
+	if (!pluginEntries.length) {
+		log.warn("Plugins(Y2TB)", "No plugin folders with plugin.json were found");
 	}
 
 	// Batch install missing dependencies discovered from init metadata
@@ -217,13 +194,18 @@ async function loadPlugins() {
 	// Now load plugins for real
 	for (const entry of pluginEntries) {
 		try {
-			const moduleFuncs = evelStringSync(entry.func, entry.fileUsed, entry.loadedFromRemote ? false : useDevMode);
-			let pluginInfo = moduleFuncs.init();
-			// Fallback to preview info if init throws
-			if (!pluginInfo && entry.previewInfo) pluginInfo = entry.previewInfo;
+			const pluginInfo = entry.pluginInfo || entry.previewInfo;
 			installmd(entry.fileUsed, pluginInfo, { skipNodeDepends: true });
-			await load(entry.fileUsed, pluginInfo, entry.func, entry.loadedFromRemote ? false : useDevMode, moduleFuncs);
-			log.log("Plugins(Y2TB)", `Loaded ${entry.fileUsed} (${entry.loadedFromRemote ? "remote" : "local"}) v${pluginInfo.version}`);
+
+			// Require plugin module only after dependency installation.
+			if (require.cache[require.resolve(entry.pluginMainPath)]) {
+				delete require.cache[require.resolve(entry.pluginMainPath)];
+			}
+			const moduleFuncs = require(entry.pluginMainPath);
+			moduleFuncs.dirFile = entry.pluginMainPath;
+
+			await load(entry.fileUsed, pluginInfo, entry.func, moduleFuncs, entry.configDefault);
+			log.log("Plugins(Y2TB)", `Loaded plugin ${entry.fileUsed} v${pluginInfo.version}`);
 		} catch (err) {
 			log.err("Plugins(Y2TB)", `Can't load "${entry.name}" with error: ${err}`);
 			!global.temp.loadPlugin.stderr ? global.temp.loadPlugin.stderr = [] : "";
@@ -249,38 +231,13 @@ async function unloadPlugins() {
 	console.log("Plugins(Y2TB)", "Unloaded main plugins Y2TB!");
 }
 
-async function load(file, pluginInfo, func, devmode, fullFuncModule) {
-	const fileKey = file.endsWith('.js') ? file : `${file}.js`;
+async function load(file, pluginInfo, func, fullFuncModule, configDefault) {
 	const dirConfig = path.join(ROOT, "config", "plugins");
 	const dirLang = path.join(ROOT, "lang");
 	ensureExists(dirConfig);
 
-	//Load obb if needed
-	if (pluginInfo.obb && (!fs.existsSync(path.join(dirPlugins, "obb", pluginInfo.obb)) || pluginInfo.version != global.data.pluginTemp[fileKey])) {
-		let dirObb = path.join(dirPlugins, "obb");
-		console.warn(pluginInfo.pluginName, "Updating obb: " + pluginInfo.obb);
-		try {
-			const obbPath = path.join(dirObb, pluginInfo.obb);
-			if (fs.existsSync(obbPath)) {
-				const stat = fs.lstatSync(obbPath);
-				if (stat.isDirectory()) fs.rmSync(obbPath, { recursive: true, force: true });
-				else fs.unlinkSync(obbPath);
-			}
-			await downloadfile(pluginInfo.obb + ".zip");
-			let zip = new AdmZip(path.join(dirObb, pluginInfo.obb + ".zip"));
-			zip.extractAllTo(path.join(dirObb, pluginInfo.obb), true);
-			fs.unlinkSync(path.join(dirObb, pluginInfo.obb + ".zip"));
-			console.warn(pluginInfo.pluginName, "Successfully installed obb " + pluginInfo.obb);
-		} catch (e) {
-			console.error(pluginInfo.pluginName, "Can't install obb " + pluginInfo.obb + ": Does not exist in the database or has been corrupted!", e);
-			!global.temp.loadPlugin.stderr ? global.temp.loadPlugin.stderr = [] : "";
-			const id = pluginInfo.pluginMain || file;
-			global.temp.loadPlugin.stderr.push({ plugin: id, error: e });
-		}
-	}
-
 	// Evaluate plugin source (use provided module if available to avoid re-eval)
-	const fullFunc = fullFuncModule || evelStringSync(func, file, devmode);
+	const fullFunc = fullFuncModule || evelStringSync(func, file);
 
 	// Normalize plugin identity to file name if missing
 	if (!pluginInfo.pluginMain) pluginInfo.pluginMain = file;
@@ -306,15 +263,13 @@ async function load(file, pluginInfo, func, devmode, fullFuncModule) {
 			"fullFunc": fullFunc,
 			"dirFile": fullFunc.dirFile,
 			"lang": false,
-			"configDefault": pluginInfo.config || null
+			"config": false,
+			"configDefault": (configDefault && typeof configDefault === "object") ? configDefault : null
 		};
 	} else {
-		global.plugins.Y2TB.plugins[pluginInfo.pluginName].configDefault = pluginInfo.config || null;
+		global.plugins.Y2TB.plugins[pluginInfo.pluginName].configDefault = (configDefault && typeof configDefault === "object") ? configDefault : null;
 	}
-	global.data.pluginTemp[fileKey] = pluginInfo.version;
 	!global.plugins.Y2TB.plugins.listen ? global.plugins.Y2TB.plugins.listen = { "lang": true } : "";
-	!global.plugins.Y2TB.obb ? global.plugins.Y2TB.obb = {} : "";
-	if (pluginInfo.obb) global.plugins.Y2TB.obb[pluginInfo.obb] = pluginInfo.pluginName;
 
 	for (let cmdName in pluginInfo.commandList) {
 		!global.plugins.Y2TB.command[cmdName] ? global.plugins.Y2TB.command[cmdName] = {} : "";
@@ -334,140 +289,90 @@ async function load(file, pluginInfo, func, devmode, fullFuncModule) {
 		};
 	}
 
-	//Load language
-	if (typeof pluginInfo.langMap === "object") {
-		if (global.coreconfig.main_bot.developMode) {
-			fs.writeFileSync(path.join(dirLang, `${pluginInfo.pluginName}.json`), JSON.stringify(pluginInfo.langMap, null, 4), { mode: 0o666 });
-			global.plugins.Y2TB.plugins[pluginInfo.pluginName].lang = true;
-		} else {
-			const langPath = path.join(dirLang, `${pluginInfo.pluginName}.json`);
-			if (!fs.existsSync(langPath)) {
-				const backupPath = path.join(dirLang, "backup", `${pluginInfo.pluginName}.json`);
-				if (!fs.existsSync(backupPath)) {
-					fs.writeFileSync(langPath, JSON.stringify(pluginInfo.langMap, null, 4), { mode: 0o666 });
-				} else {
-					fs.renameSync(backupPath, langPath);
-					let langjs = {};
-					try {
-						langjs = JSON.parse(fs.readFileSync(langPath));
-					} catch (e) {
-						log.warn("Plugins(Y2TB)", `${pluginInfo.pluginName} lang backup corrupted, rewriting defaults: ${e.message || e}`);
-						langjs = {};
-					}
-					for (let l in langjs) if (pluginInfo.langMap[l] === undefined) delete langjs[l];
-					for (let l in pluginInfo.langMap) if (langjs[l] === undefined) langjs[l] = pluginInfo.langMap[l];
-					fs.writeFileSync(langPath, JSON.stringify(langjs, null, 4), { mode: 0o666 });
-				}
-			} else {
-				let langjs = {};
-				try {
-					langjs = JSON.parse(fs.readFileSync(langPath));
-				} catch (e) {
-					log.warn("Plugins(Y2TB)", `${pluginInfo.pluginName} lang file corrupted, rewriting defaults: ${e.message || e}`);
-					langjs = {};
-				}
-				for (let l in langjs) if (pluginInfo.langMap[l] === undefined) delete langjs[l];
-				for (let l in pluginInfo.langMap) if (langjs[l] === undefined) langjs[l] = pluginInfo.langMap[l];
-				fs.writeFileSync(langPath, JSON.stringify(langjs, null, 4), { mode: 0o666 });
+	// Sync plugin language source to bot language folder: lang/<pluginName>/<locale>.json
+	if (Array.isArray(pluginInfo.lang) && pluginInfo.lang.length) {
+		const pluginDir = path.dirname(fullFunc.dirFile || "");
+		const pluginLangDir = path.join(pluginDir, "lang");
+		const botPluginLangDir = path.join(dirLang, pluginInfo.pluginName);
+		ensureExists(botPluginLangDir);
+
+		let hasLang = false;
+		for (const locale of pluginInfo.lang) {
+			if (typeof locale !== "string" || locale.trim() === "") continue;
+			const sourcePath = path.join(pluginLangDir, `${locale}.json`);
+			const targetPath = path.join(botPluginLangDir, `${locale}.json`);
+			if (!fs.existsSync(sourcePath) || !fs.lstatSync(sourcePath).isFile()) {
+				log.warn("Plugins(Y2TB)", `${pluginInfo.pluginName} missing source language file: ${sourcePath}`);
+				continue;
 			}
-			global.plugins.Y2TB.plugins[pluginInfo.pluginName].lang = true;
+
+			let sourceLang = {};
+			try {
+				sourceLang = JSON.parse(stripBom(fs.readFileSync(sourcePath, { encoding: "utf8" })));
+			} catch (e) {
+				log.warn("Plugins(Y2TB)", `${pluginInfo.pluginName} source language invalid (${locale}): ${e.message || e}`);
+				continue;
+			}
+
+			if (!fs.existsSync(targetPath)) {
+				fs.writeFileSync(targetPath, JSON.stringify(sourceLang, null, 4), { mode: 0o666 });
+				hasLang = true;
+				continue;
+			}
+
+			let botLang = {};
+			try {
+				botLang = JSON.parse(stripBom(fs.readFileSync(targetPath, { encoding: "utf8" })));
+			} catch (e) {
+				log.warn("Plugins(Y2TB)", `${pluginInfo.pluginName} bot language invalid (${locale}), rewriting from plugin source`);
+				botLang = {};
+			}
+
+			const merged = mergeMissingFields(botLang, sourceLang);
+			fs.writeFileSync(targetPath, JSON.stringify(merged, null, 4), { mode: 0o666 });
+			hasLang = true;
 		}
+
+		global.plugins.Y2TB.plugins[pluginInfo.pluginName].lang = hasLang;
 	}
 
-	//Load plugin config
-	if (typeof pluginInfo.config === "object") {
+	// Load plugin config (runtime file in config/plugins, defaults from plugin folder config.json)
+	if (configDefault && typeof configDefault === "object") {
 		const cfgPath = path.join(dirConfig, `${pluginInfo.pluginName}.json`);
-		if (global.coreconfig.main_bot.developMode) {
-			fs.writeFileSync(cfgPath, JSON.stringify(pluginInfo.config, null, 4), { mode: 0o666 });
-			global.plugins.Y2TB.plugins[pluginInfo.pluginName].config = true;
-		} else {
-			if (!fs.existsSync(cfgPath)) {
-				const backupCfg = path.join(dirConfig, "backup", `${pluginInfo.pluginName}.json`);
-				if (!fs.existsSync(backupCfg)) {
-					fs.writeFileSync(cfgPath, JSON.stringify(pluginInfo.config, null, 4), { mode: 0o666 });
-				} else {
-					fs.renameSync(backupCfg, cfgPath);
-					let configjs = {};
-					try {
-						configjs = JSON.parse(fs.readFileSync(cfgPath));
-					} catch (e) {
-						log.warn("Plugins(Y2TB)", `${pluginInfo.pluginName} config backup corrupted, rewriting defaults: ${e.message || e}`);
-						configjs = {};
-					}
-					for (let l in configjs) if (pluginInfo.config[l] === undefined) delete configjs[l];
-					for (let l in pluginInfo.config) if (configjs[l] === undefined) configjs[l] = pluginInfo.config[l];
-					fs.writeFileSync(cfgPath, JSON.stringify(configjs, null, 4), { mode: 0o666 });
-				}
+		if (!fs.existsSync(cfgPath)) {
+			const backupCfg = path.join(dirConfig, "backup", `${pluginInfo.pluginName}.json`);
+			if (!fs.existsSync(backupCfg)) {
+				fs.writeFileSync(cfgPath, JSON.stringify(configDefault, null, 4), { mode: 0o666 });
 			} else {
+				fs.renameSync(backupCfg, cfgPath);
 				let configjs = {};
 				try {
 					configjs = JSON.parse(fs.readFileSync(cfgPath));
 				} catch (e) {
-					log.warn("Plugins(Y2TB)", `${pluginInfo.pluginName} config file corrupted, rewriting defaults: ${e.message || e}`);
+					log.warn("Plugins(Y2TB)", `${pluginInfo.pluginName} config backup corrupted, rewriting defaults: ${e.message || e}`);
 					configjs = {};
 				}
-				for (let l in configjs) if (pluginInfo.config[l] === undefined) delete configjs[l];
-				for (let l in pluginInfo.config) if (configjs[l] === undefined) configjs[l] = pluginInfo.config[l];
+				for (let l in configjs) if (configDefault[l] === undefined) delete configjs[l];
+				for (let l in configDefault) if (configjs[l] === undefined) configjs[l] = configDefault[l];
 				fs.writeFileSync(cfgPath, JSON.stringify(configjs, null, 4), { mode: 0o666 });
 			}
-			global.plugins.Y2TB.plugins[pluginInfo.pluginName].config = true;
+		} else {
+			let configjs = {};
+			try {
+				configjs = JSON.parse(fs.readFileSync(cfgPath));
+			} catch (e) {
+				log.warn("Plugins(Y2TB)", `${pluginInfo.pluginName} config file corrupted, rewriting defaults: ${e.message || e}`);
+				configjs = {};
+			}
+			for (let l in configjs) if (configDefault[l] === undefined) delete configjs[l];
+			for (let l in configDefault) if (configjs[l] === undefined) configjs[l] = configDefault[l];
+			fs.writeFileSync(cfgPath, JSON.stringify(configjs, null, 4), { mode: 0o666 });
 		}
+		global.plugins.Y2TB.plugins[pluginInfo.pluginName].config = true;
+	} else {
+		global.plugins.Y2TB.plugins[pluginInfo.pluginName].config = false;
 	}
 }
-
-async function getFileContent(linkDir) {
-	try {
-		const response = await octokit.repos.getContent({
-			owner: "VangBanLaNhat",
-			repo: "Y2TB-data",
-			path: "PluginStorage/" + linkDir,
-			ref: "main"
-		});
-		const content = Buffer.from(response.data.content, 'base64').toString();
-		return content;
-	} catch (error) {
-		try {
-			let cnt = (await axios.get('https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-data/main/PluginStorage/' + linkDir)).data;
-			return cnt;
-		} catch (e) {
-			return false;
-		}
-	}
-}
-
-async function downloadfile(linkDir) {
-	const name = path.join(dirPlugins, "obb", linkDir);
-	let url = null;
-	try {
-		const response = await octokit.repos.getContent({
-			owner: "VangBanLaNhat",
-			repo: "Y2TB-data",
-			path: "PluginStorage/obb/" + linkDir,
-			ref: "main"
-		});
-		url = response.data.download_url;
-	} catch (err) {
-		// Fall back to raw URL if rate limited or API fails
-		url = `https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-data/main/PluginStorage/obb/${linkDir}`;
-	}
-
-	try {
-		const response = await axios({
-			method: 'get',
-			url,
-			responseType: 'stream'
-		});
-		const writer = fs.createWriteStream(name);
-		response.data.pipe(writer);
-		await new Promise((resolve, reject) => {
-			writer.on('finish', resolve);
-			writer.on('error', reject);
-		});
-	} catch (error) {
-		console.error("Plugins(Y2TB)", `Failed to download ${linkDir} from ${url}:`, error.message || error);
-	}
-}
-
 
 function installmd(file, pluginInfo, opts = {}) {
 	const skipNodeDepends = opts.skipNodeDepends || false;
@@ -489,10 +394,8 @@ function installmd(file, pluginInfo, opts = {}) {
 	}
 }
 
-function evelStringSync(str, fileName, dev) {
+function evelStringSync(str, fileName) {
 	fileName = fileName ? fileName : (new Date()).getTime() + "";
-
-	if (dev) return require(path.join(dirPlugins, fileName));
 	const nameEncode = Buffer.from(fileName).toString("base64") + ".js";
 	ensureExists(dirPlugins);
 	const linkDir = path.join(dirPlugins, nameEncode);
@@ -543,14 +446,24 @@ function ensureExists(path, mask) {
 	}
 }
 
-function normalizePluginTemp(map) {
-	const res = {};
-	if (!map || typeof map !== 'object') return res;
-	for (const [key, val] of Object.entries(map)) {
-		const withExt = /\.js$/i.test(key) ? key : `${key}.js`;
-		if (FILE_KEY_RE.test(withExt)) res[withExt] = val;
+function isObject(value) {
+	return value && typeof value === "object" && !Array.isArray(value);
+}
+
+function mergeMissingFields(target, source) {
+	if (!isObject(target)) target = {};
+	if (!isObject(source)) return target;
+
+	for (const key of Object.keys(source)) {
+		if (target[key] === undefined) {
+			target[key] = source[key];
+			continue;
+		}
+		if (isObject(target[key]) && isObject(source[key])) {
+			target[key] = mergeMissingFields(target[key], source[key]);
+		}
 	}
-	return res;
+	return target;
 }
 
 module.exports = {

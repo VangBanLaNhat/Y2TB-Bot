@@ -24,7 +24,6 @@ function loadConfig() {
     const pluginMeta = global.plugins.Y2TB.plugins[pluginName];
     const cfgPath = path.join(dirConfig, configFiles[i]);
     if (!pluginMeta || !pluginMeta.config) {
-      if (global.coreconfig.main_bot.developMode) continue;
       fs.renameSync(cfgPath, path.join(dirConfig, "backup", configFiles[i]));
       continue;
     }
