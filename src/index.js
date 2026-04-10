@@ -206,16 +206,46 @@ for (var i = 0; i < ll.length; i++) {
 	var loginstate;
 	(!fbStateExisting && fbCredentials.email == "" && fbCredentials.password == "") ? loginstate = false : loginstate = true
 	if (loginstate) {
+		let e2eeEnabled = !!global.coreconfig.facebook.enableE2EE;
+		if (e2eeEnabled && !isE2EEBridgeReady()) {
+			if (global.coreconfig.facebook.e2eeAutoBuild !== false) {
+				console.warn("E2EE", "Bridge is missing, trying auto-build...");
+				const built = autoBuildE2EEBridge();
+				if (!built || !isE2EEBridgeReady()) {
+					e2eeEnabled = false;
+					console.warn("E2EE", "Bridge is not ready, fallback to normal transport. Install/build meta-messenger.js to enable E2EE.");
+				} else {
+					console.log("E2EE", "Bridge build success. E2EE transport enabled.");
+				}
+			} else {
+				e2eeEnabled = false;
+				console.warn("E2EE", "Bridge is not ready, fallback to normal transport. Install/build meta-messenger.js to enable E2EE.");
+			}
+		}
+
+		let e2eeDevicePath = global.coreconfig.facebook.e2eeDevicePath || "config/e2ee_device.json";
+		if (typeof e2eeDevicePath === "string" && !path.isAbsolute(e2eeDevicePath)) {
+			e2eeDevicePath = path.join(ROOT, e2eeDevicePath);
+		}
+		let appStatePath = fbStateExisting || path.join(ROOT, "config", "fbstate.json");
+		let fbStateAutoSaveMinutes = Number(global.coreconfig.facebook.fbStateAutoSaveMinutes);
+		if (!Number.isFinite(fbStateAutoSaveMinutes) || fbStateAutoSaveMinutes <= 0) {
+			fbStateAutoSaveMinutes = 30;
+		}
 		let loginOptions = {
 			"logLevel": global.coreconfig.facebook.logLevel,
 			"userAgent": global.coreconfig.facebook.userAgent,
 			"selfListen": global.config.facebook.selfListen,
 			"listenEvents": global.coreconfig.facebook.listenEvents,
 			"updatePresence": global.coreconfig.facebook.updatePresence,
-			"autoMarkRead": global.config.facebook.autoMarkRead
+			"autoMarkRead": global.config.facebook.autoMarkRead,
+			"enableE2EE": e2eeEnabled,
+			"e2eeAutoConnect": global.coreconfig.facebook.e2eeAutoConnect !== false,
+			"e2eeDevicePath": e2eeDevicePath,
+			"fbStatePath": appStatePath,
+			"fbStateAutoSaveMinutes": fbStateAutoSaveMinutes
 		}
 		console.log("Manager", "Logging...")
-		let appStatePath = fbStateExisting || path.join(ROOT, "config", "fbstate.json");
 		let appState = {};
 		if (fs.existsSync(appStatePath)) {
 			//login using appstate
@@ -367,5 +397,55 @@ function ensureExists(path, mask) {
 		return {
 			err: ex
 		};
+	}
+}
+
+function isE2EEBridgeReady() {
+	try {
+		const pkgPath = resolveMetaMessengerPackagePath();
+		if (!pkgPath) return false;
+		const baseDir = path.dirname(pkgPath);
+		let nativeFile = "messagix.so";
+		if (process.platform === "win32") nativeFile = "messagix.dll";
+		if (process.platform === "darwin") nativeFile = "messagix.dylib";
+		return fs.existsSync(path.join(baseDir, "build", nativeFile));
+	} catch (e) {
+		return false;
+	}
+}
+
+function resolveMetaMessengerPackagePath() {
+	try {
+		const { createRequire } = require("module");
+		const fcaPkg = require.resolve("fca-unofficial/package.json");
+		const fcaRequire = createRequire(fcaPkg);
+		return fcaRequire.resolve("meta-messenger.js/package.json");
+	} catch (_) {
+		return null;
+	}
+}
+
+function autoBuildE2EEBridge() {
+	try {
+		cmd.execSync("pnpm -w run build:e2ee", {
+			cwd: ROOT,
+			stdio: "inherit",
+			env: process.env,
+			shell: true
+		});
+		return true;
+	} catch (_) {
+		try {
+			cmd.execSync("pnpm run build:e2ee", {
+				cwd: ROOT,
+				stdio: "inherit",
+				env: process.env,
+				shell: true
+			});
+			return true;
+		} catch (e) {
+			console.error("E2EE", "Auto-build failed:", e && e.message ? e.message : e);
+			return false;
+		}
 	}
 }

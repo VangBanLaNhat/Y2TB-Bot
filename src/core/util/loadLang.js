@@ -44,9 +44,9 @@ function loadLang() {
           if (!mergedLang[key]) mergedLang[key] = {};
           const entry = parsed[key];
           if (entry && typeof entry === "object" && !Array.isArray(entry)) {
-            if (typeof entry.text === "string") mergedLang[key][locale] = entry.text;
-            else if (typeof entry[locale] === "string") mergedLang[key][locale] = entry[locale];
-          } else if (typeof entry === "string") {
+            if (Object.prototype.hasOwnProperty.call(entry, "text")) mergedLang[key][locale] = entry.text;
+            else if (Object.prototype.hasOwnProperty.call(entry, locale)) mergedLang[key][locale] = entry[locale];
+          } else if (entry !== undefined) {
             mergedLang[key][locale] = entry;
           }
         }

@@ -5,9 +5,72 @@ const listen = require(path.join(__dirname, "listen.js"))
 var log = require(path.join(__dirname, "..", "util", "log.js"));
 
 const ROOT = path.join(__dirname, "..", "..", "..");
+const DEFAULT_FBSTATE_AUTOSAVE_MINUTES = 30;
+
+function resolveFbStatePath(opts) {
+    if (opts && typeof opts.fbStatePath === "string" && opts.fbStatePath.trim() !== "") {
+        return opts.fbStatePath;
+    }
+    return path.join(ROOT, "config", "fbstate.json");
+}
+
+function resolveFbStateAutoSaveMinutes(opts) {
+    var minutes = Number(opts && opts.fbStateAutoSaveMinutes);
+    if (!Number.isFinite(minutes) || minutes <= 0) {
+        minutes = DEFAULT_FBSTATE_AUTOSAVE_MINUTES;
+    }
+    return minutes;
+}
+
+function writeFbState(api, fbStatePath) {
+    if (!api || typeof api.getAppState !== "function") {
+        throw new Error("getAppState is not available on current API instance");
+    }
+
+    var appState = api.getAppState();
+    if (!Array.isArray(appState) || appState.length === 0) {
+        throw new Error("Received empty appState");
+    }
+
+    fs.mkdirSync(path.dirname(fbStatePath), { recursive: true });
+    fs.writeFileSync(fbStatePath, JSON.stringify(appState, null, "\t"), { mode: 0o666 });
+}
+
+function startFbStateAutoSave(api, opts) {
+    var fbStatePath = resolveFbStatePath(opts);
+    var intervalMinutes = resolveFbStateAutoSaveMinutes(opts);
+    var intervalMs = Math.max(1000, Math.floor(intervalMinutes * 60 * 1000));
+
+    if (global.fbStateAutoSaveTimer) {
+        clearInterval(global.fbStateAutoSaveTimer);
+        global.fbStateAutoSaveTimer = null;
+    }
+
+    try {
+        writeFbState(api, fbStatePath);
+        log.log("Facebook", "Saved fbstate at login: " + fbStatePath);
+    } catch (saveErr) {
+        log.warn("Facebook", "Initial fbstate save failed: " + (saveErr && saveErr.message ? saveErr.message : saveErr));
+    }
+
+    global.fbStateAutoSaveTimer = setInterval(function () {
+        try {
+            writeFbState(api, fbStatePath);
+            log.log("Facebook", "Auto-updated fbstate: " + fbStatePath);
+        } catch (saveErr) {
+            log.warn("Facebook", "Auto-update fbstate failed: " + (saveErr && saveErr.message ? saveErr.message : saveErr));
+        }
+    }, intervalMs);
+
+    if (typeof global.fbStateAutoSaveTimer.unref === "function") {
+        global.fbStateAutoSaveTimer.unref();
+    }
+
+    log.log("Facebook", "Auto-update fbstate every " + intervalMinutes + " minutes.");
+}
 
 module.exports = async (appState, loginOptions) => {
-    var opts = loginOptions;
+    var opts = Object.assign({}, loginOptions || {});
     delete opts["userAgent"];
 	
     login({ appState }, opts, async (err, api) => {
@@ -26,6 +89,22 @@ module.exports = async (appState, loginOptions) => {
 
 
         log.log("Manager","Login successfuly!");
+        startFbStateAutoSave(api, opts);
+
+        if (opts.enableE2EE && opts.e2eeAutoConnect !== false && typeof api.connectE2EE === "function") {
+            try {
+                await new Promise((resolve, reject) => {
+                    api.connectE2EE((connectErr) => {
+                        if (connectErr) return reject(connectErr);
+                        resolve();
+                    });
+                });
+                log.log("E2EE", `Connected (device: ${opts.e2eeDevicePath || "default"})`);
+            } catch (connectErr) {
+                log.warn("E2EE", `Connect failed: ${connectErr && connectErr.message ? connectErr.message : connectErr}`);
+            }
+        }
+
         for(let i in global.plugins.Y2TB.plugins){
             try{
             	let adv = {

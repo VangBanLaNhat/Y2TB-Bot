@@ -16,8 +16,8 @@ const ROOT = path.join(__dirname, "..");
   // fs.writeFileSync(path.join(__dirname, "data", "isStart.txt"), "1");
 
   var nodeVersion = semver.parse(process.version);
-  if (nodeVersion.major < 16) {
-    console.error("MAIN", "ERROR: Node.JS 16+ required in this version!");
+  if (nodeVersion.major < 22) {
+    console.error("MAIN", "ERROR: Node.JS 22+ required in this version!");
     console.error("MAIN", "Node.JS version running this bot:", process.version);
     process.exit(1);
   }
