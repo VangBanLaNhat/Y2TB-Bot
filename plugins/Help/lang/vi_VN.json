@@ -1,0 +1,44 @@
+{
+  "listCommand": {
+    "desc": "listCommand",
+    "text": "Danh sách các lệnh:",
+    "args": {}
+  },
+  "pages": {
+    "desc": "Pages",
+    "text": "Trang {0}/{1}",
+    "args": {
+      "{0}": "Trang hiện tại",
+      "{1}": "Tổng số trang"
+    }
+  },
+  "listCommandEnd": {
+    "desc": "listCommandEnd",
+    "text": "Hãy gõ \"{prefix}help [Lệnh]\" để biết thêm chi tiết về lệnh đó",
+    "args": {
+      "{prefix}": "Prefix"
+    }
+  },
+  "commandInfo": {
+    "desc": "Pages",
+    "text": "Chi tiết lệnh:\n-Cách dùng:\n{0}\n-Mô tả: {1}\n\nChú thích:\n<>: Bắt buộc phải có\n[]: Không bắt buộc phải có",
+    "args": {
+      "{0}": "Cách dùng",
+      "{1}": "Mô tả"
+    }
+  },
+  "noCommand": {
+    "desc": "No Command",
+    "text": "Lệnh \"{0}\" không tồn tại!",
+    "args": {
+      "{0}": "Lời nhắn"
+    }
+  },
+  "exitCM": {
+    "desc": "Exit command",
+    "text": "Lệnh không tồn tại! Vui lòng sử dụng lệnh \"{0}help [Trang số]\" để xem các lệnh hiện có",
+    "args": {
+      "{0}": "Prefix"
+    }
+  }
+}
