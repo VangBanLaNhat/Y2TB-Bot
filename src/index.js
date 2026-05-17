@@ -14,9 +14,9 @@ var scanDir = require("./core/util/scanDir.js");
 
 const ROOT = path.join(__dirname, "..");
 
-const linkUpdate = "https://github.com/VangBanLaNhat/Y2TB-Bot-lite-noPanel/archive/refs/heads/main.zip";
-const versionUpdate = "https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-Bot-lite-noPanel/main/package.json";
-const folderUpdate = "Y2TB-Bot-lite-noPanel-main";
+const linkUpdate = "https://github.com/VangBanLaNhat/Y2TB-Bot/archive/refs/heads/main.zip";
+const versionUpdate = "https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-Bot/main/package.json";
+const folderUpdate = "Y2TB-Bot";
 
 //Write logs
 
