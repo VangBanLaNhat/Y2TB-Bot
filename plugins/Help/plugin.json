@@ -27,5 +27,7 @@
     }
   },
   "author": "HerokeyVN",
-  "version": "0.0.1"
+  "version": "0.0.1",
+  "updateUrl": "https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-data/refs/heads/main/plugins/Help.zip",
+  "versionUrl": "https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-data/refs/heads/main/plugins/version/Help.txt"
 }
