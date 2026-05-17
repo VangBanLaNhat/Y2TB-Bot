@@ -1,4 +1,4 @@
-# Y2TB-Bot Lite (No Panel)
+# Y2TB-Bot
 
 A lightweight Facebook Messenger bot built with Node.js. It supports core updates, a plugin system, and plugin auto update.
 
@@ -9,8 +9,8 @@ A lightweight Facebook Messenger bot built with Node.js. It supports core update
 
 ## Quick Start
 ```bash
-git clone https://github.com/VangBanLaNhat/Y2TB-Bot-lite-noPanel.git
-cd Y2TB-Bot-lite-noPanel-main
+git clone https://github.com/VangBanLaNhat/Y2TB-Bot.git
+cd Y2TB-Bot
 yarn install
 
 # Config
