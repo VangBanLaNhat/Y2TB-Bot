@@ -50,13 +50,7 @@ for (var i = 0; i < ll.length; i++) {
 		console.warn("Update", "Proceed to update node_modules...")
 		deleteFolderRecursive(path.join(ROOT, "update"));
 		if(!fs.existsSync(path.join(ROOT, "data", "user.json"))){
-			let listModule = (JSON.parse(fs.readFileSync(path.join(ROOT, "package.json")))).dependencies;
-			let listInstall = "";
-			for(let i in listModule){
-				listInstall += " " + i;
-				listModule[i].indexOf("^") != -1 ? listInstall+="@"+listModule[i]:"";
-			}
-			cmd.execSync(`npm install`+listInstall, {
+			cmd.execSync("yarn install --non-interactive", {
 				stdio: "inherit",
 				env: process.env,
 				shell: true
@@ -143,6 +137,15 @@ for (var i = 0; i < ll.length; i++) {
 		}
 	}, global.coreconfig.main_bot.dataSaveTime * 1000)
 
+	//plugin auto update
+
+	console.log("Plugins(Update)", "Checking plugin updates...");
+	try {
+		await require("./core/util/pluginAutoUpdate.js")();
+	} catch (err) {
+		console.warn("Plugins(Update)", "Auto update failed:", err);
+	}
+
 	//loadPlugins
 
 	console.log("Plugin", "Loading Plugins...")
@@ -207,25 +210,15 @@ for (var i = 0; i < ll.length; i++) {
 	(!fbStateExisting && fbCredentials.email == "" && fbCredentials.password == "") ? loginstate = false : loginstate = true
 	if (loginstate) {
 		let e2eeEnabled = !!global.coreconfig.facebook.enableE2EE;
-		if (e2eeEnabled && !isE2EEBridgeReady()) {
-			if (global.coreconfig.facebook.e2eeAutoBuild !== false) {
-				console.warn("E2EE", "Bridge is missing, trying auto-build...");
-				const built = autoBuildE2EEBridge();
-				if (!built || !isE2EEBridgeReady()) {
-					e2eeEnabled = false;
-					console.warn("E2EE", "Bridge is not ready, fallback to normal transport. Install/build meta-messenger.js to enable E2EE.");
-				} else {
-					console.log("E2EE", "Bridge build success. E2EE transport enabled.");
-				}
-			} else {
-				e2eeEnabled = false;
-				console.warn("E2EE", "Bridge is not ready, fallback to normal transport. Install/build meta-messenger.js to enable E2EE.");
-			}
+		let e2eeDeviceStorePath = global.coreconfig.facebook.e2eeDeviceStorePath
+			|| global.coreconfig.facebook.e2eeDevicePath
+			|| "config/device-store.json";
+		if (typeof e2eeDeviceStorePath === "string" && !path.isAbsolute(e2eeDeviceStorePath)) {
+			e2eeDeviceStorePath = path.join(ROOT, e2eeDeviceStorePath);
 		}
-
-		let e2eeDevicePath = global.coreconfig.facebook.e2eeDevicePath || "config/e2ee_device.json";
-		if (typeof e2eeDevicePath === "string" && !path.isAbsolute(e2eeDevicePath)) {
-			e2eeDevicePath = path.join(ROOT, e2eeDevicePath);
+		let e2eeSessionStorePath = global.coreconfig.facebook.e2eeSessionStorePath || "";
+		if (typeof e2eeSessionStorePath === "string" && e2eeSessionStorePath !== "" && !path.isAbsolute(e2eeSessionStorePath)) {
+			e2eeSessionStorePath = path.join(ROOT, e2eeSessionStorePath);
 		}
 		let appStatePath = fbStateExisting || path.join(ROOT, "config", "fbstate.json");
 		let fbStateAutoSaveMinutes = Number(global.coreconfig.facebook.fbStateAutoSaveMinutes);
@@ -238,10 +231,13 @@ for (var i = 0; i < ll.length; i++) {
 			"selfListen": global.config.facebook.selfListen,
 			"listenEvents": global.coreconfig.facebook.listenEvents,
 			"updatePresence": global.coreconfig.facebook.updatePresence,
-			"autoMarkRead": global.config.facebook.autoMarkRead,
+			"autoMarkRead": global.config.facebook.autoMarkRead
+		};
+		let botOptions = {
 			"enableE2EE": e2eeEnabled,
 			"e2eeAutoConnect": global.coreconfig.facebook.e2eeAutoConnect !== false,
-			"e2eeDevicePath": e2eeDevicePath,
+			"e2eeDeviceStorePath": e2eeDeviceStorePath,
+			"e2eeSessionStorePath": e2eeSessionStorePath,
 			"fbStatePath": appStatePath,
 			"fbStateAutoSaveMinutes": fbStateAutoSaveMinutes
 		}
@@ -250,7 +246,7 @@ for (var i = 0; i < ll.length; i++) {
 		if (fs.existsSync(appStatePath)) {
 			//login using appstate
 			appState = JSON.parse(fs.readFileSync(appStatePath, "utf-8"));
-			await require("./core/communication/fb.js")(appState, loginOptions);
+			await require("./core/communication/fb.js")(appState, loginOptions, botOptions);
 		} else {
 			//login using credentials then create appstate
 			console.log("Manager", "Creating appstate for further login...");
@@ -276,10 +272,10 @@ for (var i = 0; i < ll.length; i++) {
 				}
 
 				appState = api.getAppState();
-				require("./core/communication/fb.js")(appState, loginOptions);
+				require("./core/communication/fb.js")(appState, loginOptions, botOptions);
 				fs.writeFileSync(appStatePath, JSON.stringify(appState, null, "\t"));
 				if (fbStateExisting && fbStateExisting !== appStatePath && fs.existsSync(fbStateExisting)) {
-					fs.unlinkSync(fbStateExisting);
+					// fs.unlinkSync(fbStateExisting);
 				}
 			});
 		}
@@ -397,55 +393,5 @@ function ensureExists(path, mask) {
 		return {
 			err: ex
 		};
-	}
-}
-
-function isE2EEBridgeReady() {
-	try {
-		const pkgPath = resolveMetaMessengerPackagePath();
-		if (!pkgPath) return false;
-		const baseDir = path.dirname(pkgPath);
-		let nativeFile = "messagix.so";
-		if (process.platform === "win32") nativeFile = "messagix.dll";
-		if (process.platform === "darwin") nativeFile = "messagix.dylib";
-		return fs.existsSync(path.join(baseDir, "build", nativeFile));
-	} catch (e) {
-		return false;
-	}
-}
-
-function resolveMetaMessengerPackagePath() {
-	try {
-		const { createRequire } = require("module");
-		const fcaPkg = require.resolve("fca-unofficial/package.json");
-		const fcaRequire = createRequire(fcaPkg);
-		return fcaRequire.resolve("meta-messenger.js/package.json");
-	} catch (_) {
-		return null;
-	}
-}
-
-function autoBuildE2EEBridge() {
-	try {
-		cmd.execSync("pnpm -w run build:e2ee", {
-			cwd: ROOT,
-			stdio: "inherit",
-			env: process.env,
-			shell: true
-		});
-		return true;
-	} catch (_) {
-		try {
-			cmd.execSync("pnpm run build:e2ee", {
-				cwd: ROOT,
-				stdio: "inherit",
-				env: process.env,
-				shell: true
-			});
-			return true;
-		} catch (e) {
-			console.error("E2EE", "Auto-build failed:", e && e.message ? e.message : e);
-			return false;
-		}
 	}
 }

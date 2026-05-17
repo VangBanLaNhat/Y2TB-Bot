@@ -67,6 +67,8 @@ plugins/coinFlip/
   "chathook": "onChat",
   "onload": "onLoad",
   "loginFunc": "onLogin",
+  "updateUrl": "https://example.com/plugins/coinFlip.zip",
+  "versionUrl": "https://example.com/plugins/coinFlip.version.txt",
   "author": "YourName",
   "version": "0.0.1"
 }
@@ -76,6 +78,10 @@ Notes:
 
 - If not needed, you can remove `nodeDepends`, `config`, `chathook`, `onload`, `loginFunc`.
 - `pluginMain` must match the JS file name.
+- For auto update:
+  - `updateUrl` must be a direct .zip link containing `plugin.json` at or under the root.
+  - If `versionUrl` exists, it should point to a plain text file with only the version string (example: `1.2.3`).
+  - If `versionUrl` is missing, the updater reads the version from `plugin.json` inside the zip (downloaded to memory only for the check).
 
 ## 4. Language File Format
 

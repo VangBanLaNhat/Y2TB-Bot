@@ -33,8 +33,9 @@ function core() {
 	    	"updatePresence": false,
 	    	"fbStateAutoSaveMinutes": 30,
 	    	"enableE2EE": false,
-	    	"e2eeAutoBuild": true,
 	    	"e2eeAutoConnect": true,
+	    	"e2eeDeviceStorePath": "config/device-store.json",
+	    	"e2eeSessionStorePath": "config/e2ee_session.json",
 	    	"e2eeDevicePath": "config/e2ee_device.json"
     	}
     }

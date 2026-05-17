@@ -13,13 +13,32 @@ function getBaseId(value) {
 }
 
 function normalizeE2EEEvent(event) {
-	if (!event || !event.e2ee) return event;
+	if (!event) return event;
 
-	if (!event.threadID && event.e2ee.chatJid) {
+	if (event.data && event.type && event.type.indexOf("e2ee_") === 0) {
+		if (!event.e2ee) event.e2ee = event.data;
+		if (!event.threadID && event.data.threadId) {
+			event.threadID = String(event.data.threadId);
+		}
+		if (!event.senderID && event.data.senderId) {
+			event.senderID = String(event.data.senderId);
+		}
+		if (!event.body && event.data.text) {
+			event.body = event.data.text;
+		}
+		if (!event.messageID && event.data.messageId) {
+			event.messageID = event.data.messageId;
+		}
+		if (typeof event.isGroup !== "boolean" && typeof event.data.isGroup === "boolean") {
+			event.isGroup = event.data.isGroup;
+		}
+	}
+
+	if (event.e2ee && !event.threadID && event.e2ee.chatJid) {
 		event.threadID = String(event.e2ee.chatJid);
 	}
 
-	if (!event.senderID && event.e2ee.senderJid) {
+	if (event.e2ee && !event.senderID && event.e2ee.senderJid) {
 		event.senderID = getBaseId(event.e2ee.senderJid);
 	}
 
@@ -52,17 +71,27 @@ async function listen(err, event, api) {
 			break;
 		case "e2ee_message":
 			// Handle event structure
-			event.senderID += "@msgr";
-			event.threadID = event.e2ee.chatJid;
-			event.messageReply = event.e2ee.replyTo === null ? undefined : {
-				senderID: event.e2ee.replyTo.senderId ? event.e2ee.replyTo.senderId.toString() + '@msgr' : undefined,
-				messageID: event.e2ee.replyTo.messageId,
-				body: event.e2ee.replyTo.text
-			};
+			var e2eeData = event.data || event.e2ee || {};
+			if (event.senderID && event.senderID.indexOf("@") === -1) {
+				event.senderID += "@msgr";
+			}
+			if (!event.threadID && e2eeData.chatJid) {
+				event.threadID = e2eeData.chatJid;
+			}
+			if (!event.body && e2eeData.text) {
+				event.body = e2eeData.text;
+			}
+			if (e2eeData.replyTo) {
+				event.messageReply = {
+					senderID: e2eeData.replyTo.senderId ? String(e2eeData.replyTo.senderId) + '@msgr' : undefined,
+					messageID: e2eeData.replyTo.messageId,
+					body: e2eeData.replyTo.text
+				};
+			}
 			if (global.coreconfig.main_bot.toggleDebug == true) {
 				log.log("E2EE", event);
 			} else {
-				log.log("E2EE", `[${event.senderID || "unknown"} to ${(event.e2ee && event.e2ee.chatJid) || event.threadID || "unknown"}] ${event.body || ""}`);
+				log.log("E2EE", `[${event.senderID || "unknown"} to ${event.threadID || "unknown"}] ${event.body || ""}`);
 			}
 			break;
 		default:
