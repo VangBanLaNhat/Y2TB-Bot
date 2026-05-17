@@ -133,4 +133,3 @@ plugins/cache/
 self-note.txt
 config/device-store.json
 config/e2ee_session.json
-config/plugins-lock.json
