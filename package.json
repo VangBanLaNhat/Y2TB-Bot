@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/VangBanLaNhat/Y2TB-Bot-lite-noPanel.git"
+    "url": "git+https://github.com/VangBanLaNhat/Y2TB-Bot.git"
   },
   "keywords": [
     "chatbot"
@@ -17,9 +17,9 @@
   "author": "Kaysil <kaysilminer@gmail.com> (kaysil.net), HerokeyVN <herokey2018@gmail.com>, Fong, Hygameo",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/VangBanLaNhat/Y2TB-Bot-lite-noPanel/issues"
+    "url": "https://github.com/VangBanLaNhat/Y2TB-Bot/issues"
   },
-  "homepage": "https://github.com/VangBanLaNhat/Y2TB-Bot-lite-noPanel#readme",
+  "homepage": "https://github.com/VangBanLaNhat/Y2TB-Bot#readme",
   "packageManager": "yarn@1.22.22",
   "dependencies": {
     "@octokit/rest": "20.0.0",
