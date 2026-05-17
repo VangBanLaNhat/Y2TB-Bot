@@ -50,13 +50,7 @@ for (var i = 0; i < ll.length; i++) {
 		console.warn("Update", "Proceed to update node_modules...")
 		deleteFolderRecursive(path.join(ROOT, "update"));
 		if(!fs.existsSync(path.join(ROOT, "data", "user.json"))){
-			let listModule = (JSON.parse(fs.readFileSync(path.join(ROOT, "package.json")))).dependencies;
-			let listInstall = "";
-			for(let i in listModule){
-				listInstall += " " + i;
-				listModule[i].indexOf("^") != -1 ? listInstall+="@"+listModule[i]:"";
-			}
-			cmd.execSync(`npm install`+listInstall, {
+			cmd.execSync("yarn install --non-interactive", {
 				stdio: "inherit",
 				env: process.env,
 				shell: true
@@ -143,6 +137,15 @@ for (var i = 0; i < ll.length; i++) {
 		}
 	}, global.coreconfig.main_bot.dataSaveTime * 1000)
 
+	//plugin auto update
+
+	console.log("Plugins(Update)", "Checking plugin updates...");
+	try {
+		await require("./core/util/pluginAutoUpdate.js")();
+	} catch (err) {
+		console.warn("Plugins(Update)", "Auto update failed:", err);
+	}
+
 	//loadPlugins
 
 	console.log("Plugin", "Loading Plugins...")
@@ -206,6 +209,22 @@ for (var i = 0; i < ll.length; i++) {
 	var loginstate;
 	(!fbStateExisting && fbCredentials.email == "" && fbCredentials.password == "") ? loginstate = false : loginstate = true
 	if (loginstate) {
+		let e2eeEnabled = !!global.coreconfig.facebook.enableE2EE;
+		let e2eeDeviceStorePath = global.coreconfig.facebook.e2eeDeviceStorePath
+			|| global.coreconfig.facebook.e2eeDevicePath
+			|| "config/device-store.json";
+		if (typeof e2eeDeviceStorePath === "string" && !path.isAbsolute(e2eeDeviceStorePath)) {
+			e2eeDeviceStorePath = path.join(ROOT, e2eeDeviceStorePath);
+		}
+		let e2eeSessionStorePath = global.coreconfig.facebook.e2eeSessionStorePath || "";
+		if (typeof e2eeSessionStorePath === "string" && e2eeSessionStorePath !== "" && !path.isAbsolute(e2eeSessionStorePath)) {
+			e2eeSessionStorePath = path.join(ROOT, e2eeSessionStorePath);
+		}
+		let appStatePath = fbStateExisting || path.join(ROOT, "config", "fbstate.json");
+		let fbStateAutoSaveMinutes = Number(global.coreconfig.facebook.fbStateAutoSaveMinutes);
+		if (!Number.isFinite(fbStateAutoSaveMinutes) || fbStateAutoSaveMinutes <= 0) {
+			fbStateAutoSaveMinutes = 30;
+		}
 		let loginOptions = {
 			"logLevel": global.coreconfig.facebook.logLevel,
 			"userAgent": global.coreconfig.facebook.userAgent,
@@ -213,14 +232,21 @@ for (var i = 0; i < ll.length; i++) {
 			"listenEvents": global.coreconfig.facebook.listenEvents,
 			"updatePresence": global.coreconfig.facebook.updatePresence,
 			"autoMarkRead": global.config.facebook.autoMarkRead
+		};
+		let botOptions = {
+			"enableE2EE": e2eeEnabled,
+			"e2eeAutoConnect": global.coreconfig.facebook.e2eeAutoConnect !== false,
+			"e2eeDeviceStorePath": e2eeDeviceStorePath,
+			"e2eeSessionStorePath": e2eeSessionStorePath,
+			"fbStatePath": appStatePath,
+			"fbStateAutoSaveMinutes": fbStateAutoSaveMinutes
 		}
 		console.log("Manager", "Logging...")
-		let appStatePath = fbStateExisting || path.join(ROOT, "config", "fbstate.json");
 		let appState = {};
 		if (fs.existsSync(appStatePath)) {
 			//login using appstate
 			appState = JSON.parse(fs.readFileSync(appStatePath, "utf-8"));
-			await require("./core/communication/fb.js")(appState, loginOptions);
+			await require("./core/communication/fb.js")(appState, loginOptions, botOptions);
 		} else {
 			//login using credentials then create appstate
 			console.log("Manager", "Creating appstate for further login...");
@@ -246,10 +272,10 @@ for (var i = 0; i < ll.length; i++) {
 				}
 
 				appState = api.getAppState();
-				require("./core/communication/fb.js")(appState, loginOptions);
+				require("./core/communication/fb.js")(appState, loginOptions, botOptions);
 				fs.writeFileSync(appStatePath, JSON.stringify(appState, null, "\t"));
 				if (fbStateExisting && fbStateExisting !== appStatePath && fs.existsSync(fbStateExisting)) {
-					fs.unlinkSync(fbStateExisting);
+					// fs.unlinkSync(fbStateExisting);
 				}
 			});
 		}

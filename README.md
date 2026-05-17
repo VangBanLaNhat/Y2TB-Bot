@@ -4,19 +4,19 @@ Bot Facebook Messenger nhẹ, chạy bằng Node.js, hỗ trợ tự cập nhậ
 
 ## Yêu cầu
 - Node.js >= 16
-- npm
+- yarn
 - Tài khoản Facebook hoặc `fbstate.json` đã xuất trước đó
 
 ## Cài đặt nhanh
 ```bash
 git clone https://github.com/VangBanLaNhat/Y2TB-Bot-lite-noPanel.git
 cd Y2TB-Bot-lite-noPanel-main
-npm install
+yarn install
 
 # Cấu hình
 # 1) Sửa thông tin bot và account tại config/config.env (copy từ config/config.env.example)
 
-npm start
+yarn start
 ```
 
 ### Thông tin đăng nhập
@@ -36,7 +36,7 @@ npm start
 ├─ lang/                 # Chuỗi ngôn ngữ, Help.json
 ├─ logs/                 # Log xoay vòng theo ngày
 ├─ err.js                # Xử lý lỗi (nếu dùng)
-├─ package.json          # Thông tin gói, script npm
+├─ package.json          # Thông tin gói, script yarn
 └─ README.md
 ```
 
@@ -65,7 +65,7 @@ npm start
 - Nếu đổi vị trí thư mục, nhớ cập nhật biến `ROOT` trong các file nguồn.
 
 ## Lệnh hữu ích
-- `npm start` / `npm test`: chạy bot
+- `yarn start` / `yarn test`: chạy bot
 - Dừng bot: `Ctrl + C`
 
 ## Giấy phép

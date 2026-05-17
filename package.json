@@ -20,6 +20,7 @@
     "url": "https://github.com/VangBanLaNhat/Y2TB-Bot-lite-noPanel/issues"
   },
   "homepage": "https://github.com/VangBanLaNhat/Y2TB-Bot-lite-noPanel#readme",
+  "packageManager": "yarn@1.22.22",
   "dependencies": {
     "@octokit/rest": "20.0.0",
     "adm-zip": "^0.5.9",
@@ -27,6 +28,7 @@
     "dotenv": "^10.0.0",
     "enc": "",
     "event-stream": "^4.0.1",
+    "fb-messenger-e2ee": "^0.1.2",
     "fca-unofficial": "github:VangBanLaNhat/fca-unofficial",
     "fs-extra": "^10.1.0",
     "luxon": "^3.7.2",

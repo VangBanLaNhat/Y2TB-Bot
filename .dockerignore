@@ -1,0 +1,17 @@
+node_modules
+npm-debug.log*
+yarn-error.log*
+
+.git
+.github
+
+logs
+data
+update
+
+config/config.env
+config/fbstate.json
+config/fbsstate.json
+config/e2ee_device.json
+
+self-note.txt

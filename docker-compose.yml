@@ -1,0 +1,14 @@
+services:
+  y2tb-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: y2tb-bot:lite
+    container_name: y2tb-bot
+    restart: unless-stopped
+    tty: true
+    volumes:
+      - ./config:/app/config
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./plugins/cache:/app/plugins/cache

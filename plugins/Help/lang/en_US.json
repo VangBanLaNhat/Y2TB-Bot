@@ -1,0 +1,44 @@
+{
+  "listCommand": {
+    "desc": "listCommand",
+    "text": "List of commands:",
+    "args": {}
+  },
+  "pages": {
+    "desc": "Pages",
+    "text": "Page {0}/{1}",
+    "args": {
+      "{0}": "Current page",
+      "{1}": "Total pages"
+    }
+  },
+  "listCommandEnd": {
+    "desc": "listCommandEnd",
+    "text": "Type \"{prefix}help [Command]\" for more details about that command",
+    "args": {
+      "{prefix}": "Prefix"
+    }
+  },
+  "commandInfo": {
+    "desc": "Pages",
+    "text": "Command details:\n-Usage:\n{0}\n-Description: {1}\n\nNote:\n<>: Required\n[]: Not required",
+    "args": {
+      "{0}": "Use",
+      "{1}": "Description"
+    }
+  },
+  "noCommand": {
+    "desc": "No Command",
+    "text": "The command \"{0}\" does not exist!",
+    "args": {
+      "{0}": "Message"
+    }
+  },
+  "exitCM": {
+    "desc": "Exit command",
+    "text": "Command does not exist!  Please use the command \"{0}help [Page Number]\" to view the available commands",
+    "args": {
+      "{0}": "Prefix"
+    }
+  }
+}

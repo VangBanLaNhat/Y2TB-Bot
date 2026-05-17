@@ -3,6 +3,7 @@ const path = require("path");
 const stripBom = require("strip-bom");
 const cmd = require('child_process');
 const log = require(path.join(__dirname, "..", "util", "log.js"));
+const pluginLock = require(path.join(__dirname, "..", "util", "pluginLock.js"));
 
 const ROOT = path.join(__dirname, "..", "..", "..");
 const dirPlugins = path.join(ROOT, "plugins");
@@ -10,102 +11,107 @@ const dirPlugins = path.join(ROOT, "plugins");
 !global.temp ? global.temp = {} : "";
 !global.temp.loadPlugin ? global.temp.loadPlugin = {} : "";
 
-function collectMissingDeps(entries) {
-	const needs = new Set();
+function collectPluginDeps(entries) {
+	const all = new Set();
+	const missing = new Set();
+
 	for (const entry of entries) {
 		const info = entry.previewInfo;
 		if (!info || typeof info.nodeDepends !== "object") continue;
+
 		for (const dep in info.nodeDepends) {
-			const depPath = path.join(ROOT, "node_modules", dep, "package.json");
-			if (fs.existsSync(depPath)) continue;
 			const ver = info.nodeDepends[dep];
-			needs.add(ver && ver !== "" ? `${dep}@${ver}` : dep);
+			const spec = ver && ver !== "" ? `${dep}@${ver}` : dep;
+			all.add(spec);
+
+			const depPath = path.join(ROOT, "node_modules", dep, "package.json");
+			if (!fs.existsSync(depPath)) {
+				missing.add(spec);
+			}
 		}
 	}
-	return Array.from(needs);
+
+	return {
+		all: Array.from(all),
+		missing: Array.from(missing)
+	};
 }
 
-function npmBatchInstall(pkgs) {
-	if (!pkgs || !pkgs.length) return;
-	const npmEnv = Object.assign({}, process.env, {
-		npm_config_yes: "true",
-		npm_config_audit: "false",
-		npm_config_fund: "false",
-		npm_config_legacy_peer_deps: "true"
-	});
-
-	// Keep only one spec per package name, prefer versioned spec if present.
+function dedupeSpecs(pkgs) {
 	const byName = {};
-	for (const spec of pkgs) {
+	for (const spec of (pkgs || [])) {
 		if (!spec) continue;
 		const at = spec.lastIndexOf("@");
 		const name = at > 0 ? spec.slice(0, at) : spec;
 		const current = byName[name];
 		if (!current || spec.includes("@")) byName[name] = spec;
 	}
-	const uniquePkgs = Object.values(byName);
+	return Object.values(byName);
+}
 
-	let hasPnpm = false;
+function yarnBatchInstall(missingPkgs, allPkgs) {
+	if (!missingPkgs || !missingPkgs.length) return;
+
+	const uniqueMissingPkgs = dedupeSpecs(missingPkgs);
+	const uniqueAllPkgs = dedupeSpecs(allPkgs && allPkgs.length ? allPkgs : missingPkgs);
+
+	let hasYarn = false;
 	try {
-		cmd.execSync("pnpm -v", { stdio: "ignore", env: process.env, shell: true });
-		hasPnpm = true;
+		cmd.execSync("yarn -v", { stdio: "ignore", env: process.env, shell: true });
+		hasYarn = true;
 	} catch (e) {
-		hasPnpm = false;
+		hasYarn = false;
 	}
 
-	if (hasPnpm) {
-		const batchCmd = `pnpm add ${uniquePkgs.join(" ")} --save-prod=false --save-dev=false --ignore-workspace-root-check`;
-		log.warn("Plugins(Y2TB)", `Installing dependencies via pnpm (single batch): ${uniquePkgs.join(", ")}`);
-		const packageJsonPath = path.join(ROOT, "package.json");
-		const pnpmLockPath = path.join(ROOT, "pnpm-lock.yaml");
-		const packageJsonBefore = fs.existsSync(packageJsonPath) ? fs.readFileSync(packageJsonPath, "utf8") : null;
-		const pnpmLockBefore = fs.existsSync(pnpmLockPath) ? fs.readFileSync(pnpmLockPath, "utf8") : null;
+	if (!hasYarn) {
+		log.warn("Plugins(Y2TB)", "Yarn not found. Skip runtime dependency install.");
+		return;
+	}
+
+	const packageJsonPath = path.join(ROOT, "package.json");
+	const yarnLockPath = path.join(ROOT, "yarn.lock");
+	const packageJsonBefore = fs.existsSync(packageJsonPath) ? fs.readFileSync(packageJsonPath, "utf8") : null;
+	const yarnLockBefore = fs.existsSync(yarnLockPath) ? fs.readFileSync(yarnLockPath, "utf8") : null;
+
+	function restoreManifests() {
 		try {
-			cmd.execSync(batchCmd, {
+			if (packageJsonBefore !== null) fs.writeFileSync(packageJsonPath, packageJsonBefore, { mode: 0o666 });
+		} catch (restoreErr) {
+			log.warn("Plugins(Y2TB)", `Failed to restore package.json after yarn add: ${restoreErr.message || restoreErr}`);
+		}
+		try {
+			if (yarnLockBefore !== null) fs.writeFileSync(yarnLockPath, yarnLockBefore, { mode: 0o666 });
+		} catch (restoreErr) {
+			log.warn("Plugins(Y2TB)", `Failed to restore yarn.lock after yarn add: ${restoreErr.message || restoreErr}`);
+		}
+	}
+
+	const batchCmd = `yarn add ${uniqueAllPkgs.join(" ")} --non-interactive`;
+	log.warn("Plugins(Y2TB)", `Installing dependencies via yarn (full plugin set to avoid prune): ${uniqueAllPkgs.join(", ")}`);
+	try {
+		cmd.execSync(batchCmd, {
+			stdio: "inherit",
+			env: process.env,
+			shell: true
+		});
+		return;
+	} catch (e) {
+		log.warn("Plugins(Y2TB)", `yarn batch install failed, fallback one-by-one: ${e.message || e}`);
+	} finally {
+		restoreManifests();
+	}
+
+	for (const pkg of uniqueMissingPkgs) {
+		try {
+			cmd.execSync(`yarn add ${pkg} --non-interactive`, {
 				stdio: "inherit",
 				env: process.env,
 				shell: true
 			});
-			return;
-		} catch (e) {
-			log.warn("Plugins(Y2TB)", `pnpm batch install failed, fallback npm one-by-one: ${e.message || e}`);
-		} finally {
-			// pnpm add always updates manifests/lockfile; restore originals to keep runtime installs ephemeral.
-			try {
-				if (packageJsonBefore !== null) fs.writeFileSync(packageJsonPath, packageJsonBefore, { mode: 0o666 });
-			} catch (restoreErr) {
-				log.warn("Plugins(Y2TB)", `Failed to restore package.json after pnpm add: ${restoreErr.message || restoreErr}`);
-			}
-			try {
-				if (pnpmLockBefore !== null) fs.writeFileSync(pnpmLockPath, pnpmLockBefore, { mode: 0o666 });
-			} catch (restoreErr) {
-				log.warn("Plugins(Y2TB)", `Failed to restore pnpm-lock.yaml after pnpm add: ${restoreErr.message || restoreErr}`);
-			}
-		}
-	}
-
-	log.warn("Plugins(Y2TB)", `Installing dependencies one-by-one (npm fallback): ${uniquePkgs.join(", ")}`);
-
-	for (const pkg of uniquePkgs) {
-		try {
-			cmd.execSync(`npm install --no-save --no-package-lock --legacy-peer-deps ${pkg}`, {
-				stdio: "inherit",
-				env: npmEnv,
-				shell: true
-			});
-			continue;
 		} catch (er) {
-			log.warn("Plugins(Y2TB)", `Install retry with --force for ${pkg}: ${er.message || er}`);
-		}
-
-		try {
-			cmd.execSync(`npm install --no-save --no-package-lock --legacy-peer-deps --force ${pkg}`, {
-				stdio: "inherit",
-				env: npmEnv,
-				shell: true
-			});
-		} catch (er2) {
-			log.warn("Plugins(Y2TB)", `Install failed for ${pkg}: ${er2.message || er2}`);
+			log.warn("Plugins(Y2TB)", `Install failed for ${pkg}: ${er.message || er}`);
+		} finally {
+			restoreManifests();
 		}
 	}
 }
@@ -118,8 +124,11 @@ async function loadPlugins() {
 	!global.data ? global.data = {} : "";
 
 	ensureExists(dirPlugins);
+	const pluginLockState = pluginLock.loadPluginLock();
+	await pluginLock.restoreMissingPlugins(pluginLockState);
 
 	const pluginEntries = [];
+	const lockEntries = {};
 	const children = fs.readdirSync(dirPlugins);
 	for (const child of children) {
 		const pluginDir = path.join(dirPlugins, child);
@@ -172,6 +181,12 @@ async function loadPlugins() {
 				pluginInfo,
 				configDefault
 			});
+
+			if (pluginInfo.updateUrl && typeof pluginInfo.updateUrl === "string") {
+				lockEntries[child] = {
+					updateUrl: pluginInfo.updateUrl
+				};
+			}
 		} catch (err) {
 			log.err("Plugins(Y2TB)", `Can't prepare plugin folder "${child}" with error: ${err}`);
 			!global.temp.loadPlugin.stderr ? global.temp.loadPlugin.stderr = [] : "";
@@ -183,10 +198,12 @@ async function loadPlugins() {
 		log.warn("Plugins(Y2TB)", "No plugin folders with plugin.json were found");
 	}
 
+	pluginLock.savePluginLock(lockEntries);
+
 	// Batch install missing dependencies discovered from init metadata
 	try {
-		const deps = collectMissingDeps(pluginEntries);
-		npmBatchInstall(deps);
+		const deps = collectPluginDeps(pluginEntries);
+		yarnBatchInstall(deps.missing, deps.all);
 	} catch (e) {
 		log.warn("Plugins(Y2TB)", `Batch install failed: ${e.message || e}`);
 	}
@@ -383,12 +400,24 @@ function installmd(file, pluginInfo, opts = {}) {
 				log.warn("Plugins(Y2TB)", `Installing Node_module "${dep}" for plugin "${pluginInfo.pluginName}":`);
 				const ver = pluginInfo.nodeDepends[dep];
 				const pkg = ver && ver !== "" ? `${dep}@${ver}` : dep;
-				const env = Object.assign({}, process.env, {
-					npm_config_yes: "true",
-					npm_config_audit: "false",
-					npm_config_fund: "false"
-				});
-				cmd.execSync(`npm install --no-save --no-package-lock ${pkg}`, { stdio: "inherit", env, shell: true });
+				const packageJsonPath = path.join(ROOT, "package.json");
+				const yarnLockPath = path.join(ROOT, "yarn.lock");
+				const packageJsonBefore = fs.existsSync(packageJsonPath) ? fs.readFileSync(packageJsonPath, "utf8") : null;
+				const yarnLockBefore = fs.existsSync(yarnLockPath) ? fs.readFileSync(yarnLockPath, "utf8") : null;
+				try {
+					cmd.execSync(`yarn add ${pkg} --non-interactive`, { stdio: "inherit", env: process.env, shell: true });
+				} finally {
+					try {
+						if (packageJsonBefore !== null) fs.writeFileSync(packageJsonPath, packageJsonBefore, { mode: 0o666 });
+					} catch (restoreErr) {
+						log.warn("Plugins(Y2TB)", `Failed to restore package.json after yarn add: ${restoreErr.message || restoreErr}`);
+					}
+					try {
+						if (yarnLockBefore !== null) fs.writeFileSync(yarnLockPath, yarnLockBefore, { mode: 0o666 });
+					} catch (restoreErr) {
+						log.warn("Plugins(Y2TB)", `Failed to restore yarn.lock after yarn add: ${restoreErr.message || restoreErr}`);
+					}
+				}
 			}
 		}
 	}

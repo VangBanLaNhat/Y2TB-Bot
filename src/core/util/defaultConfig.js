@@ -30,7 +30,13 @@ function core() {
     		"logLevel": "error",
     		"userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",
     		"listenEvents": true,
-    		"updatePresence": false
+	    	"updatePresence": false,
+	    	"fbStateAutoSaveMinutes": 30,
+	    	"enableE2EE": false,
+	    	"e2eeAutoConnect": true,
+	    	"e2eeDeviceStorePath": "config/device-store.json",
+	    	"e2eeSessionStorePath": "config/e2ee_session.json",
+	    	"e2eeDevicePath": "config/e2ee_device.json"
     	}
     }
 }
