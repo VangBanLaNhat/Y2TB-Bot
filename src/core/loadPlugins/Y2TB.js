@@ -3,6 +3,7 @@ const path = require("path");
 const stripBom = require("strip-bom");
 const cmd = require('child_process');
 const log = require(path.join(__dirname, "..", "util", "log.js"));
+const pluginLock = require(path.join(__dirname, "..", "util", "pluginLock.js"));
 
 const ROOT = path.join(__dirname, "..", "..", "..");
 const dirPlugins = path.join(ROOT, "plugins");
@@ -123,8 +124,11 @@ async function loadPlugins() {
 	!global.data ? global.data = {} : "";
 
 	ensureExists(dirPlugins);
+	const pluginLockState = pluginLock.loadPluginLock();
+	await pluginLock.restoreMissingPlugins(pluginLockState);
 
 	const pluginEntries = [];
+	const lockEntries = {};
 	const children = fs.readdirSync(dirPlugins);
 	for (const child of children) {
 		const pluginDir = path.join(dirPlugins, child);
@@ -177,6 +181,12 @@ async function loadPlugins() {
 				pluginInfo,
 				configDefault
 			});
+
+			if (pluginInfo.updateUrl && typeof pluginInfo.updateUrl === "string") {
+				lockEntries[child] = {
+					updateUrl: pluginInfo.updateUrl
+				};
+			}
 		} catch (err) {
 			log.err("Plugins(Y2TB)", `Can't prepare plugin folder "${child}" with error: ${err}`);
 			!global.temp.loadPlugin.stderr ? global.temp.loadPlugin.stderr = [] : "";
@@ -187,6 +197,8 @@ async function loadPlugins() {
 	if (!pluginEntries.length) {
 		log.warn("Plugins(Y2TB)", "No plugin folders with plugin.json were found");
 	}
+
+	pluginLock.savePluginLock(lockEntries);
 
 	// Batch install missing dependencies discovered from init metadata
 	try {
