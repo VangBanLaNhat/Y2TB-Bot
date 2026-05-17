@@ -1,72 +1,78 @@
 # Y2TB-Bot Lite (No Panel)
 
-Bot Facebook Messenger nhẹ, chạy bằng Node.js, hỗ trợ tự cập nhật và hệ thống plugin.
+A lightweight Facebook Messenger bot built with Node.js. It supports core updates, a plugin system, and plugin auto update.
 
-## Yêu cầu
-- Node.js >= 16
+## Requirements
+- Node.js 22+
 - yarn
-- Tài khoản Facebook hoặc `fbstate.json` đã xuất trước đó
+- A Facebook account or a pre-exported `fbstate.json`
 
-## Cài đặt nhanh
+## Quick Start
 ```bash
 git clone https://github.com/VangBanLaNhat/Y2TB-Bot-lite-noPanel.git
 cd Y2TB-Bot-lite-noPanel-main
 yarn install
 
-# Cấu hình
-# 1) Sửa thông tin bot và account tại config/config.env (copy từ config/config.env.example)
+# Config
+# 1) Copy config/config.env.example -> config/config.env
+# 2) Edit values in config/config.env
 
 yarn start
 ```
 
-### Thông tin đăng nhập
-- Ưu tiên đặt file `config/fbstate.json` (appstate) để đăng nhập không cần mật khẩu.
-- Nếu không có, điền `Y2TB_CFG_FACEBOOK_FBEMAIL` và `Y2TB_CFG_FACEBOOK_FBPASSWORD` trong `config/config.env` (cẩn trọng với bảo mật tài khoản).
+### Login Notes
+- Prefer using `config/fbstate.json` (appstate) so you can log in without a password.
+- If no appstate is available, set `Y2TB_CFG_FACEBOOK_FBEMAIL` and `Y2TB_CFG_FACEBOOK_FBPASSWORD` in `config/config.env`.
 
-## Cấu trúc hiện tại
+## Project Layout
 ```
 .
 ├─ src/
-│  ├─ main.js            # Tiến trình giám sát/restart src/index.js
-│  ├─ index.js           # Luồng chính: cập nhật, nạp config, data, plugin, đăng nhập FB
+│  ├─ main.js            # Supervisor/restart for src/index.js
+│  ├─ index.js           # Main flow: update, load config/data/plugins, login
 │  ├─ core/              # communication/, loadPlugins/, util/
-│  └─ plugins/           # Plugin chính; danh sách tại pluginList.json
-├─ config/               # Config env + sample, fbstate/fbsstate, plugins/
-├─ data/                 # data.json, user.json (tự sinh, không commit)
-├─ lang/                 # Chuỗi ngôn ngữ, Help.json
-├─ logs/                 # Log xoay vòng theo ngày
-├─ err.js                # Xử lý lỗi (nếu dùng)
-├─ package.json          # Thông tin gói, script yarn
+├─ plugins/              # User plugins (each has plugin.json)
+├─ config/               # Env config, fbstate/fbsstate, plugins/ and plugins-lock.json
+├─ data/                 # data.json, user.json (runtime only)
+├─ lang/                 # Language packs
+├─ logs/                 # Rotating logs
+├─ err.js                # Error helper (optional)
+├─ package.json          # Yarn scripts and dependencies
 └─ README.md
 ```
 
-## Cấu hình
-- `config/config.env.example` → copy sang `config/config.env` rồi chỉnh.
-- Cấu hình chính dùng biến môi trường:
-	- Config thường: `Y2TB_CFG_<SECTION>_<KEY>`
-	- Core config: `Y2TB_CORE_<SECTION>_<KEY>`
+## Configuration
+- Copy `config/config.env.example` to `config/config.env` and edit it.
+- Environment prefixes:
+  - Normal config: `Y2TB_CFG_<SECTION>_<KEY>`
+  - Core config: `Y2TB_CORE_<SECTION>_<KEY>`
 
-## Plugin
-- Đặt plugin người dùng tại `src/plugins/` và khai báo trong `src/plugins/pluginList.json`.
-- Plugin lõi nằm trong `src/core/loadPlugins/`, được `loadPlugin.js` tự động nạp.
-- Cần ngôn ngữ hay config riêng: thêm file vào `lang/` hoặc `config/plugins/` tùy plugin.
-- Config runtime của plugin vẫn dùng file JSON trong `config/plugins/`.
+## Plugins
+- Place plugins in `plugins/<pluginName>/` with a `plugin.json` file.
+- Core loader lives in `src/core/loadPlugins/`.
+- Per-plugin config is stored in `config/plugins/` and languages in `lang/<pluginName>/`.
+- Plugin auto update uses `updateUrl` in `plugin.json`.
 
-## Dữ liệu & log
-- Runtime data: `data/data.json`, `data/user.json` (tự lưu định kỳ; không chỉnh tay khi bot đang chạy).
-- Log: `logs/` (được dọn theo ngày hiện tại).
+### Plugin Auto Update + Lock File
+- If a plugin has `updateUrl`, the loader writes it to `config/plugins-lock.json`.
+- On next start, if a plugin folder is missing, it will be restored from the zip at `updateUrl`.
+- The restore folder name is derived from the zip file name (example: `Baucua.zip` -> `plugins/Baucua`).
 
-## Cơ chế cập nhật
-- `index.js` kiểm tra version GitHub, tải về vào thư mục `update/` rồi tự khởi động lại với mã thoát `7378278`.
-- Không sửa tay thư mục `update/`; để bot tự xoá sau khi hoàn tất.
+## Data and Logs
+- Runtime data: `data/data.json`, `data/user.json` (auto-saved; do not edit while running).
+- Logs: `logs/` (rotated daily).
 
-## Ghi chú
-- Runtime data và log nằm ngoài `src/`; không commit `data/`, `logs/`, `update/`, `config/config.env`, `config/fbstate.json`, `config/fbsstate.json`.
-- Nếu đổi vị trí thư mục, nhớ cập nhật biến `ROOT` trong các file nguồn.
+## Update Flow
+- `src/index.js` checks the GitHub version, downloads to `update/`, and restarts with exit code `7378278`.
+- Do not manually edit `update/`.
 
-## Lệnh hữu ích
-- `yarn start` / `yarn test`: chạy bot
-- Dừng bot: `Ctrl + C`
+## Notes
+- Do not commit runtime files: `data/`, `logs/`, `update/`, `config/config.env`, `config/fbstate.json`, `config/fbsstate.json`.
+- If you move the project, update the `ROOT` constant in code.
 
-## Giấy phép
+## Useful Commands
+- `yarn start` / `yarn test`: run the bot
+- Stop: `Ctrl + C`
+
+## License
 ISC
