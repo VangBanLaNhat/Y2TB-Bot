@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-17T11:42:59.951Z",
+  "updatedAt": "2026-05-19T15:31:15.237Z",
   "plugins": {
     "AntiUnsend": {
       "updateUrl": "https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-data/refs/heads/main/plugins/AntiUnsend.zip"
@@ -19,7 +19,13 @@
     "Connected": {
       "updateUrl": "https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-data/refs/heads/main/plugins/Connected.zip"
     },
+    "Csim": {
+      "updateUrl": "https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-data/refs/heads/main/plugins/Csim.zip"
+    },
     "DLTiktok": {
+      "updateUrl": "https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-data/refs/heads/main/plugins/DLTiktok.zip"
+    },
+    "Download Tiktok": {
       "updateUrl": "https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-data/refs/heads/main/plugins/DLTiktok.zip"
     },
     "Economy": {
@@ -30,6 +36,9 @@
     },
     "Facebook": {
       "updateUrl": "https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-data/refs/heads/main/plugins/Facebook.zip"
+    },
+    "Gemini": {
+      "updateUrl": "https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-data/refs/heads/main/plugins/Gemini.zip"
     },
     "Help": {
       "updateUrl": "https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-data/refs/heads/main/plugins/Help.zip"
@@ -52,6 +61,9 @@
     "SearchWiki": {
       "updateUrl": "https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-data/refs/heads/main/plugins/Wiki.zip"
     },
+    "Spotify": {
+      "updateUrl": "https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-data/refs/heads/main/plugins/Spotify.zip"
+    },
     "T2Speaks": {
       "updateUrl": "https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-data/refs/heads/main/plugins/T2Speaks.zip"
     },
@@ -72,6 +84,9 @@
     },
     "adduser": {
       "updateUrl": "https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-data/refs/heads/main/plugins/adduser.zip"
+    },
+    "chatgpt": {
+      "updateUrl": "https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-data/refs/heads/main/plugins/chatgpt.zip"
     },
     "coinFlip": {
       "updateUrl": "https://raw.githubusercontent.com/VangBanLaNhat/Y2TB-data/refs/heads/main/plugins/coinFlip.zip"

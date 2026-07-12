@@ -142,10 +142,11 @@ async function mess(event, api) {
 						config: global.configPl[name],
 						replaceMap,
 						getUserInfo,
-						getThreadInfo
+						getThreadInfo,
+						e2ee: global.e2ee
 					};
 
-					await mainFunc[func](event, api, adv);
+					await mainFunc[func](event, api, global.e2ee, adv);
 				}
 				catch (err) {
 					log.err(global.plugins[i].command[ms[0]].namePlugin, err);
@@ -191,10 +192,11 @@ async function chathook(event, api) {
 				config: global.configPl[name],
 				replaceMap: replaceMap,
 				getUserInfo,
-				getThreadInfo
+				getThreadInfo,
+				e2ee: global.e2ee
 			};
 
-			await mainFunc[func](event, api, adv);
+			await mainFunc[func](event, api, global.e2ee, adv);
 		}
 		catch (err) {
 			log.err(i, err);
