@@ -1,7 +1,7 @@
 function isE2EEThread(threadID) {
     if (!threadID) return false;
     const s = String(threadID);
-    return s.includes("@msgr") || s.includes("@g.us") || s.includes(".g.");
+    return /^\d+$/.test(s) || s.includes("@msgr") || s.includes("@g.us") || s.includes(".g.");
 }
 
 function createEventApi(api, event, e2eeClient, log) {
