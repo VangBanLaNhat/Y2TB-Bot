@@ -50,7 +50,7 @@ function help(data, api, e2ee){
     
     var rt = global.lang.Help.listCommand[global.config.bot_info.lang]+"\n"+listHelp+`"${p}"`+"\n"+global.lang.Help.listCommandEnd[global.config.bot_info.lang].replace("{prefix}", global.config.facebook.prefix)
     
-    api.sendMessage(rt , data.threadID, data.messageID);
+    adv.reply(rt);
 }
 
 function moreInfo(data, api, e2ee){
@@ -62,7 +62,7 @@ function moreInfo(data, api, e2ee){
             break;
         }
     }
-    api.sendMessage(rt , data.threadID, data.messageID);
+    adv.reply(rt);
 }
 
 module.exports = {
