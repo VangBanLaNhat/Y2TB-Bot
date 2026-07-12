@@ -229,9 +229,53 @@ Notes:
 - Based on your updated `plugins/coinFlip/coinFlip.js`, command logic is directly inside this JS file.
 - Metadata/language are now separated into `plugin.json` and `lang/*.json`.
 
-## 6. `adv` Object In Command/Chathook
+## 6. `adv` Object and the Canonical Context (`ctx`)
 
-Inside handlers such as `main(data, api, adv)`, you can use:
+Inside handlers such as `main(data, api, adv)`, you can access the canonical context object at `adv.ctx` (or the alias `adv.message`).
+
+### Recommended API
+
+New plugins should prefer using `adv.ctx` for sending messages and retrieving message details:
+
+- `adv.ctx.send(msg, callback)`: sends a message to the current thread. E2EE-safe.
+- `adv.ctx.reply(msg, callback)`: replies to the incoming message. E2EE-safe.
+- `adv.ctx.react(emoji, callback)`: reacts to the incoming message. Fail-safe in E2EE mode.
+- `adv.ctx.unsend(messageID, callback)`: unsends a message. Fail-safe in E2EE mode.
+- `adv.ctx.isE2EE`: boolean indicating if the thread is E2EE.
+- `adv.ctx.threadID`: thread ID of the event.
+- `adv.ctx.senderID`: sender ID of the event.
+- `adv.ctx.messageID`: message ID of the event.
+- `adv.ctx.body`: body text of the event.
+- `adv.ctx.attachments`: attachments list.
+- `adv.ctx.mentions`: mentions map.
+- `adv.ctx.rawEvent`: the raw, unmodified message event.
+
+Example:
+```javascript
+function main(data, api, adv) {
+  const { ctx } = adv;
+  ctx.reply("Hello from the new context API!");
+}
+```
+
+### Legacy Compatibility
+
+For backward compatibility, the legacy aliases below still function exactly as before:
+
+- `adv.send(msg, callback)` -> alias for `adv.ctx.send`
+- `adv.reply(msg, callback)` -> alias for `adv.ctx.reply`
+- `adv.react(emoji, callback)` -> alias for `adv.ctx.react`
+- `adv.unsend(messageID, callback)` -> alias for `adv.ctx.unsend`
+- `adv.isE2EE` -> alias for `adv.ctx.isE2EE`
+
+### E2EE Safety & Fallback Rules
+
+1. **Safety First**: Plugins must not use `api.sendMessage` or other output APIs directly because they bypass the E2EE-safe proxy layer. Always use `adv.ctx.send`, `adv.ctx.reply`, etc.
+2. **E2EE Attachment Fallbacks**:
+   - If sending an object with `{ body, attachment }` inside an E2EE thread, the adapter will send `body` and drop the attachment with a warning.
+   - If sending an attachment-only message inside an E2EE thread, it sends a friendly fallback string warning that attachments are not yet supported.
+
+### Other `adv` Properties
 
 - `adv.pluginName`: plugin name.
 - `adv.lang`: full language map of the plugin.

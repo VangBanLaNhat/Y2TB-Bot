@@ -3,7 +3,8 @@ const path = require("path");
 const process = require("process");
 const log = require(path.join(__dirname, "..", "util", "log.js"));
 const infoService = require(path.join(__dirname, "..", "services", "infoService.js"));
-const { createEventApi, isE2EEThread } = require(path.join(__dirname, "pluginApi.js"));
+const { createEventApi } = require(path.join(__dirname, "pluginApi.js"));
+const { createPluginContext } = require(path.join(__dirname, "pluginContext.js"));
 
 const { shouldMarkAsRead } = require(path.join(__dirname, "markReadPolicy.js"));
 
@@ -152,12 +153,14 @@ async function mess(event, api) {
 					};
 
 					const pluginApi = createEventApi(api, event, global.e2eeClient, log);
-					adv.send = (msg, cb) => pluginApi.sendMessage(msg, event.threadID, cb);
-					adv.reply = (msg, cb) => pluginApi.sendMessage(msg, event.threadID, cb, event.messageID);
-					adv.react = (emoji, cb) => pluginApi.setMessageReaction(emoji, event.messageID, cb, true);
-					adv.unsend = (msgID, cb) => pluginApi.unsendMessage(msgID || event.messageID, cb);
-					adv.isE2EE = !!(global.e2eeClient && event && event.threadID && isE2EEThread(event.threadID));
-					adv.ctx = adv; // alias for clarity
+					const ctx = createPluginContext({ api, event, e2eeClient: global.e2eeClient, log });
+					adv.ctx = ctx;
+					adv.message = ctx;
+					adv.send = ctx.send;
+					adv.reply = ctx.reply;
+					adv.react = ctx.react;
+					adv.unsend = ctx.unsend;
+					adv.isE2EE = ctx.isE2EE;
 					await mainFunc[func](event, pluginApi, global.e2ee, adv);
 				}
 				catch (err) {
@@ -210,12 +213,14 @@ async function chathook(event, api) {
 			};
 
 			const pluginApi = createEventApi(api, event, global.e2eeClient, log);
-			adv.send = (msg, cb) => pluginApi.sendMessage(msg, event.threadID, cb);
-			adv.reply = (msg, cb) => pluginApi.sendMessage(msg, event.threadID, cb, event.messageID);
-			adv.react = (emoji, cb) => pluginApi.setMessageReaction(emoji, event.messageID, cb, true);
-			adv.unsend = (msgID, cb) => pluginApi.unsendMessage(msgID || event.messageID, cb);
-			adv.isE2EE = !!(global.e2eeClient && event && event.threadID && isE2EEThread(event.threadID));
-			adv.ctx = adv; // alias for clarity
+			const ctx = createPluginContext({ api, event, e2eeClient: global.e2eeClient, log });
+			adv.ctx = ctx;
+			adv.message = ctx;
+			adv.send = ctx.send;
+			adv.reply = ctx.reply;
+			adv.react = ctx.react;
+			adv.unsend = ctx.unsend;
+			adv.isE2EE = ctx.isE2EE;
 			await mainFunc[func](event, pluginApi, global.e2ee, adv);
 		}
 		catch (err) {
