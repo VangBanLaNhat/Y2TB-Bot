@@ -30,7 +30,8 @@ function createEventApi(api, event, e2eeClient, log) {
                         callback = null;
                     }
                     
-                    const isE2EE = isEventE2EE(event, threadID, e2eeClient);
+                    const hasAttachment = msg && typeof msg === "object" && msg.attachment;
+                    const isE2EE = isEventE2EE(event, threadID, e2eeClient) && !hasAttachment;
                     if (isE2EE) {
                         const input = { threadId: String(threadID) };
                         if (typeof msg === "string") {

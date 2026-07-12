@@ -107,7 +107,8 @@ function createE2EEContext(api, e2eeClient) {
 function wrapApiForE2EE(api, e2eeClient) {
     const originalSendMessage = api.sendMessage;
     api.sendMessage = function (msg, threadID, callback, replyMessageID) {
-        if (e2eeClient && isE2EEThread(threadID)) {
+        const hasAttachment = msg && typeof msg === "object" && msg.attachment;
+        if (e2eeClient && isE2EEThread(threadID) && !hasAttachment) {
             const input = { threadId: String(threadID) };
             if (typeof msg === "string") {
                 input.text = msg;
