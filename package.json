@@ -4,8 +4,11 @@
   "description": "",
   "main": "src/main.js",
   "scripts": {
-    "test": "node src/main.js",
-    "start": "node src/main.js"
+    "test": "jest",
+    "start": "node src/main.js",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:unit": "jest tests/unit"
   },
   "repository": {
     "type": "git",
@@ -39,5 +42,8 @@
     "stream-buffers": "^3.0.2",
     "strip-bom": "^4.0.0",
     "wait-for-stuff": "^1.4.0"
+  },
+  "devDependencies": {
+    "jest": "^30.4.2"
   }
 }

@@ -4,6 +4,8 @@ const process = require("process");
 const log = require(path.join(__dirname, "..", "util", "log.js"));
 const infoService = require(path.join(__dirname, "..", "services", "infoService.js"));
 
+const { shouldMarkAsRead } = require(path.join(__dirname, "markReadPolicy.js"));
+
 function getBaseId(value) {
 	var raw = String(value || "");
 	var colonIndex = raw.indexOf(":");
@@ -52,11 +54,7 @@ async function listen(err, event, api) {
 	if (!event.threadID && !event.senderID) return;
 
 	// E2EE chat JID is not compatible with markAsRead for legacy threads.
-	if (
-		global.config?.facebook?.autoMarkRead === true &&
-		event.type !== "e2ee_message" &&
-		event.threadID
-	) {
+	if (shouldMarkAsRead(global.config, event)) {
 		api.markAsRead(event.threadID, (err) => {
 			if (err) log.err(err);
 		});

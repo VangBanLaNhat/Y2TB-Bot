@@ -1,0 +1,4 @@
+{
+  "pluginName": "invalid-plugin-missing-metadata",
+  "pluginMain": "missing-file.js"
+}
