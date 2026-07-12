@@ -1,7 +1,7 @@
 function isE2EEThread(threadID) {
     if (!threadID) return false;
     const s = String(threadID);
-    return s.includes("@msgr") || s.includes("@g.us") || s.includes(".g.") || /^\d+$/.test(s);
+    return /^\d+$/.test(s) || s.includes("@msgr") || s.includes("@g.us") || s.includes(".g.");
 }
 
 function createEventApi(api, event, e2eeClient, log) {
@@ -54,9 +54,28 @@ function createEventApi(api, event, e2eeClient, log) {
                 return function (reaction, messageID, callback, force) {
                     const isE2EE = e2eeClient && event && event.threadID && isE2EEThread(event.threadID);
                     if (isE2EE) {
-                        if (log && log.warn) log.warn("E2EE", "setMessageReaction is unsupported in E2EE mode. Failing gracefully.");
-                        if (callback) callback(new Error("Unsupported in E2EE"));
-                        return Promise.resolve();
+                        if (typeof e2eeClient.sendReaction === "function") {
+                            const threadId = String(event.threadID);
+                            const senderJid = event.senderID ? (event.senderID.indexOf("@") === -1 ? event.senderID + "@msgr" : event.senderID) : undefined;
+                            return e2eeClient.sendReaction({
+                                threadId,
+                                messageId: String(messageID),
+                                reaction,
+                                senderJid
+                            })
+                            .then(res => {
+                                if (callback) callback(null, res);
+                                return res;
+                            })
+                            .catch(err => {
+                                if (log && log.warn) log.warn("E2EE", `E2EE reaction failed, falling back to plaintext: ${err.message}`);
+                                return target.setMessageReaction(reaction, messageID, callback, force);
+                            });
+                        } else {
+                            if (log && log.warn) log.warn("E2EE", "setMessageReaction is unsupported in E2EE mode. Failing gracefully.");
+                            if (callback) callback(new Error("Unsupported in E2EE"));
+                            return Promise.resolve();
+                        }
                     }
                     return target.setMessageReaction(reaction, messageID, callback, force);
                 };
@@ -65,9 +84,25 @@ function createEventApi(api, event, e2eeClient, log) {
                 return function (messageID, callback) {
                     const isE2EE = e2eeClient && event && event.threadID && isE2EEThread(event.threadID);
                     if (isE2EE) {
-                        if (log && log.warn) log.warn("E2EE", "unsendMessage is unsupported in E2EE mode. Failing gracefully.");
-                        if (callback) callback(new Error("Unsupported in E2EE"));
-                        return Promise.resolve();
+                        if (typeof e2eeClient.unsendMessage === "function") {
+                            const threadId = String(event.threadID);
+                            return e2eeClient.unsendMessage({
+                                messageId: String(messageID),
+                                threadId
+                            })
+                            .then(res => {
+                                if (callback) callback(null, res);
+                                return res;
+                            })
+                            .catch(err => {
+                                if (log && log.warn) log.warn("E2EE", `E2EE unsend failed, falling back to plaintext: ${err.message}`);
+                                return target.unsendMessage(messageID, callback);
+                            });
+                        } else {
+                            if (log && log.warn) log.warn("E2EE", "unsendMessage is unsupported in E2EE mode. Failing gracefully.");
+                            if (callback) callback(new Error("Unsupported in E2EE"));
+                            return Promise.resolve();
+                        }
                     }
                     return target.unsendMessage(messageID, callback);
                 };
