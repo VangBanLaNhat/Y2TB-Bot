@@ -6,25 +6,15 @@ const log = require(path.join(__dirname, "..", "util", "log.js"));
 const pluginLock = require(path.join(__dirname, "..", "util", "pluginLock.js"));
 
 const ROOT = path.join(__dirname, "..", "..", "..");
-const dirPlugins = path.join(ROOT, "plugins");
+const dirPlugins = process.env.Y2TB_PLUGINS_DIR || path.join(ROOT, "plugins");
 
 !global.temp ? global.temp = {} : "";
 !global.temp.loadPlugin ? global.temp.loadPlugin = {} : "";
 
+const { isSafeDependencySpec } = require("../util/dependencyValidator");
+
 function isValidDependency(spec) {
-	if (typeof spec !== "string") return false;
-	const trimmed = spec.trim();
-	if (trimmed === "" || trimmed !== spec) return false;
-	
-	if (spec.startsWith("-")) return false;
-
-	const shellMetacharacters = /[;&|><`$(){}\[\]\n\r]/;
-	if (shellMetacharacters.test(spec)) return false;
-
-	const normalNpmRegex = /^(@[a-zA-Z0-9-._~]+\/)?[a-zA-Z0-9-._~]+(@[a-zA-Z0-9-._~^><= *+:/]+)?$/;
-	if (!normalNpmRegex.test(spec)) return false;
-
-	return true;
+	return isSafeDependencySpec(spec);
 }
 
 function collectPluginDeps(entries) {

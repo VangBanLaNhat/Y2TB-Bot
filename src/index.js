@@ -52,7 +52,8 @@ for (var i = 0; i < ll.length; i++) {
 	}
 
 	// Main update
-	if (global.coreconfig?.update?.auto === true) {
+	const { isCoreAutoUpdateEnabled } = require("./core/util/coreUpdatePolicy");
+	if (isCoreAutoUpdateEnabled(global.coreconfig)) {
 		console.log("Update", "Core auto-update is enabled. Checking update...");
 		let vern = (JSON.parse(fs.readFileSync(path.join(ROOT, "package.json")))).version;
 		try {

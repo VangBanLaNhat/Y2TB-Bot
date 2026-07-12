@@ -1,0 +1,10 @@
+{
+  "pluginName": "unsafe-dependency-plugin",
+  "pluginMain": "index.js",
+  "version": "1.0.0",
+  "author": "Test",
+  "nodeDepends": {
+    "is-odd": "3.0.1",
+    "bad-pkg; rm -rf /": "1.0.0"
+  }
+}
