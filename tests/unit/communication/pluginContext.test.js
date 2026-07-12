@@ -122,11 +122,11 @@ describe('pluginContext', () => {
             ctx.send({ body: 'Attachment msg', attachment: 'stream' }, resolve);
         });
 
-        expect(mockLog.warn).toHaveBeenCalledWith("E2EE", "Attachments are currently unsupported in E2EE mode. Sending text only.");
-        expect(mockE2eeClient.sendMessage).toHaveBeenCalledWith({
-            threadId: '123456@msgr',
-            text: 'Attachment msg'
-        });
+                expect(mockApi.sendMessage).toHaveBeenCalledWith({
+            body: 'Attachment msg',
+            attachment: 'stream'
+        }, '123456@msgr', expect.any(Function), undefined);
+        expect(mockE2eeClient.sendMessage).not.toHaveBeenCalled();
     });
 
     test('E2EE attachment-only fallback', async () => {
@@ -137,11 +137,10 @@ describe('pluginContext', () => {
             ctx.send({ attachment: 'stream' }, resolve);
         });
 
-        expect(mockLog.warn).toHaveBeenCalledWith("E2EE", "Attachments are currently unsupported in E2EE mode. Sending text only.");
-        expect(mockE2eeClient.sendMessage).toHaveBeenCalledWith({
-            threadId: '123456@msgr',
-            text: '[E2EE] This plugin tried to send an attachment, but E2EE attachments are not supported yet.'
-        });
+        expect(mockApi.sendMessage).toHaveBeenCalledWith({
+            attachment: 'stream'
+        }, '123456@msgr', expect.any(Function), undefined);
+        expect(mockE2eeClient.sendMessage).not.toHaveBeenCalled();
     });
 
     test('missing event does not crash', () => {

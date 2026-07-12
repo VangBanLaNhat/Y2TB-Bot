@@ -73,7 +73,11 @@ function startFbStateAutoSave(api, opts) {
 function isE2EEThread(threadID) {
     if (!threadID) return false;
     const s = String(threadID);
-    return /^\d+$/.test(s) || s.includes("@msgr") || s.includes("@g.us") || s.includes(".g.");
+    if (s.includes("@msgr") || s.includes("@g.us") || s.includes(".g.")) return true;
+    if (/^\d+$/.test(s)) {
+        return !!(global.e2eeThreads && global.e2eeThreads.has(s));
+    }
+    return false;
 }
 
 function createE2EEContext(api, e2eeClient) {
@@ -103,7 +107,8 @@ function createE2EEContext(api, e2eeClient) {
 function wrapApiForE2EE(api, e2eeClient) {
     const originalSendMessage = api.sendMessage;
     api.sendMessage = function (msg, threadID, callback, replyMessageID) {
-        if (e2eeClient && isE2EEThread(threadID)) {
+        const hasAttachment = msg && typeof msg === "object" && msg.attachment;
+        if (e2eeClient && isE2EEThread(threadID) && !hasAttachment) {
             const input = { threadId: String(threadID) };
             if (typeof msg === "string") {
                 input.text = msg;
