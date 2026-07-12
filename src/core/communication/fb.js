@@ -76,6 +76,30 @@ function isE2EEThread(threadID) {
     return s.includes("@msgr") || s.includes("@g.us") || s.includes(".g.") || /^\d+$/.test(s);
 }
 
+function createE2EEContext(api, e2eeClient) {
+    return {
+        enabled: !!e2eeClient,
+        client: e2eeClient || null,
+        isE2EEThread,
+        sendText: function (threadID, text, replyMessageID) {
+            if (e2eeClient && isE2EEThread(threadID)) {
+                const input = { threadId: String(threadID), text: String(text || "") };
+                if (replyMessageID) input.replyToMessageId = String(replyMessageID);
+                return e2eeClient.sendMessage(input);
+            }
+            return new Promise((resolve, reject) => {
+                api.sendMessage(String(text || ""), threadID, (err, res) => {
+                    if (err) return reject(err);
+                    resolve(res);
+                }, replyMessageID);
+            });
+        },
+        sendMessage: function (msg, threadID, callback, replyMessageID) {
+            return api.sendMessage(msg, threadID, callback, replyMessageID);
+        }
+    };
+}
+
 function wrapApiForE2EE(api, e2eeClient) {
     const originalSendMessage = api.sendMessage;
     api.sendMessage = function (msg, threadID, callback, replyMessageID) {
@@ -93,6 +117,9 @@ function wrapApiForE2EE(api, e2eeClient) {
             if (input.text) {
                 e2eeClient.sendMessage(input)
                     .then(res => {
+                        if (res && res.messageId && !res.messageID) {
+                            res.messageID = res.messageId;
+                        }
                         if (typeof callback === "function") callback(null, res);
                     })
                     .catch(err => {
@@ -148,6 +175,33 @@ module.exports = async (appState, loginOptions, botOptions) => {
         log.log("Manager","Login successfuly!");
         startFbStateAutoSave(api, botOpts);
 
+        global.e2ee = createE2EEContext(api, null);
+
+        for(let i in global.plugins.Y2TB.plugins){
+            try{
+            	let adv = {
+            		pluginName: i,
+            		lang: global.lang[i],
+            		rlang: (inp)=>{
+                    		return global.lang[i][inp][global.config.bot_info.lang];
+                    	},
+            		iso639: global.config.bot_info.lang,
+            		config: global.configPl[i],
+            		replaceMap: replaceMap,
+            		getUserInfo: api.getUserInfo,
+                    getThreadInfo: api.getThreadInfo,
+                    e2ee: global.e2ee
+            	};
+                await global.plugins.Y2TB.plugins[i].loginFunc(api, global.e2ee, adv);
+                delete global.plugins.Y2TB.plugins[i].loginFunc;
+            } catch(e){}
+        }
+        try{
+		  api.listenMqtt((err, event) => {
+		  	listen(err, event, api);
+		  });
+        } catch (e) {};
+
         if (botOpts.enableE2EE !== false) {
             const e2eeOptions = resolveE2EEOptions(botOpts);
             if (!e2eeOptions) {
@@ -164,6 +218,8 @@ module.exports = async (appState, loginOptions, botOptions) => {
                     await e2eeClient.connectE2EE(e2eeOptions.deviceStorePath, userId);
 
                     wrapApiForE2EE(api, e2eeClient);
+                    global.e2ee = createE2EEContext(api, e2eeClient);
+                    global.e2eeClient = e2eeClient;
 
                     e2eeClient.onEvent((event) => {
                         if (event.type === "e2ee_connected") {
@@ -185,30 +241,6 @@ module.exports = async (appState, loginOptions, botOptions) => {
                 }
             }
         }
-
-        for(let i in global.plugins.Y2TB.plugins){
-            try{
-            	let adv = {
-            		pluginName: i,
-            		lang: global.lang[i],
-            		rlang: (inp)=>{
-                    		return global.lang[i][inp][global.config.bot_info.lang];
-                    	},
-            		iso639: global.config.bot_info.lang,
-            		config: global.configPl[i],
-            		replaceMap: replaceMap,
-            		getUserInfo: api.getUserInfo,
-                    getThreadInfo: api.getThreadInfo
-            	};
-                await global.plugins.Y2TB.plugins[i].loginFunc(api, adv);
-                delete global.plugins.Y2TB.plugins[i].loginFunc;
-            } catch(e){}
-        }
-        try{
-		  api.listenMqtt((err, event) => {
-		  	listen(err, event, api);
-		  });
-        } catch (e) {};
     })
 }
 

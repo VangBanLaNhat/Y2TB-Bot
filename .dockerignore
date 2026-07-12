@@ -5,13 +5,20 @@ yarn-error.log*
 .git
 .github
 
-logs
-data
-update
+logs/
+data/
+update/
 
 config/config.env
 config/fbstate.json
 config/fbsstate.json
+config/device-store.json
+config/e2ee_session.json
 config/e2ee_device.json
+config/plugins-lock.json
+
+lang/
+plugins/cache/
+plugins/*/cache/
 
 self-note.txt

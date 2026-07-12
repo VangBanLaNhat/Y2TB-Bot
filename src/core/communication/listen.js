@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const process = require("process");
 const log = require(path.join(__dirname, "..", "util", "log.js"));
+const infoService = require(path.join(__dirname, "..", "services", "infoService.js"));
 
 function getBaseId(value) {
 	var raw = String(value || "");
@@ -51,7 +52,11 @@ async function listen(err, event, api) {
 	if (!event.threadID && !event.senderID) return;
 
 	// E2EE chat JID is not compatible with markAsRead for legacy threads.
-	if (event.type !== "e2ee_message" && event.threadID) {
+	if (
+		global.config?.facebook?.autoMarkRead === true &&
+		event.type !== "e2ee_message" &&
+		event.threadID
+	) {
 		api.markAsRead(event.threadID, (err) => {
 			if (err) log.err(err);
 		});
@@ -112,7 +117,8 @@ async function mess(event, api) {
 	//Running Chathook...
 	await chathook(event, api);
 	//Convert necessary function
-	eval(strFunc);
+	const getUserInfo = (uid, callback) => infoService.getUserInfo(uid, api, event, callback);
+	const getThreadInfo = (tid, callback) => infoService.getThreadInfo(tid, api, callback);
 	//Running Command...
 	if (event.body != undefined && event.body.slice(0, global.config.facebook.prefix.length) == global.config.facebook.prefix) {
 		var cml = event.body.slice(global.config.facebook.prefix.length, event.body.length);
@@ -142,10 +148,11 @@ async function mess(event, api) {
 						config: global.configPl[name],
 						replaceMap,
 						getUserInfo,
-						getThreadInfo
+						getThreadInfo,
+						e2ee: global.e2ee
 					};
 
-					await mainFunc[func](event, api, adv);
+					await mainFunc[func](event, api, global.e2ee, adv);
 				}
 				catch (err) {
 					log.err(global.plugins[i].command[ms[0]].namePlugin, err);
@@ -166,7 +173,8 @@ async function mess(event, api) {
 }
 
 async function chathook(event, api) {
-	eval(strFunc);
+	const getUserInfo = (uid, callback) => infoService.getUserInfo(uid, api, event, callback);
+	const getThreadInfo = (tid, callback) => infoService.getThreadInfo(tid, api, callback);
 	try {
 		event.args = event.body;
 		event.args = event.args.split(" ");
@@ -191,10 +199,11 @@ async function chathook(event, api) {
 				config: global.configPl[name],
 				replaceMap: replaceMap,
 				getUserInfo,
-				getThreadInfo
+				getThreadInfo,
+				e2ee: global.e2ee
 			};
 
-			await mainFunc[func](event, api, adv);
+			await mainFunc[func](event, api, global.e2ee, adv);
 		}
 		catch (err) {
 			log.err(i, err);
@@ -273,61 +282,5 @@ function normalizeAdminIDs(adminIDs) {
 		.filter(Boolean)
 		.map((id) => String(id));
 }
-
-const strFunc = `async function getUserInfo(uid, callback){
-		if(global.userInfo[uid]){
-			if(callback) return callback(undefined, global.userInfo[uid]);
-			return global.userInfo[uid];
-		}
-		if(uid != event.senderID || !event.isGroup){
-			try {
-				var UI = (await api.getUserInfo(uid))[uid];
-			}catch(e){
-				if(callback) return callback(e);
-				throw new Error(e);
-			}
-			global.userInfo[uid] = Object.assign({}, UI);
-			let time = new Date();
-			global.userInfo[uid].timestamp = time.getTime();
-		} else {
-			try {
-				var threadInfo = await api.getThreadInfo(event.threadID);
-			}catch(e){
-				if(callback) return callback(e);
-				throw new Error(e);
-			}
-			for(let user of threadInfo.userInfo){
-				global.userInfo[user.id] = user;
-				let time = new Date();
-				global.userInfo[user.id].timestamp  = time.getTime();
-			}
-			threadInfo.adminIDs = normalizeAdminIDs(threadInfo.adminIDs);
-			global.threadInfo[threadInfo.threadID] = threadInfo;
-			delete global.threadInfo[threadInfo.threadID].userInfo;
-		}
-		if(callback) return callback(undefined, global.userInfo[uid]);
-		return global.userInfo[uid];
-	}
-	async function getThreadInfo(tid, callback){
-		if(!global.threadInfo[tid]){
-			try {
-				var threadInfo = await api.getThreadInfo(tid);
-			}catch(e){
-				if(callback) return callback(e);
-				throw new Error(e);
-			}
-			for(let user of threadInfo.userInfo){
-				global.userInfo[user.id] = user;
-				let time = new Date();
-				global.userInfo[user.id].timestamp  = time.getTime();
-			}
-			threadInfo.adminIDs = normalizeAdminIDs(threadInfo.adminIDs);
-			global.threadInfo[threadInfo.threadID] = threadInfo;
-			delete global.threadInfo[threadInfo.threadID].userInfo;
-		}
-		if(callback) return callback(undefined, global.threadInfo[tid]);
-		return global.threadInfo[tid];
-	}
-`
 
 module.exports = listen;

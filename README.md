@@ -75,4 +75,4 @@ yarn start
 - Stop: `Ctrl + C`
 
 ## License
-ISC
+GPL-3.0

@@ -11,6 +11,22 @@ const dirPlugins = path.join(ROOT, "plugins");
 !global.temp ? global.temp = {} : "";
 !global.temp.loadPlugin ? global.temp.loadPlugin = {} : "";
 
+function isValidDependency(spec) {
+	if (typeof spec !== "string") return false;
+	const trimmed = spec.trim();
+	if (trimmed === "" || trimmed !== spec) return false;
+	
+	if (spec.startsWith("-")) return false;
+
+	const shellMetacharacters = /[;&|><`$(){}\[\]\n\r]/;
+	if (shellMetacharacters.test(spec)) return false;
+
+	const normalNpmRegex = /^(@[a-zA-Z0-9-._~]+\/)?[a-zA-Z0-9-._~]+(@[a-zA-Z0-9-._~^><= *+:/]+)?$/;
+	if (!normalNpmRegex.test(spec)) return false;
+
+	return true;
+}
+
 function collectPluginDeps(entries) {
 	const all = new Set();
 	const missing = new Set();
@@ -52,13 +68,43 @@ function dedupeSpecs(pkgs) {
 function yarnBatchInstall(missingPkgs, allPkgs) {
 	if (!missingPkgs || !missingPkgs.length) return;
 
-	const uniqueMissingPkgs = dedupeSpecs(missingPkgs);
-	const uniqueAllPkgs = dedupeSpecs(allPkgs && allPkgs.length ? allPkgs : missingPkgs);
+	const validMissing = (missingPkgs || []).filter(pkg => {
+		if (isValidDependency(pkg)) {
+			return true;
+		} else {
+			log.err("Plugins(Y2TB)", `Dependency specification is invalid and will be skipped: "${pkg}"`);
+			return false;
+		}
+	});
+
+	const validAll = (allPkgs || []).filter(pkg => {
+		if (isValidDependency(pkg)) {
+			return true;
+		} else {
+			log.err("Plugins(Y2TB)", `Dependency specification is invalid and will be skipped: "${pkg}"`);
+			return false;
+		}
+	});
+
+	if (validMissing.length === 0) {
+		log.warn("Plugins(Y2TB)", "No valid missing dependencies to install.");
+		return;
+	}
+
+	const uniqueMissingPkgs = dedupeSpecs(validMissing);
+	const uniqueAllPkgs = dedupeSpecs(validAll.length ? validAll : validMissing);
+
+	if (uniqueAllPkgs.length === 0) {
+		log.warn("Plugins(Y2TB)", "No valid dependencies to install.");
+		return;
+	}
 
 	let hasYarn = false;
 	try {
-		cmd.execSync("yarn -v", { stdio: "ignore", env: process.env, shell: true });
-		hasYarn = true;
+		const res = cmd.spawnSync("yarn", ["-v"], { stdio: "ignore", env: process.env, shell: false });
+		if (!res.error && res.status === 0) {
+			hasYarn = true;
+		}
 	} catch (e) {
 		hasYarn = false;
 	}
@@ -86,14 +132,22 @@ function yarnBatchInstall(missingPkgs, allPkgs) {
 		}
 	}
 
-	const batchCmd = `yarn add ${uniqueAllPkgs.join(" ")} --non-interactive`;
 	log.warn("Plugins(Y2TB)", `Installing dependencies via yarn (full plugin set to avoid prune): ${uniqueAllPkgs.join(", ")}`);
 	try {
-		cmd.execSync(batchCmd, {
+		const res = cmd.spawnSync("yarn", ["add", ...uniqueAllPkgs, "--non-interactive"], {
 			stdio: "inherit",
 			env: process.env,
-			shell: true
+			shell: false
 		});
+		if (res.error) {
+			log.err("Plugins(Y2TB)", `Yarn process failed to execute: ${res.error.message || res.error}`);
+			throw res.error;
+		}
+		if (res.status !== 0) {
+			const err = new Error(`Yarn exited with status code ${res.status}`);
+			log.err("Plugins(Y2TB)", err.message);
+			throw err;
+		}
 		return;
 	} catch (e) {
 		log.warn("Plugins(Y2TB)", `yarn batch install failed, fallback one-by-one: ${e.message || e}`);
@@ -103,11 +157,16 @@ function yarnBatchInstall(missingPkgs, allPkgs) {
 
 	for (const pkg of uniqueMissingPkgs) {
 		try {
-			cmd.execSync(`yarn add ${pkg} --non-interactive`, {
+			const res = cmd.spawnSync("yarn", ["add", pkg, "--non-interactive"], {
 				stdio: "inherit",
 				env: process.env,
-				shell: true
+				shell: false
 			});
+			if (res.error) {
+				log.err("Plugins(Y2TB)", `Yarn process failed to execute for ${pkg}: ${res.error.message || res.error}`);
+			} else if (res.status !== 0) {
+				log.err("Plugins(Y2TB)", `Yarn exited with status code ${res.status} for ${pkg}`);
+			}
 		} catch (er) {
 			log.warn("Plugins(Y2TB)", `Install failed for ${pkg}: ${er.message || er}`);
 		} finally {
@@ -400,12 +459,23 @@ function installmd(file, pluginInfo, opts = {}) {
 				log.warn("Plugins(Y2TB)", `Installing Node_module "${dep}" for plugin "${pluginInfo.pluginName}":`);
 				const ver = pluginInfo.nodeDepends[dep];
 				const pkg = ver && ver !== "" ? `${dep}@${ver}` : dep;
+				
+				if (!isValidDependency(pkg)) {
+					log.err("Plugins(Y2TB)", `Dependency specification is invalid and will be skipped: "${pkg}"`);
+					continue;
+				}
+
 				const packageJsonPath = path.join(ROOT, "package.json");
 				const yarnLockPath = path.join(ROOT, "yarn.lock");
 				const packageJsonBefore = fs.existsSync(packageJsonPath) ? fs.readFileSync(packageJsonPath, "utf8") : null;
 				const yarnLockBefore = fs.existsSync(yarnLockPath) ? fs.readFileSync(yarnLockPath, "utf8") : null;
 				try {
-					cmd.execSync(`yarn add ${pkg} --non-interactive`, { stdio: "inherit", env: process.env, shell: true });
+					const res = cmd.spawnSync("yarn", ["add", pkg, "--non-interactive"], { stdio: "inherit", env: process.env, shell: false });
+					if (res.error) {
+						log.err("Plugins(Y2TB)", `Yarn process failed to execute for ${pkg}: ${res.error.message || res.error}`);
+					} else if (res.status !== 0) {
+						log.err("Plugins(Y2TB)", `Yarn exited with status code ${res.status} for ${pkg}`);
+					}
 				} finally {
 					try {
 						if (packageJsonBefore !== null) fs.writeFileSync(packageJsonPath, packageJsonBefore, { mode: 0o666 });
