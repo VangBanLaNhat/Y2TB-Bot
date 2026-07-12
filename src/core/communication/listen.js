@@ -3,6 +3,7 @@ const path = require("path");
 const process = require("process");
 const log = require(path.join(__dirname, "..", "util", "log.js"));
 const infoService = require(path.join(__dirname, "..", "services", "infoService.js"));
+const { createEventApi, isE2EEThread } = require(path.join(__dirname, "pluginApi.js"));
 
 const { shouldMarkAsRead } = require(path.join(__dirname, "markReadPolicy.js"));
 
@@ -150,7 +151,14 @@ async function mess(event, api) {
 						e2ee: global.e2ee
 					};
 
-					await mainFunc[func](event, api, global.e2ee, adv);
+					const pluginApi = createEventApi(api, event, global.e2eeClient, log);
+					adv.send = (msg, cb) => pluginApi.sendMessage(msg, event.threadID, cb);
+					adv.reply = (msg, cb) => pluginApi.sendMessage(msg, event.threadID, cb, event.messageID);
+					adv.react = (emoji, cb) => pluginApi.setMessageReaction(emoji, event.messageID, cb, true);
+					adv.unsend = (msgID, cb) => pluginApi.unsendMessage(msgID || event.messageID, cb);
+					adv.isE2EE = !!(global.e2eeClient && event && event.threadID && isE2EEThread(event.threadID));
+					adv.ctx = adv; // alias for clarity
+					await mainFunc[func](event, pluginApi, global.e2ee, adv);
 				}
 				catch (err) {
 					log.err(global.plugins[i].command[ms[0]].namePlugin, err);
@@ -201,7 +209,14 @@ async function chathook(event, api) {
 				e2ee: global.e2ee
 			};
 
-			await mainFunc[func](event, api, global.e2ee, adv);
+			const pluginApi = createEventApi(api, event, global.e2eeClient, log);
+			adv.send = (msg, cb) => pluginApi.sendMessage(msg, event.threadID, cb);
+			adv.reply = (msg, cb) => pluginApi.sendMessage(msg, event.threadID, cb, event.messageID);
+			adv.react = (emoji, cb) => pluginApi.setMessageReaction(emoji, event.messageID, cb, true);
+			adv.unsend = (msgID, cb) => pluginApi.unsendMessage(msgID || event.messageID, cb);
+			adv.isE2EE = !!(global.e2eeClient && event && event.threadID && isE2EEThread(event.threadID));
+			adv.ctx = adv; // alias for clarity
+			await mainFunc[func](event, pluginApi, global.e2ee, adv);
 		}
 		catch (err) {
 			log.err(i, err);
