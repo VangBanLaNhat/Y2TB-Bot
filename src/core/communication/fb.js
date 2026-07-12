@@ -73,7 +73,11 @@ function startFbStateAutoSave(api, opts) {
 function isE2EEThread(threadID) {
     if (!threadID) return false;
     const s = String(threadID);
-    return /^\d+$/.test(s) || s.includes("@msgr") || s.includes("@g.us") || s.includes(".g.");
+    if (s.includes("@msgr") || s.includes("@g.us") || s.includes(".g.")) return true;
+    if (/^\d+$/.test(s)) {
+        return !!(global.e2eeThreads && global.e2eeThreads.has(s));
+    }
+    return false;
 }
 
 function createE2EEContext(api, e2eeClient) {

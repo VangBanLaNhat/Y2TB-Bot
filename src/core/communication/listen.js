@@ -55,6 +55,15 @@ async function listen(err, event, api) {
 	if (!event) return;
 	if (!event.threadID && !event.senderID) return;
 
+	if (event.type === "e2ee_message" && event.threadID) {
+		global.e2eeThreads = global.e2eeThreads || new Set();
+		global.e2eeThreads.add(String(event.threadID));
+		const baseId = getBaseId(event.threadID);
+		if (baseId) {
+			global.e2eeThreads.add(String(baseId));
+		}
+	}
+
 	// E2EE chat JID is not compatible with markAsRead for legacy threads.
 	if (shouldMarkAsRead(global.config, event)) {
 		api.markAsRead(event.threadID, (err) => {
