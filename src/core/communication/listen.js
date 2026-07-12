@@ -51,7 +51,11 @@ async function listen(err, event, api) {
 	if (!event.threadID && !event.senderID) return;
 
 	// E2EE chat JID is not compatible with markAsRead for legacy threads.
-	if (event.type !== "e2ee_message" && event.threadID) {
+	if (
+		global.config?.facebook?.autoMarkRead === true &&
+		event.type !== "e2ee_message" &&
+		event.threadID
+	) {
 		api.markAsRead(event.threadID, (err) => {
 			if (err) log.err(err);
 		});

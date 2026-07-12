@@ -37,6 +37,9 @@ function core() {
 	    	"e2eeDeviceStorePath": "config/device-store.json",
 	    	"e2eeSessionStorePath": "config/e2ee_session.json",
 	    	"e2eeDevicePath": "config/e2ee_device.json"
+    	},
+    	"update": {
+    		"auto": false
     	}
     }
 }
