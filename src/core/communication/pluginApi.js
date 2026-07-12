@@ -4,6 +4,18 @@ function isE2EEThread(threadID) {
     return /^\d+$/.test(s) || s.includes("@msgr") || s.includes("@g.us") || s.includes(".g.");
 }
 
+function isEventE2EE(event, threadID, e2eeClient) {
+    if (!e2eeClient) return false;
+    const tid = threadID || (event ? event.threadID : undefined);
+    if (!tid) return false;
+    
+    if (event && event.type) {
+        return event.type.startsWith("e2ee_");
+    }
+    
+    return isE2EEThread(tid);
+}
+
 function createEventApi(api, event, e2eeClient, log) {
     return new Proxy(api, {
         get: function (target, prop, receiver) {
@@ -14,7 +26,7 @@ function createEventApi(api, event, e2eeClient, log) {
                         callback = null;
                     }
                     
-                    const isE2EE = e2eeClient && isE2EEThread(threadID);
+                    const isE2EE = isEventE2EE(event, threadID, e2eeClient);
                     if (isE2EE) {
                         const input = { threadId: String(threadID) };
                         if (typeof msg === "string") {
@@ -52,7 +64,7 @@ function createEventApi(api, event, e2eeClient, log) {
             }
             if (prop === "setMessageReaction") {
                 return function (reaction, messageID, callback, force) {
-                    const isE2EE = e2eeClient && event && event.threadID && isE2EEThread(event.threadID);
+                    const isE2EE = isEventE2EE(event, event && event.threadID, e2eeClient);
                     if (isE2EE) {
                         if (typeof e2eeClient.sendReaction === "function") {
                             const threadId = String(event.threadID);
@@ -82,7 +94,7 @@ function createEventApi(api, event, e2eeClient, log) {
             }
             if (prop === "unsendMessage") {
                 return function (messageID, callback) {
-                    const isE2EE = e2eeClient && event && event.threadID && isE2EEThread(event.threadID);
+                    const isE2EE = isEventE2EE(event, event && event.threadID, e2eeClient);
                     if (isE2EE) {
                         if (typeof e2eeClient.unsendMessage === "function") {
                             const threadId = String(event.threadID);
@@ -115,5 +127,6 @@ function createEventApi(api, event, e2eeClient, log) {
 
 module.exports = {
     createEventApi,
-    isE2EEThread
+    isE2EEThread,
+    isEventE2EE
 };

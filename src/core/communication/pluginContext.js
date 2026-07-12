@@ -1,10 +1,10 @@
-const { createEventApi, isE2EEThread } = require("./pluginApi.js");
+const { createEventApi, isE2EEThread, isEventE2EE } = require("./pluginApi.js");
 
 function createPluginContext({ api, event, e2eeClient, log }) {
     const pluginApi = createEventApi(api, event, e2eeClient, log);
     const threadID = event ? event.threadID : undefined;
     const messageID = event ? event.messageID : undefined;
-    const isE2EE = !!(e2eeClient && threadID && isE2EEThread(threadID));
+    const isE2EE = isEventE2EE(event, threadID, e2eeClient);
 
     const ctx = {
         send: (msg, callback) => {
