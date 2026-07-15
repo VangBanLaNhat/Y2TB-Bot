@@ -10,7 +10,7 @@ RUN apt-get update \
     && corepack prepare yarn@1.22.22 --activate
 
 COPY package.json yarn.lock ./
-RUN yarn install --production --frozen-lockfile --non-interactive
+RUN yarn install --production --non-interactive
 
 
 FROM node:22-bookworm-slim

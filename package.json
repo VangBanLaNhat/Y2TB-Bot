@@ -30,7 +30,7 @@
     "axios": "^1.7.2",
     "dotenv": "^10.0.0",
     "enc": "",
-    "fb-messenger-e2ee": "^0.1.3",
+    "fb-messenger-e2ee": "",
     "fca-unofficial": "github:VangBanLaNhat/fca-unofficial",
     "fs-extra": "^10.1.0",
     "luxon": "^3.7.2",
