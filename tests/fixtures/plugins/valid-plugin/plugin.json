@@ -1,0 +1,9 @@
+{
+  "pluginName": "valid-plugin",
+  "pluginMain": "index.js",
+  "version": "1.0.0",
+  "author": "Test",
+  "nodeDepends": {
+    "some-missing-dep-12345": "1.0.0"
+  }
+}
