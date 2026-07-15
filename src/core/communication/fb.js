@@ -163,8 +163,8 @@ module.exports = async (appState, loginOptions, botOptions) => {
         if (err) {
             const fbStatePath = path.join(ROOT, "config", "fbstate.json");
             const fbStateAlt = path.join(ROOT, "config", "fbsstate.json");
-            if (fs.existsSync(fbStatePath)) fs.unlinkSync(fbStatePath);
-            else if (fs.existsSync(fbStateAlt)) fs.unlinkSync(fbStateAlt);
+            // if (fs.existsSync(fbStatePath)) fs.unlinkSync(fbStatePath);
+            // else if (fs.existsSync(fbStateAlt)) fs.unlinkSync(fbStateAlt);
             log.err("Login", err);
             process.exit(1);
         }
