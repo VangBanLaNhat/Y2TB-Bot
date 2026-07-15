@@ -34,7 +34,12 @@ function parseEnvValue(raw, sample) {
     return raw;
 }
 
-function applyEnvOverrides(target, prefix) {
+function clone(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
+
+function parseEnvConfig(env, defaults, prefix) {
+    var target = clone(defaults);
     function walk(obj, trail) {
         var keys = Object.keys(obj);
         for (var i = 0; i < keys.length; i++) {
@@ -48,8 +53,8 @@ function applyEnvOverrides(target, prefix) {
             }
 
             var envKey = (prefix + nextTrail.join("_")).replace(/[^A-Za-z0-9_]/g, "_").toUpperCase();
-            if (process.env[envKey] !== undefined) {
-                obj[key] = parseEnvValue(process.env[envKey], value);
+            if (env[envKey] !== undefined) {
+                obj[key] = parseEnvValue(env[envKey], value);
             }
         }
     }
@@ -58,21 +63,16 @@ function applyEnvOverrides(target, prefix) {
     return target;
 }
 
-function clone(obj) {
-    return JSON.parse(JSON.stringify(obj));
-}
-
 function getConfig() {
-    var returnConfig = clone(dfcf);
-    return applyEnvOverrides(returnConfig, "Y2TB_CFG_");
+    return parseEnvConfig(process.env, dfcf, "Y2TB_CFG_");
 }
 
 function getCoreConfig() {
-    var returnConfig = clone(ccf);
-    return applyEnvOverrides(returnConfig, "Y2TB_CORE_");
+    return parseEnvConfig(process.env, ccf, "Y2TB_CORE_");
 }
 
 module.exports = {
     getConfig: getConfig,
-    getCoreConfig: getCoreConfig
+    getCoreConfig: getCoreConfig,
+    parseEnvConfig: parseEnvConfig
 };

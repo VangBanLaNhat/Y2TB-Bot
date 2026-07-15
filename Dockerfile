@@ -2,14 +2,15 @@ FROM node:22-bookworm-slim AS deps
 
 WORKDIR /app
 
+# Needed to install git-based dependencies.
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends git openssh-client ca-certificates \
+    && apt-get install -y --no-install-recommends git ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
     && corepack enable \
     && corepack prepare yarn@1.22.22 --activate
 
 COPY package.json yarn.lock ./
-RUN yarn install --production --non-interactive
+RUN yarn install --production --frozen-lockfile --non-interactive
 
 
 FROM node:22-bookworm-slim

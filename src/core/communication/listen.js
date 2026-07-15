@@ -2,6 +2,11 @@ const fs = require("fs");
 const path = require("path");
 const process = require("process");
 const log = require(path.join(__dirname, "..", "util", "log.js"));
+const infoService = require(path.join(__dirname, "..", "services", "infoService.js"));
+const { createEventApi } = require(path.join(__dirname, "pluginApi.js"));
+const { createPluginContext } = require(path.join(__dirname, "pluginContext.js"));
+
+const { shouldMarkAsRead } = require(path.join(__dirname, "markReadPolicy.js"));
 
 function getBaseId(value) {
 	var raw = String(value || "");
@@ -50,8 +55,17 @@ async function listen(err, event, api) {
 	if (!event) return;
 	if (!event.threadID && !event.senderID) return;
 
+	if (event.type === "e2ee_message" && event.threadID) {
+		global.e2eeThreads = global.e2eeThreads || new Set();
+		global.e2eeThreads.add(String(event.threadID));
+		const baseId = getBaseId(event.threadID);
+		if (baseId) {
+			global.e2eeThreads.add(String(baseId));
+		}
+	}
+
 	// E2EE chat JID is not compatible with markAsRead for legacy threads.
-	if (event.type !== "e2ee_message" && event.threadID) {
+	if (shouldMarkAsRead(global.config, event)) {
 		api.markAsRead(event.threadID, (err) => {
 			if (err) log.err(err);
 		});
@@ -112,7 +126,8 @@ async function mess(event, api) {
 	//Running Chathook...
 	await chathook(event, api);
 	//Convert necessary function
-	eval(strFunc);
+	const getUserInfo = (uid, callback) => infoService.getUserInfo(uid, api, event, callback);
+	const getThreadInfo = (tid, callback) => infoService.getThreadInfo(tid, api, callback);
 	//Running Command...
 	if (event.body != undefined && event.body.slice(0, global.config.facebook.prefix.length) == global.config.facebook.prefix) {
 		var cml = event.body.slice(global.config.facebook.prefix.length, event.body.length);
@@ -146,7 +161,16 @@ async function mess(event, api) {
 						e2ee: global.e2ee
 					};
 
-					await mainFunc[func](event, api, global.e2ee, adv);
+					const pluginApi = createEventApi(api, event, global.e2eeClient, log);
+					const ctx = createPluginContext({ api, event, e2eeClient: global.e2eeClient, log });
+					adv.ctx = ctx;
+					adv.message = ctx;
+					adv.send = ctx.send;
+					adv.reply = ctx.reply;
+					adv.react = ctx.react;
+					adv.unsend = ctx.unsend;
+					adv.isE2EE = ctx.isE2EE;
+					await mainFunc[func](event, pluginApi, global.e2ee, adv);
 				}
 				catch (err) {
 					log.err(global.plugins[i].command[ms[0]].namePlugin, err);
@@ -167,7 +191,8 @@ async function mess(event, api) {
 }
 
 async function chathook(event, api) {
-	eval(strFunc);
+	const getUserInfo = (uid, callback) => infoService.getUserInfo(uid, api, event, callback);
+	const getThreadInfo = (tid, callback) => infoService.getThreadInfo(tid, api, callback);
 	try {
 		event.args = event.body;
 		event.args = event.args.split(" ");
@@ -196,7 +221,16 @@ async function chathook(event, api) {
 				e2ee: global.e2ee
 			};
 
-			await mainFunc[func](event, api, global.e2ee, adv);
+			const pluginApi = createEventApi(api, event, global.e2eeClient, log);
+			const ctx = createPluginContext({ api, event, e2eeClient: global.e2eeClient, log });
+			adv.ctx = ctx;
+			adv.message = ctx;
+			adv.send = ctx.send;
+			adv.reply = ctx.reply;
+			adv.react = ctx.react;
+			adv.unsend = ctx.unsend;
+			adv.isE2EE = ctx.isE2EE;
+			await mainFunc[func](event, pluginApi, global.e2ee, adv);
 		}
 		catch (err) {
 			log.err(i, err);
@@ -275,61 +309,5 @@ function normalizeAdminIDs(adminIDs) {
 		.filter(Boolean)
 		.map((id) => String(id));
 }
-
-const strFunc = `async function getUserInfo(uid, callback){
-		if(global.userInfo[uid]){
-			if(callback) return callback(undefined, global.userInfo[uid]);
-			return global.userInfo[uid];
-		}
-		if(uid != event.senderID || !event.isGroup){
-			try {
-				var UI = (await api.getUserInfo(uid))[uid];
-			}catch(e){
-				if(callback) return callback(e);
-				throw new Error(e);
-			}
-			global.userInfo[uid] = Object.assign({}, UI);
-			let time = new Date();
-			global.userInfo[uid].timestamp = time.getTime();
-		} else {
-			try {
-				var threadInfo = await api.getThreadInfo(event.threadID);
-			}catch(e){
-				if(callback) return callback(e);
-				throw new Error(e);
-			}
-			for(let user of threadInfo.userInfo){
-				global.userInfo[user.id] = user;
-				let time = new Date();
-				global.userInfo[user.id].timestamp  = time.getTime();
-			}
-			threadInfo.adminIDs = normalizeAdminIDs(threadInfo.adminIDs);
-			global.threadInfo[threadInfo.threadID] = threadInfo;
-			delete global.threadInfo[threadInfo.threadID].userInfo;
-		}
-		if(callback) return callback(undefined, global.userInfo[uid]);
-		return global.userInfo[uid];
-	}
-	async function getThreadInfo(tid, callback){
-		if(!global.threadInfo[tid]){
-			try {
-				var threadInfo = await api.getThreadInfo(tid);
-			}catch(e){
-				if(callback) return callback(e);
-				throw new Error(e);
-			}
-			for(let user of threadInfo.userInfo){
-				global.userInfo[user.id] = user;
-				let time = new Date();
-				global.userInfo[user.id].timestamp  = time.getTime();
-			}
-			threadInfo.adminIDs = normalizeAdminIDs(threadInfo.adminIDs);
-			global.threadInfo[threadInfo.threadID] = threadInfo;
-			delete global.threadInfo[threadInfo.threadID].userInfo;
-		}
-		if(callback) return callback(undefined, global.threadInfo[tid]);
-		return global.threadInfo[tid];
-	}
-`
 
 module.exports = listen;

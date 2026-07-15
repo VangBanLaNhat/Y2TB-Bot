@@ -36,68 +36,7 @@ for (var i = 0; i < ll.length; i++) {
 
 (async () => {
 
-	//Main update
-	console.log("Update", "Checking update...");
-	let vern = (JSON.parse(fs.readFileSync(path.join(ROOT, "package.json")))).version;
-	try {
-		var verg = (await axios.get(versionUpdate)).data.version;
-	} catch (e) {
-		console.error("Update", e, "Failed to connect to to the server!");
-		process.exit(504);
-	}
-
-	if (fs.existsSync(path.join(ROOT, "update"))) {
-		console.warn("Update", "Proceed to update node_modules...")
-		deleteFolderRecursive(path.join(ROOT, "update"));
-		if(!fs.existsSync(path.join(ROOT, "data", "user.json"))){
-			cmd.execSync("yarn install --non-interactive", {
-				stdio: "inherit",
-				env: process.env,
-				shell: true
-			})
-			console.log("Update", "Complete update. Proceed to restart...");
-			process.exit(7378278);
-		}
-	}
-
-	if (vern != verg) {
-		console.warn("Update", "The new update has been discovered. Proceed to download the imported version...");
-		let pathFile = path.join(ROOT, "update");
-		try {
-			await downloadUpdate(pathFile);
-			console.log("Update", 'Download the update completed!');
-		} catch (error) {
-			console.error("Update", 'Error generation during the download process: ' + error);
-			process.exit(504);
-		}
-
-		try {
-			await extractZip(path.join(pathFile, "update.zip"), pathFile);
-			fs.unlinkSync(path.join(pathFile, "update.zip"));
-			console.log("Update", 'Extraction completed!');
-		} catch (error) {
-			fs.unlinkSync(path.join(pathFile, "update.zip"));
-			console.error("Update", error);
-			process.exit(504);
-		}
-
-		let minus = ["tool", "plugins"];
-
-		let listFile = fs.readdirSync(path.join(pathFile, folderUpdate));
-		// delete require.cache[require.resolve("./core/util/log.js")];
-		// delete require.cache[require.resolve("./core/util/scanDir.js")]
-		for (let i of listFile)
-			if (minus.indexOf(i) == -1) {
-				if (!fs.lstatSync(path.join(pathFile, folderUpdate, i)).isFile()) copyFolder(path.join(pathFile, folderUpdate, i), path.join(pathFile, "..", i));
-				else fs.renameSync(path.join(pathFile, folderUpdate, i), path.join(pathFile, "..", i));
-			}
-		console.log("Update", "Complete update. Proceed to restart...");
-		process.exit(7378278);
-
-	} else console.log("Update", "Awesome, you're on the latest version!");
-
-	//globalC = Object.assign({}, global);
-	log.blank();
+	// Load config first
 	console.log("Config", "Loading config...");
 	try {
 		global.config = require("./core/util/getConfig.js").getConfig();
@@ -110,6 +49,71 @@ for (var i = 0; i < ll.length; i++) {
 		console.error("Config", "Can't load Config. Existing...");
 		log.blank();
 		process.exit(101);
+	}
+
+	// Main update
+	const { isCoreAutoUpdateEnabled } = require("./core/util/coreUpdatePolicy");
+	if (isCoreAutoUpdateEnabled(global.coreconfig)) {
+		console.log("Update", "Core auto-update is enabled. Checking update...");
+		let vern = (JSON.parse(fs.readFileSync(path.join(ROOT, "package.json")))).version;
+		try {
+			var verg = (await axios.get(versionUpdate)).data.version;
+		} catch (e) {
+			console.error("Update", e, "Failed to connect to to the server!");
+			process.exit(504);
+		}
+
+		if (fs.existsSync(path.join(ROOT, "update"))) {
+			console.warn("Update", "WARNING: Proceeding to overwrite project files and update node_modules...");
+			deleteFolderRecursive(path.join(ROOT, "update"));
+			if(!fs.existsSync(path.join(ROOT, "data", "user.json"))){
+				cmd.execSync("yarn install --non-interactive", {
+					stdio: "inherit",
+					env: process.env,
+					shell: true
+				})
+				console.log("Update", "Complete update. Proceed to restart...");
+				process.exit(7378278);
+			}
+		}
+
+		if (vern != verg) {
+			console.warn("Update", "WARNING: A new update has been discovered. Proceeding to download and apply changes...");
+			let pathFile = path.join(ROOT, "update");
+			try {
+				await downloadUpdate(pathFile);
+				console.log("Update", 'Download the update completed!');
+			} catch (error) {
+				console.error("Update", 'Error generation during the download process: ' + error);
+				process.exit(504);
+			}
+
+			try {
+				await extractZip(path.join(pathFile, "update.zip"), pathFile);
+				fs.unlinkSync(path.join(pathFile, "update.zip"));
+				console.log("Update", 'Extraction completed!');
+			} catch (error) {
+				fs.unlinkSync(path.join(pathFile, "update.zip"));
+				console.error("Update", error);
+				process.exit(504);
+			}
+
+			let minus = ["tool", "plugins", "config", "data", "logs", "lang"];
+
+			let listFile = fs.readdirSync(path.join(pathFile, folderUpdate));
+			// delete require.cache[require.resolve("./core/util/log.js")];
+			// delete require.cache[require.resolve("./core/util/scanDir.js")]
+			for (let i of listFile)
+				if (minus.indexOf(i) == -1) {
+					if (!fs.lstatSync(path.join(pathFile, folderUpdate, i)).isFile()) copyFolder(path.join(pathFile, folderUpdate, i), path.join(pathFile, "..", i));
+					else fs.renameSync(path.join(pathFile, folderUpdate, i), path.join(pathFile, "..", i));
+				}
+			console.log("Update", "Complete update. Proceed to restart...");
+			process.exit(7378278);
+
+		} else console.log("Update", "Awesome, you're on the latest version!");
+	} else {
+		console.log("Update", "Core auto-update is disabled (Y2TB_CORE_UPDATE_AUTO is false or unset). Skipping update checks.");
 	}
 
 	//data loader

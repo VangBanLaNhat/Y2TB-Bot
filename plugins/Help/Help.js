@@ -1,13 +1,13 @@
 
-function main(data, api, e2ee){
+function main(data, api, e2ee, adv){
     if(!Number(data.body) && data.body.length != 0){
-        moreInfo(data, api, e2ee);
+        moreInfo(data, api, e2ee, adv);
     }
     else{
-        help(data, api, e2ee);
+        help(data, api, e2ee, adv);
     }
 }
-function help(data, api, e2ee){
+function help(data, api, e2ee, adv){
     var cmNumber = 10;
     var msg;
     data.body ? msg = data.body : msg = 1;
@@ -50,10 +50,10 @@ function help(data, api, e2ee){
     
     var rt = global.lang.Help.listCommand[global.config.bot_info.lang]+"\n"+listHelp+`"${p}"`+"\n"+global.lang.Help.listCommandEnd[global.config.bot_info.lang].replace("{prefix}", global.config.facebook.prefix)
     
-    api.sendMessage(rt , data.threadID, data.messageID);
+    adv.reply(rt);
 }
 
-function moreInfo(data, api, e2ee){
+function moreInfo(data, api, e2ee, adv){
     var rt = global.lang.Help.noCommand[global.config.bot_info.lang].replace("{0}", data.body);
     for (var i in global.plugins){
         if (global.plugins[i].command[data.body] != undefined){
@@ -62,7 +62,7 @@ function moreInfo(data, api, e2ee){
             break;
         }
     }
-    api.sendMessage(rt , data.threadID, data.messageID);
+    adv.reply(rt);
 }
 
 module.exports = {
